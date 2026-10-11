@@ -77,7 +77,7 @@ Choose English or Chinese; source posts keep their original wording. Body text a
 
 Scheduled automatic resets for your plan use persistent notifications with an **Acknowledge** button. Messages with similar reset times are grouped, including matching announcements from different sites.
 
-Screenshots use demo data. Personal quota is read through the official local Codex service; settings and cached data are stored on your computer. See [Privacy](PRIVACY.md) for data flows.
+Personal quota is read through the official local Codex service; settings and cached data are stored on your computer. See [Privacy](PRIVACY.md) for data flows.
 
 ## Run from source
 

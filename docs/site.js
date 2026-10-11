@@ -14,7 +14,6 @@ const translations={
     "step3": "To show personal quota, install the official Codex CLI and sign in with codex login.",
     "installNote": "The installation guide covers CLI setup, Windows publisher prompts and where settings are saved.",
     "guide": "Installation guide ↗",
-    "demo": "Screenshots use demo data.",
     "privacyLink": "Privacy",
     "issues": "Report an issue",
     "features": [
@@ -66,7 +65,6 @@ const translations={
     "step3": "要显示个人额度，安装官方 Codex CLI，并用 codex login 登录。",
     "installNote": "CLI 安装方法、Windows 发布者提示和设置保存位置见安装说明。",
     "guide": "安装说明 ↗",
-    "demo": "截图使用演示数据。",
     "privacyLink": "隐私说明",
     "issues": "反馈问题",
     "features": [
@@ -118,7 +116,6 @@ const translations={
     "step3": "個人の利用枠を表示するには公式 Codex CLI をインストールし、codex login でログインします。",
     "installNote": "CLI の導入、Windows の発行元表示、設定の保存場所はインストールガイドにあります。",
     "guide": "インストールガイド ↗",
-    "demo": "画面はデモデータを使用しています。",
     "privacyLink": "プライバシー",
     "issues": "問題を報告",
     "features": [
@@ -170,7 +167,6 @@ const translations={
     "step3": "Para ver tu cuota personal, instala el Codex CLI oficial e inicia sesión con codex login.",
     "installNote": "La guía explica cómo instalar el CLI, los avisos de Windows sobre el editor y dónde se guardan los ajustes.",
     "guide": "Guía de instalación ↗",
-    "demo": "Las capturas usan datos de demostración.",
     "privacyLink": "Privacidad",
     "issues": "Informar de un problema",
     "features": [
@@ -222,7 +218,6 @@ const translations={
     "step3": "Pour afficher votre quota personnel, installez le Codex CLI officiel et connectez-vous avec codex login.",
     "installNote": "Le guide explique l’installation du CLI, les messages Windows sur l’éditeur et l’emplacement des paramètres.",
     "guide": "Guide d’installation ↗",
-    "demo": "Les captures utilisent des données de démonstration.",
     "privacyLink": "Confidentialité",
     "issues": "Signaler un problème",
     "features": [
@@ -274,7 +269,6 @@ const translations={
     "step3": "Für dein persönliches Kontingent installiere die offizielle Codex CLI und melde dich mit codex login an.",
     "installNote": "Die Anleitung erklärt die CLI-Einrichtung, Windows-Herausgeberhinweise und den Speicherort der Einstellungen.",
     "guide": "Installationsanleitung ↗",
-    "demo": "Die Screenshots verwenden Demodaten.",
     "privacyLink": "Datenschutz",
     "issues": "Problem melden",
     "features": [
@@ -326,7 +320,6 @@ const translations={
     "step3": "개인 잔여 사용량을 표시하려면 공식 Codex CLI를 설치하고 codex login으로 로그인하세요.",
     "installNote": "CLI 설치, Windows 게시자 알림, 설정 저장 위치는 설치 안내에서 확인할 수 있습니다.",
     "guide": "설치 안내 ↗",
-    "demo": "스크린샷은 데모 데이터를 사용합니다.",
     "privacyLink": "개인정보 처리",
     "issues": "문제 제보",
     "features": [
@@ -366,7 +359,7 @@ const translations={
   }
 };
 const images=['modes','pace','forecast','sources','history','settings'];
-function renderSite(language){const t=translations[language]||translations.en;document.documentElement.lang=language;document.querySelector('#language').value=language;document.querySelectorAll('[data-text]').forEach(e=>{e.textContent=t[e.dataset.text];});const target=document.querySelector('#features');target.replaceChildren();t.features.forEach(([title,body],i)=>{const section=document.createElement('section');section.className='feature';const copy=document.createElement('div');copy.className='feature-copy';const number=document.createElement('span');number.className='number';number.textContent=`0${i+1}`;const words=document.createElement('div');const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=body;words.append(h,p);copy.append(number,words);const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=`assets/feature-${images[i]}.png`;img.alt=title;img.loading=i?'lazy':'eager';caption.textContent=t.captions[i];figure.append(img,caption);section.append(copy,figure);target.append(section);});document.title=language==='zh-CN'?'codex重置预测看板':'Codex Reset Forecast Dashboard';}
+function renderSite(language){const t=translations[language]||translations.en;document.documentElement.lang=language;document.querySelector('#language').value=language;document.querySelectorAll('[data-text]').forEach(e=>{e.textContent=t[e.dataset.text];});const target=document.querySelector('#features');target.replaceChildren();t.features.forEach(([title,body],i)=>{const section=document.createElement('section');section.className='feature';const copy=document.createElement('div');copy.className='feature-copy';const number=document.createElement('span');number.className='number';number.textContent=`0${i+1}`;const words=document.createElement('div');const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=body;words.append(h,p);copy.append(number,words);const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=`assets/feature-${images[i]}.png?v=2.0.1`;img.alt=title;img.loading=i?'lazy':'eager';caption.textContent=t.captions[i];figure.append(img,caption);section.append(copy,figure);target.append(section);});document.title=language==='zh-CN'?'codex重置预测看板':'Codex Reset Forecast Dashboard';}
 let saved;try{saved=localStorage.getItem('site-language');}catch{}
 const browser=navigator.language.startsWith('zh')?'zh-CN':navigator.language.split('-')[0];renderSite(translations[saved]?saved:translations[browser]?browser:'en');
 document.querySelector('#language').addEventListener('change',e=>{renderSite(e.target.value);try{localStorage.setItem('site-language',e.target.value);}catch{}});

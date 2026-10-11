@@ -1,6 +1,6 @@
 {
   "name": "codex-reset-forecast-dashboard",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "private": true,
   "description": "Codex reset forecasts, local quota pacing and multi-source evidence.",
   "main": "app/main.cjs",
@@ -51,10 +51,10 @@
         "zh_CN"
       ],
       "multiLanguageInstaller": true,
-      "artifactName": "Codex-Reset-Forecast-Dashboard-Setup-2.0.0-x64.exe"
+      "artifactName": "Codex-Reset-Forecast-Dashboard-Setup-${version}-x64.exe"
     },
     "portable": {
-      "artifactName": "Codex-Reset-Forecast-Dashboard-Portable-2.0.0-x64.exe"
+      "artifactName": "Codex-Reset-Forecast-Dashboard-Portable-${version}-x64.exe"
     }
   },
   "license": "GPL-3.0-only",
