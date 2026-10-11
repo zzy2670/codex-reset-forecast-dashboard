@@ -128,7 +128,7 @@ async function main() {
         *{box-sizing:border-box}html,body{margin:0;width:1440px;background:#0e1112;color:#eff5f2;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding:52px 54px 36px;background:radial-gradient(ellipse at 85% 0,${accent}12,transparent 58%),#0e1112}
         .meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:19px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:${accent};font-weight:650}.demo{font-size:10px;letter-spacing:1.3px;color:#9dada6;padding:7px 10px;border:1px solid #2b3730;border-radius:20px}
         h1{font-size:41px;letter-spacing:-1.5px;font-weight:550;line-height:1.16;margin:0 0 14px}.description{font-size:17px;line-height:1.65;max-width:1040px;color:#a7b9b0;margin:0 0 32px}.shots{display:grid;grid-template-columns:repeat(${columns},minmax(0,1fr));gap:22px;align-items:start}.shot{margin:0;border:1px solid #29352f;overflow:hidden;border-radius:17px;background:#131919;box-shadow:0 12px 40px #0003}.shot-label{padding:14px 19px;color:#cbd9d1;font-size:12px;font-weight:600;letter-spacing:.7px;border-bottom:1px solid #29352f}.shot img{display:block;width:100%;height:auto}.notes{display:flex;gap:28px;flex-wrap:wrap;padding-top:24px}.note{display:flex;align-items:flex-start;gap:10px;flex:1;min-width:250px;color:#9fb2a7;font-size:13px;line-height:1.65}.note b{display:grid;place-items:center;flex-shrink:0;width:23px;height:23px;border-radius:50%;color:#10221a;background:${accent};font-size:12px;font-weight:700;margin-top:1px}.note strong{color:#e3eee7;font-weight:550}.footer{margin-top:28px;padding-top:20px;border-top:1px solid #27332c;display:flex;justify-content:space-between;color:#637c6e;font-size:11px;letter-spacing:.6px}
-      </style></head><body><div class="meta"><span>${escape(eyebrow)}</span><span class="demo">Synthetic demonstration · no personal data</span></div><h1>${escape(title)}</h1><p class="description">${escape(description)}</p><div class="shots">${items}</div><div class="notes">${notes.map(n=>`<div class="note"><b>${n.number}</b><div><strong>${escape(n.title)}</strong><br>${escape(n.text)}</div></div>`).join('')}</div><div class="footer"><span>CODEX RESET FORECAST DASHBOARD</span><span>Real application captures · Illustrative data</span></div></body></html>`;
+      </style></head><body><div class="meta"><span>${escape(eyebrow)}</span><span class="demo">Demo data</span></div><h1>${escape(title)}</h1><p class="description">${escape(description)}</p><div class="shots">${items}</div><div class="notes">${notes.map(n=>`<div class="note"><b>${n.number}</b><div><strong>${escape(n.title)}</strong><br>${escape(n.text)}</div></div>`).join('')}</div><div class="footer"><span>CODEX RESET FORECAST DASHBOARD</span></div></body></html>`;
       const composition=await artworkBrowser.newPage({viewport:{width:1440,height:600}});
       await composition.route(/^https?:\/\//,route=>route.abort());
       await composition.setContent(html,{waitUntil:'load'});
@@ -146,10 +146,10 @@ async function main() {
     await mark('#forecast-warning',2,{color:'#ffc18a',padding:6});
     const alert=await crop('.quota-panel',12);
     await artwork('feature-modes.png',{
-      eyebrow:'01 / Two visual modes',title:'A calm rhythm. A clear signal to accelerate.',
-      description:'Stay in the dark green overview for routine monitoring. A valid, timed reset announcement turns the dashboard amber and adds a target pace.',
+      eyebrow:'01 / Reset announcements',title:'The dashboard turns orange when a reset time is announced.',
+      description:'Automatic resets for your plan add a countdown and target pace alongside your remaining quota.',
       columns:2,panels:[{label:'ROUTINE MONITORING',image:normal},{label:'ANNOUNCEMENT / ACCELERATED MODE',image:alert}],
-      notes:[{number:1,title:'Routine mode',text:'Compare actual consumption with personal-cycle and custom-cycle pacing.'},{number:2,title:'Timed forecast detected',text:'Amber styling and a deadline reminder make the change immediately visible. A forecast is not completion.'}]
+      notes:[{number:1,title:'Routine mode',text:'See remaining quota and compare your usage with the pacing bars.'},{number:2,title:'Accelerated mode',text:'A scheduled automatic reset for your plan adds a countdown and red target line.'}]
     });
 
     await viewport(1600);
@@ -158,10 +158,10 @@ async function main() {
     await mark('[data-bar="actual"] .bar-drag-handle',2,{padding:3,badge:'right'});
     await mark('#hypothetical-settings',3,{padding:4,badge:'right'});
     await artwork('feature-pace.png',{
-      eyebrow:'02 / Quota consumption pacing',title:'Three rhythms. One clear comparison.',
-      description:'Actual usage, an adjustable reset-cycle assumption, and a steady personal-cycle pace share the same scale. Reorder the rows to suit the way you think.',
+      eyebrow:'02 / Usage pacing',title:'Compare actual usage with two pacing guides.',
+      description:'Choose a reset-cycle assumption and drag the bars into your preferred order.',
       panels:[{label:'LOCAL QUOTA + THREE COMPARABLE PACE TRACKS',image:await crop('.quota-panel',12)}],
-      notes:[{number:1,title:'Consumption pacing tracks',text:'Read actual, custom-cycle and steady-cycle percentages side by side.'},{number:2,title:'Drag to reorder',text:'Use a handle to arrange the tracks. Your preferred order is saved locally.'},{number:3,title:'Your own cycle assumption',text:'Set X days; the default is three. It remains an assumption, not a forecast.'}]
+      notes:[{number:1,title:'Three usage bars',text:'Actual consumption, your assumed cycle and even personal-cycle usage.'},{number:2,title:'Drag to reorder',text:'Move a bar using its handle. The dashboard remembers the order.'},{number:3,title:'Choose X days',text:'Set the assumed reset interval. The default is 3 days.'}]
     });
 
     await viewport(1260);
@@ -173,10 +173,10 @@ async function main() {
     await mark('.forecast-band',2,{color:'#ff7c81',padding:9});
     const range=await crop('.quota-panel',12);
     await artwork('feature-forecast.png',{
-      eyebrow:'03 / The red target pace',title:'A moving target line. A visible deadline range.',
-      description:'The red line advances with time and reaches 100% at the announced deadline. Different future times form two pace boundaries with a luminous red band.',
+      eyebrow:'03 / The red target line',title:'Keep pace with the next reset.',
+      description:'The line moves right and reaches 100% at the announced time. Compare it with actual usage.',
       columns:2,accent:'#ff9c79',panels:[{label:'ONE ANNOUNCED DEADLINE',image:single},{label:'MULTIPLE FUTURE TIMES',image:range}],
-      notes:[{number:1,title:'One shared target line',text:'Matching announcements collapse into one line across all consumption tracks.'},{number:2,title:'Slow and fast pace boundaries',text:'Different deadlines show a target range. Expired times leave the next-forecast display automatically.'}]
+      notes:[{number:1,title:'One announced time',text:'Matching times share a red line across all three bars.'},{number:2,title:'A range of times',text:'Different times create two lines with a glowing red band between them.'}]
     });
 
     await viewport(1600);
@@ -185,10 +185,10 @@ async function main() {
     await mark('#sources-grid',1,{padding:8});
     await mark('[data-source="next"] .source-title,[data-source="tibo"] .source-title',2,{padding:4,badge:'right'});
     await artwork('feature-sources.png',{
-      eyebrow:'04 / Multi-source monitoring',title:'Five sources. Evidence you can inspect.',
-      description:'Compare the next estimate, the underlying announcement and collection timestamps. Shared upstream feeds are identified so repeated records cannot masquerade as independent confirmation.',
+      eyebrow:'04 / Reset sources',title:'Read five sources side by side.',
+      description:'Compare the expected times and open the original announcements.',
       panels:[{label:'FIVE SOURCE CARDS / EXPANDED EVIDENCE',image:await crop('.forecasts-section',24)}],
-      notes:[{number:1,title:'Public evidence in one row',text:'Each source keeps its forecast, original announcement, freshness and supporting explanation.'},{number:2,title:'Shared upstream identified',text:'NextReset and TIBO share an upstream collection chain; they are not counted as two independent checks.'}]
+      notes:[{number:1,title:'Five source cards',text:'Expected reset time at the top, original post and update time below.'},{number:2,title:'Shared source',text:'NextReset and TIBO are grouped under their common feed.'}]
     });
 
     await demo();
@@ -199,10 +199,10 @@ async function main() {
     await mark('.history-row:first-child .history-evidence',3,{padding:5,badge:'right'});
     if(await page.locator('.history-row:first-child .history-proof').count())await mark('.history-row:first-child .history-proof',4,{padding:5,badge:'right'});
     await artwork('feature-history.png',{
-      eyebrow:'05 / Reset history and source comparison',title:'Trace the record. Check the collection chains.',
-      description:'The latest calibrated reset and a newest-first history retain source evidence. Public completion announcements stay distinct from personal quota resets.',
+      eyebrow:'05 / Reset history',title:'Compare when each site recorded a reset.',
+      description:'Open a record to see each source’s timestamp and original post.',
       panels:[{label:'LATEST CROSS-CHECKED PUBLIC RECORD',image:confirmed,maxWidth:950},{label:'HISTORY / SOURCE-CHAIN COUNTS',image:await crop('.history-section',24)}],
-      notes:[{number:1,title:'Calibrated status',text:'Agreement across independent collection chains is shown explicitly.'},{number:2,title:'Source proof',text:'Open the source records and original public announcement.'},{number:3,title:'History with provenance',text:'Review completion times, reset type, contributing sites and independent-chain counts.'},{number:4,title:'Compare source records',text:'Expand a record to inspect the time and collection chain reported by each contributing site.'}]
+      notes:[{number:1,title:'Latest reset',text:'See the recorded time and how many source groups agree.'},{number:2,title:'Source sites',text:'Open a site that recorded the latest reset.'},{number:3,title:'Recent history',text:'Records show the time, reset type and contributing sites, newest first.'},{number:4,title:'Compare timestamps',text:'Expand a record to compare each site’s time and shared feed.'}]
     });
 
     await demo();
@@ -218,10 +218,10 @@ async function main() {
     await mark('label:has(#setting-body-font)',3,{padding:5,badge:'right'});
     const settings=await crop('#settings-dialog',26);
     await artwork('feature-settings.png',{
-      eyebrow:'06 / Bilingual and local-first',title:'Make it yours. Keep personal data local.',
-      description:'Switch the application between English and Chinese. Fine-tune text size and cycle assumptions, then let the tray keep monitoring after you close the window.',
+      eyebrow:'06 / Settings',title:'Choose your language and text size.',
+      description:'Keep the dashboard running in the tray and start it with Windows.',
       panels:[{label:'LANGUAGE, BACKGROUND MONITORING AND READING COMFORT',image:settings,maxWidth:790}],
-      notes:[{number:1,title:'English + Chinese',text:'Application controls support both languages; the website offers additional translations.'},{number:2,title:'Quiet background operation',text:'Choose tray monitoring and start at sign-in. Enable persistent alerts for meaningful, timed reset notices.'},{number:3,title:'Comfortable reading',text:'Body text and smaller labels scale together while the large figures keep their visual hierarchy.'}]
+      notes:[{number:1,title:'English or Chinese',text:'Select the interface language in Settings.'},{number:2,title:'Background monitoring',text:'Close to tray, start with Windows and get scheduled automatic-reset alerts for your plan.'},{number:3,title:'Text size',text:'Body text and smaller labels resize together. Large numbers keep their size.'}]
     });
     assert.equal(externalRequests.length,0,'Public feature captures must not access the network.');
     const persisted=await page.evaluate(() => window.dashboard.get());

@@ -1,15 +1,372 @@
 'use strict';
 const translations={
- en:{hero:'Be ready for the next reset.',intro:'Five sources, three consumption rhythms and one moving deadline signal. A quiet Windows dashboard that tells you when the pace needs to change.',download:'Download for Windows',code:'Explore the source ↗',meta:'English + Chinese app · Seven website languages · GPL-3.0',installTitle:'Download. Open. Start watching.',step1:'Get the Windows x64 installer from Releases, or choose the portable executable.',step2:'Run the app. Public-source monitoring needs no dashboard account or API key.',step3:'For personal quota, install and sign in to the official Codex CLI on your computer. Choose your language in Settings.',installNote:'Portable means no installation; settings still live in your Windows profile. The installer is currently unsigned.',guide:'Read the installation guide ↗',privacyTitle:'Your quota stays on your computer.',privacy:'No analytics, dashboard cloud account or quota upload. The app reads sanitized quota fields from the official local Codex service. Source websites receive ordinary public requests; their operators can see your IP.',limitsTitle:'Evidence before certainty.',limits:'A forecast is a reference, not a promised reset. Site probabilities are not validated hit rates. Shared upstream feeds count as one collection chain; no active forecast is displayed as None.',demo:'All feature images show the actual application with clearly marked synthetic demonstration data. The dates and quota values are not live announcements or anyone’s account.',privacyLink:'Privacy & data handling',issues:'Feedback',features:[['A calm rhythm. A clear signal to accelerate.','Routine monitoring stays dark green. A fresh, timed, applicable reset announcement turns the dashboard amber. The color change helps you spot a reason to adjust consumption immediately.'],['Quota consumption pacing, on one scale.','Compare actual consumption, steady personal-cycle pace and a custom X-day assumption (default: 3). Drag the rows into your preferred order; the app saves it locally.'],['The red target line moves with time.','Like a record line in a swimming race, the marker advances and reaches 100% at the forecast deadline. Matching times use one line; different times create two boundaries and a glowing band. Expired endpoints leave the next-reset display.'],['Five sources. Inspectable evidence.','Codex Reset, Did Codex Reset, NextReset, TIBO and Codex Reset Today appear side by side. Compare deadlines, original posts and freshness. Checks run every 30 seconds; Did Codex Reset is slower to respect its rate limit.'],['History, with source comparison.','The latest public reset is calibrated against independent collection chains. History starts in September 2026, newest first. Expand a record to compare each site’s recorded time and original link; shared feeds are deduplicated.'],['Bilingual, comfortable, and local.','Switch the app between English and Chinese. Body text and smaller labels resize together. Tray monitoring and sign-in startup keep it available; persistent Windows alerts acknowledge and merge similar timed reset messages.']]},
- 'zh-CN':{hero:'把握下一次重置。',intro:'五个信源、三条额度消耗节奏、一条随时间推进的预告目标线。简洁的 Windows 看板，让你及时发现需要加速的时刻。',download:'下载 Windows 版',code:'查看开源代码 ↗',meta:'软件中英双语 · 宣传页七种语言 · GPL-3.0',installTitle:'下载，打开，开始监控。',step1:'在 Releases 下载 Windows x64 安装版，或选择免安装的便携版。',step2:'打开软件即可监测公开信源，无需看板账号或 API 密钥。',step3:'如需个人额度，在本机安装官方 Codex CLI 并登录，在设置中选择界面语言。',installNote:'便携版无需安装，设置仍保存于 Windows 用户目录。当前安装包未进行代码签名。',guide:'查看安装说明 ↗',privacyTitle:'你的额度留在本机。',privacy:'无统计追踪、看板云端账号或额度上传。软件从官方本机 Codex 服务读取经过筛选的额度字段。信源网站会收到普通公开请求，其运营方能够看到请求 IP。',limitsTitle:'先看依据，再判断。',limits:'预告仅供参考，不是重置承诺。站方概率不等于已验证命中率。共享上游按一条采集链计数；没有有效预告时明确显示“无”。',demo:'所有功能图片均为真实软件界面，使用明确标注的虚构演示数据。图片时间与额度不是实时公告或任何人的真实账户数据。',privacyLink:'隐私与数据处理',issues:'反馈问题',features:[['常规模式安静，预告出现醒目。','日常监控采用黑绿色调。新鲜、适用且含明确时间的重置预告出现后，界面切换为黑橙色调，直观提醒你调整消耗节奏。'],['额度消耗节奏，放在同一尺度上比较。','实际消耗、个人周期均匀节奏，以及假设每 X 天重置的节奏（默认 3 天）并排对照。横条可以拖动排序，偏好保存在本机。'],['红色“游泳线”，随时间向右推进。','如同比赛记录线，红线在预告重置时刻到达 100%。相同时间合为一条线，不同时间显示双线与红色荧光区间；已过期端点自动退出下次预计。'],['五个信源，依据可展开。','Codex Reset、Did Codex Reset、NextReset、TIBO、Codex Reset Today 并列展示。比较预告时间、原帖及更新状态；每 30 秒检查，Did Codex Reset 按限流要求降低频率。'],['历史重置，多源比对。','最近一次公开重置按独立采集链校准。历史从 2026 年 9 月开始，最新在上；展开每条记录，比较各站记录时间和原帖，共享上游不重复计入独立佐证。'],['中英双语，舒适阅读，本机运行。','软件可切换中英文；正文与更小文字同步调整。支持托盘监控和开机启动；明确时间的相关重置消息触发持续通知，相近时间消息合并，通过“确认收到”关闭。']]},
- ja:{hero:'次のリセットに備える。',intro:'5つの情報源、3つの消費ペース、時間とともに進む目標線。ペース変更の判断を助ける Windows ダッシュボード。',download:'Windows 版をダウンロード',code:'ソースを見る ↗',meta:'アプリは英語・中国語 · サイトは7言語 · GPL-3.0',installTitle:'ダウンロードして監視を開始。',step1:'Releases から Windows x64 インストーラーまたはポータブル版を取得します。',step2:'公開情報の監視にダッシュボードのアカウントや API キーは不要です。',step3:'個人の利用枠を表示するには、公式 Codex CLI を本機にインストールしログインします。言語は設定で選択します。',installNote:'ポータブル版の設定は Windows ユーザープロファイルに保存されます。現在コード署名はありません。',guide:'インストールガイド ↗',privacyTitle:'利用枠の情報は本機に。',privacy:'分析用追跡、クラウドアカウント、利用枠の送信はありません。公式ローカル Codex サービスから必要な項目だけを読み取ります。公開サイトへの通常のリクエストでは IP が相手に見えます。',limitsTitle:'確信よりも根拠。',limits:'予告は参考であり保証ではありません。確率は検証済み的中率ではありません。同じ上流は1収集経路として扱い、有効な予告がない場合は None と表示します。',demo:'画像は実際のアプリ画面と明示された架空のデータです。日時や利用枠は現在の告知や実在するアカウントではありません。',privacyLink:'プライバシー',issues:'フィードバック',features:[['通常は落ち着いた緑、予告でオレンジ。','新しく、対象に適用され、時刻が明確な予告で色が変わり、ペース変更を知らせます。'],['同じ尺度で3つの消費ペースを比較。','実際の消費、個人周期の均等ペース、X 日周期の仮定（初期値3日）。行をドラッグして並べ替え、順番を本機に保存します。'],['時間とともに進む赤い目標線。','予告期限で100%に到達。同じ時刻は1本、異なる時刻は2本の境界と発光帯で表示し、過去の端点を除外します。'],['5つの情報源と確認できる根拠。','各サイトの期限、原文、鮮度を横並びで比較。30秒ごとに確認し、Did Codex Reset は制限に合わせて低頻度で取得します。'],['履歴と収集経路の比較。','独立した経路で直近の公開リセットを照合。2026年9月以降の履歴を新しい順に表示し、各サイトの日時と原文を確認できます。'],['二言語、読みやすさ、ローカル実行。','アプリは英語・中国語。文字サイズ、トレイ監視、自動起動を設定でき、類似した時刻付き通知をまとめて手動で閉じられます。']]},
- es:{hero:'Prepárate para el próximo reinicio.',intro:'Cinco fuentes, tres ritmos de consumo y una línea de plazo que avanza. Un panel de Windows para ajustar tu ritmo a tiempo.',download:'Descargar para Windows',code:'Ver el código ↗',meta:'Aplicación en inglés y chino · Sitio en siete idiomas · GPL-3.0',installTitle:'Descarga. Abre. Observa.',step1:'Descarga el instalador Windows x64 o la versión portátil en Releases.',step2:'La consulta de fuentes públicas no requiere cuenta del panel ni clave API.',step3:'Para ver tu cuota, instala e inicia sesión en el Codex CLI oficial. Elige el idioma en Ajustes.',installNote:'La versión portátil guarda ajustes en tu perfil de Windows. El instalador aún no tiene firma digital.',guide:'Guía de instalación ↗',privacyTitle:'Tu cuota permanece en tu equipo.',privacy:'Sin analítica, cuenta en la nube ni envío de cuotas. Solo se leen campos necesarios del servicio local oficial de Codex. Los sitios públicos pueden ver la IP de tus consultas.',limitsTitle:'Primero la evidencia.',limits:'Una previsión es una referencia, no una garantía. Las probabilidades no son tasas de acierto verificadas. Un origen compartido cuenta como una sola cadena; sin previsión activa se muestra None.',demo:'Las imágenes son capturas reales con datos ficticios señalados. Fechas y cuotas no representan anuncios actuales ni cuentas personales.',privacyLink:'Privacidad',issues:'Comentarios',features:[['Verde tranquilo. Ámbar para acelerar.','Un anuncio reciente, aplicable y con hora concreta cambia el aspecto del panel e indica cuándo revisar tu consumo.'],['Tres ritmos en una misma escala.','Compara consumo real, ritmo uniforme del ciclo personal y supuesto de X días (3 por defecto). Arrastra las filas y guarda el orden localmente.'],['La línea roja avanza con el tiempo.','Llega al 100% en el plazo anunciado. Horas iguales usan una línea; horas distintas, dos límites con una banda luminosa. Los extremos vencidos se retiran.'],['Cinco fuentes con evidencia visible.','Compara plazos, mensajes originales y actualización. Se consulta cada 30 segundos; Did Codex Reset tiene menor frecuencia por sus límites.'],['Historial y comparación de fuentes.','Contrasta el último reinicio público entre cadenas independientes. Historial desde septiembre de 2026, más reciente primero, con horas y enlaces de cada sitio.'],['Dos idiomas, comodidad y ejecución local.','Inglés y chino, tamaño de texto ajustable, bandeja y arranque al iniciar sesión. Los avisos persistentes agrupan mensajes con horas similares.']]},
- fr:{hero:'Préparez le prochain reset.',intro:'Cinq sources, trois rythmes de consommation et une ligne de délai mobile. Un tableau Windows pour adapter votre rythme à temps.',download:'Télécharger pour Windows',code:'Voir le code ↗',meta:'Application anglais et chinois · Site en sept langues · GPL-3.0',installTitle:'Téléchargez. Ouvrez. Surveillez.',step1:'Choisissez l’installateur Windows x64 ou la version portable dans Releases.',step2:'La surveillance des sources publiques ne demande ni compte du tableau ni clé API.',step3:'Pour votre quota personnel, installez et connectez le Codex CLI officiel. Choisissez la langue dans les paramètres.',installNote:'La version portable conserve les paramètres dans le profil Windows. L’installateur est actuellement non signé.',guide:'Guide d’installation ↗',privacyTitle:'Votre quota reste sur votre ordinateur.',privacy:'Sans suivi analytique, compte cloud ni envoi du quota. Seuls les champs utiles du service local officiel Codex sont lus. Les sites consultés peuvent voir votre adresse IP.',limitsTitle:'Les preuves avant la certitude.',limits:'Une prévision n’est pas une garantie. Les probabilités ne sont pas des taux de réussite validés. Une source amont commune compte comme une seule chaîne ; sans prévision active, None est affiché.',demo:'Les images montrent la véritable application avec des données fictives signalées. Dates et quotas ne sont ni des annonces actuelles ni des comptes personnels.',privacyLink:'Confidentialité',issues:'Commentaires',features:[['Vert au quotidien. Ambre pour accélérer.','Une annonce récente, applicable et datée change la couleur du tableau et invite à ajuster le rythme.'],['Trois rythmes sur une même échelle.','Consommation réelle, rythme uniforme du cycle personnel et hypothèse de X jours (3 par défaut). Réorganisez les lignes par glisser-déposer.'],['La ligne rouge avance avec le temps.','Elle atteint 100 % au délai annoncé. Un même horaire donne une ligne ; plusieurs horaires donnent deux limites et une bande lumineuse. Les bornes expirées disparaissent.'],['Cinq sources, des preuves accessibles.','Comparez délais, publications originales et fraîcheur. Vérification toutes les 30 secondes, moins fréquente pour Did Codex Reset selon ses limites.'],['Historique et comparaison des sources.','Le dernier reset public est recoupé entre chaînes indépendantes. Historique depuis septembre 2026, du plus récent au plus ancien, avec les horaires et liens par site.'],['Deux langues et des données locales.','Anglais et chinois, taille du texte réglable, surveillance en zone de notification et lancement à la connexion. Les alertes persistantes regroupent les horaires similaires.']]},
- de:{hero:'Bereit für den nächsten Reset.',intro:'Fünf Quellen, drei Verbrauchsrhythmen und eine bewegliche Ziellinie. Ein Windows-Dashboard, das beim Anpassen des Tempos hilft.',download:'Für Windows herunterladen',code:'Quellcode ansehen ↗',meta:'App auf Englisch und Chinesisch · Website in sieben Sprachen · GPL-3.0',installTitle:'Herunterladen. Öffnen. Beobachten.',step1:'Windows-x64-Installer oder portable Version unter Releases herunterladen.',step2:'Öffentliche Quellen benötigen kein Dashboard-Konto und keinen API-Schlüssel.',step3:'Für das persönliche Kontingent den offiziellen Codex CLI installieren und anmelden. Die Sprache lässt sich in den Einstellungen wählen.',installNote:'Die portable Version speichert Einstellungen im Windows-Profil. Der Installer ist derzeit nicht signiert.',guide:'Installationsanleitung ↗',privacyTitle:'Ihr Kontingent bleibt auf Ihrem Computer.',privacy:'Keine Analyse-Tracker, kein Cloud-Konto und kein Kontingent-Upload. Die App liest nur benötigte Felder des offiziellen lokalen Codex-Dienstes. Öffentliche Quellseiten sehen Ihre Anfrage-IP.',limitsTitle:'Belege vor Gewissheit.',limits:'Eine Prognose ist keine Garantie. Wahrscheinlichkeiten sind keine geprüften Trefferquoten. Ein gemeinsamer Ursprung zählt als eine Erfassungskette; ohne aktive Prognose erscheint None.',demo:'Die Bilder zeigen die echte App mit gekennzeichneten fiktiven Daten. Zeiten und Kontingente sind keine aktuellen Ankündigungen oder persönlichen Konten.',privacyLink:'Datenschutz',issues:'Feedback',features:[['Ruhiges Grün. Amber als Beschleunigungssignal.','Eine aktuelle, passende Ankündigung mit konkreter Zeit verändert die Farbe und macht den Anpassungsbedarf sichtbar.'],['Drei Verbrauchsrhythmen auf einer Skala.','Tatsächlicher Verbrauch, gleichmäßiges persönliches Zyklustempo und X-Tage-Annahme (Standard: 3). Zeilen lassen sich verschieben und lokal speichern.'],['Die rote Ziellinie bewegt sich mit der Zeit.','Bei der angekündigten Frist erreicht sie 100 %. Gleiche Zeiten ergeben eine Linie, unterschiedliche Zeiten zwei Grenzen mit Leuchtband. Abgelaufene Endpunkte werden entfernt.'],['Fünf Quellen mit sichtbaren Belegen.','Fristen, Originalbeiträge und Aktualität vergleichen. Prüfung alle 30 Sekunden; Did Codex Reset wird wegen seiner Limits seltener abgefragt.'],['Historie und Quellenvergleich.','Der letzte öffentliche Reset wird zwischen unabhängigen Erfassungsketten abgeglichen. Historie ab September 2026, neueste zuerst, mit Zeiten und Links pro Quelle.'],['Zweisprachig, lesbar und lokal.','Englisch und Chinesisch, skalierbare Schrift, Tray-Überwachung und Autostart. Dauerhafte Hinweise bündeln Meldungen mit ähnlichen Reset-Zeiten.']]},
- ko:{hero:'다음 초기화에 대비하세요.',intro:'다섯 출처, 세 가지 소비 속도, 시간에 따라 움직이는 목표선. 소비 속도 조정을 돕는 Windows 대시보드입니다.',download:'Windows용 다운로드',code:'소스 코드 보기 ↗',meta:'앱 영어·중국어 · 웹사이트 7개 언어 · GPL-3.0',installTitle:'다운로드하고 모니터링하세요.',step1:'Releases에서 Windows x64 설치 파일 또는 포터블 버전을 받으세요.',step2:'공개 출처 모니터링에는 대시보드 계정이나 API 키가 필요 없습니다.',step3:'개인 사용량을 보려면 공식 Codex CLI를 설치하고 로그인하세요. 언어는 설정에서 선택합니다.',installNote:'포터블 버전도 설정은 Windows 사용자 프로필에 저장합니다. 현재 설치 파일은 코드 서명이 없습니다.',guide:'설치 안내 ↗',privacyTitle:'사용량은 내 컴퓨터에 남습니다.',privacy:'분석 추적, 클라우드 계정, 사용량 업로드가 없습니다. 공식 로컬 Codex 서비스에서 필요한 필드만 읽습니다. 공개 사이트 운영자는 요청 IP를 볼 수 있습니다.',limitsTitle:'확신보다 근거를 먼저.',limits:'예고는 참고 정보이며 보장이 아닙니다. 확률은 검증된 적중률이 아닙니다. 같은 상위 출처는 하나의 수집 경로로 계산하며 유효한 예고가 없으면 None으로 표시합니다.',demo:'이미지는 실제 앱과 표시된 가상 데이터로 구성됩니다. 날짜와 사용량은 실시간 공지나 실제 계정 정보가 아닙니다.',privacyLink:'개인정보 처리',issues:'피드백',features:[['평소에는 초록색, 예고 시 주황색.','최신이며 적용 가능하고 시간이 명시된 예고가 나오면 색상이 바뀌어 소비 속도 조정을 알려줍니다.'],['동일한 척도의 세 가지 소비 속도.','실제 소비, 개인 주기의 균등 속도, X일 가정(기본 3일)을 비교합니다. 행을 드래그해 순서를 바꾸고 로컬에 저장합니다.'],['시간에 따라 움직이는 빨간 목표선.','예고 시각에 100%에 도달합니다. 같은 시각은 한 줄, 다른 시각은 두 경계와 빛나는 띠로 나타내며 지난 끝점은 제외합니다.'],['다섯 출처와 확인 가능한 근거.','예고 시각, 원문, 최신 상태를 비교합니다. 30초마다 확인하되 Did Codex Reset은 요청 제한에 따라 간격을 늘립니다.'],['기록과 출처 비교.','독립 수집 경로를 통해 최근 공개 초기화를 대조합니다. 2026년 9월부터 최신 순으로 표시하고 각 사이트의 시간과 원문을 확인합니다.'],['두 언어, 편한 읽기, 로컬 실행.','앱은 영어와 중국어를 지원합니다. 글자 크기, 트레이 모니터링, 자동 시작을 설정하고 비슷한 시각의 지속 알림을 합칩니다.']]}
+  "en": {
+    "hero": "Reset forecasts and quota, together.",
+    "intro": "Follow reset announcements from five websites alongside your remaining Codex quota. When a reset time is announced, use it to plan how much to spend before then.",
+    "eyebrow": "CODEX RESET FORECAST DASHBOARD · WINDOWS",
+    "download": "Download for Windows",
+    "code": "View on GitHub ↗",
+    "meta": "Windows 10/11 · English and Chinese · GPL-3.0",
+    "startEyebrow": "INSTALLATION",
+    "installTitle": "Get the dashboard running.",
+    "step1": "Download the installer or portable version from Releases.",
+    "step2": "Open the dashboard to see reset announcements. Choose your language and text size in Settings.",
+    "step3": "To show personal quota, install the official Codex CLI and sign in with codex login.",
+    "installNote": "The installation guide covers CLI setup, Windows publisher prompts and where settings are saved.",
+    "guide": "Installation guide ↗",
+    "demo": "Screenshots use demo data.",
+    "privacyLink": "Privacy",
+    "issues": "Report an issue",
+    "features": [
+      [
+        "A reset is announced. The dashboard turns orange.",
+        "The usual green view turns orange when an automatic reset is announced for your plan with a specific time. The countdown and red target line appear together, so you can see how long you have to use your remaining quota."
+      ],
+      [
+        "Compare your usage with two pacing guides.",
+        "Three bars show actual consumption, an assumed X-day reset cycle and even usage across your personal cycle. X defaults to 3 days. Drag the bars to change their order."
+      ],
+      [
+        "Keep pace with the red line.",
+        "The line moves right with time and reaches 100% at the announced reset time. Compare it with actual consumption to see how your usage is keeping up. Matching times use one line; different times form two lines with a red band between them."
+      ],
+      [
+        "Read five sources side by side.",
+        "Each card shows the next expected reset time, the original announcement and when the source was updated. Open the details to compare posts. Cards show “None” when there is no active forecast."
+      ],
+      [
+        "See when each source recorded a reset.",
+        "The latest reset and elapsed time sit at the top. History runs from September 2026, newest first. Expand a record to compare the timestamps, original posts and shared feeds behind it. Times use Beijing time."
+      ],
+      [
+        "Set it up once. Leave it in the tray.",
+        "Choose English or Chinese, adjust text size and enable startup with Windows. Scheduled automatic resets for your plan get a notification you can acknowledge; messages about similar reset times are grouped together."
+      ]
+    ],
+    "captions": [
+      "Left: routine mode. Right: a timed reset announcement.",
+      "Actual consumption, a custom reset cycle and personal-cycle pacing.",
+      "Left: one reset time. Right: a range of reset times.",
+      "Codex Reset · Did Codex Reset · NextReset · TIBO · Codex Reset Today",
+      "Expand a history row to compare each source’s timestamp.",
+      "Language, text size, startup and notification settings."
+    ]
+  },
+  "zh-CN": {
+    "hero": "重置预告、剩余额度，放在一起。",
+    "intro": "汇总五个网站的重置预告，显示本机 Codex 剩余额度。有了具体重置时间，就按这个时间安排接下来的使用。",
+    "eyebrow": "CODEX 重置预测看板 · WINDOWS",
+    "download": "下载 Windows 版",
+    "code": "在 GitHub 查看 ↗",
+    "meta": "Windows 10/11 · 软件中英双语 · GPL-3.0",
+    "startEyebrow": "安装",
+    "installTitle": "下载后，打开看板。",
+    "step1": "在 Releases 选择安装版或便携版。",
+    "step2": "打开即可查看重置消息，在设置中选择语言和字号。",
+    "step3": "要显示个人额度，安装官方 Codex CLI，并用 codex login 登录。",
+    "installNote": "CLI 安装方法、Windows 发布者提示和设置保存位置见安装说明。",
+    "guide": "安装说明 ↗",
+    "demo": "截图使用演示数据。",
+    "privacyLink": "隐私说明",
+    "issues": "反馈问题",
+    "features": [
+      [
+        "有重置预告时，看板变成橙色。",
+        "平时是黑绿色调。你的套餐有了定时的自动重置预告后，界面切换为黑橙色，倒计时和红色目标线一起出现。距离重置还有多久、剩余额度该怎么用，打开就能看。"
+      ],
+      [
+        "用了多少，和计划比一比。",
+        "三条横条分别显示实际消耗、假设每 X 天重置的节奏，以及个人周期内的均匀节奏。X 默认 3 天，可以手动改；横条可以拖动，按你习惯的顺序排列。"
+      ],
+      [
+        "跟着红色“游泳线”安排消耗。",
+        "红线随时间向右推进，在预告重置时刻到达 100%。和实际消耗对照，就能看出使用进度。同一时间画一条线；不同时间画两条线，中间用红色荧光标出范围。"
+      ],
+      [
+        "五个网站的消息，横着看。",
+        "每个信源各占一列，上面是下次预计时间，下面是原帖和更新状态。点击展开详情，直接比对各站的说法；没有有效预告时，时间位置显示“无”。"
+      ],
+      [
+        "上次什么时候重置，各站怎么记的。",
+        "顶部显示最近一次重置和距今时长。下方历史从 2026 年 9 月开始，最新记录在最上面。展开一条记录，就能比较各站时间、原帖和共用来源；时间统一为北京时间。"
+      ],
+      [
+        "设好字号，放到托盘继续看。",
+        "界面可切换中英文，正文和小字一起缩放。支持开机启动、关闭至托盘。适用当前套餐的定时自动重置预告会发出持续通知，相近时间的消息合并，点“确认收到”关闭。"
+      ]
+    ],
+    "captions": [
+      "左：常规模式。右：出现具体时间的重置预告。",
+      "实际消耗、自定义重置周期、个人周期均匀节奏。",
+      "左：一个重置时间。右：多个时间形成的范围。",
+      "Codex Reset · Did Codex Reset · NextReset · TIBO · Codex Reset Today",
+      "展开历史记录，逐站比较时间和原帖。",
+      "语言、字号、开机启动与通知设置。"
+    ]
+  },
+  "ja": {
+    "hero": "リセット予告と残り利用枠を、一緒に。",
+    "intro": "5つのサイトのリセット予告と、Codex の残り利用枠を表示。予告時刻を見ながら、それまでの使い方を決められます。",
+    "eyebrow": "CODEX RESET FORECAST DASHBOARD · WINDOWS",
+    "download": "Windows 版をダウンロード",
+    "code": "GitHub で見る ↗",
+    "meta": "Windows 10/11 · アプリは英語・中国語 · GPL-3.0",
+    "startEyebrow": "インストール",
+    "installTitle": "ダウンロードして起動。",
+    "step1": "Releases でインストーラーかポータブル版を選びます。",
+    "step2": "起動するとリセット情報を確認できます。設定で言語と文字サイズを選べます。",
+    "step3": "個人の利用枠を表示するには公式 Codex CLI をインストールし、codex login でログインします。",
+    "installNote": "CLI の導入、Windows の発行元表示、設定の保存場所はインストールガイドにあります。",
+    "guide": "インストールガイド ↗",
+    "demo": "画面はデモデータを使用しています。",
+    "privacyLink": "プライバシー",
+    "issues": "問題を報告",
+    "features": [
+      [
+        "時刻付きの予告が出ると、オレンジに。",
+        "通常は黒と緑。利用中のプランに時刻付きの自動リセット予告が出るとオレンジに変わり、カウントダウンと赤い目標線が表示されます。残り時間と利用枠を一緒に確認できます。"
+      ],
+      [
+        "実際の使用量を、2つのペースと比較。",
+        "実際の消費、X日でリセットする仮定、個人周期での均等ペースを3本のバーで表示。Xは初期値3日で変更でき、バーはドラッグで並べ替えられます。"
+      ],
+      [
+        "赤い線に合わせて使う。",
+        "線は時間とともに右へ進み、予告時刻に100%へ到達します。実際の消費量と並べて進み具合を確認できます。同じ時刻は1本、異なる時刻は2本と赤い帯で表示します。"
+      ],
+      [
+        "5サイトの投稿を横に並べる。",
+        "各カードに次の予告時刻、元の投稿、更新時刻を表示。詳細を開いて内容を比べられます。有効な予告がなければ「None」と表示します。"
+      ],
+      [
+        "各サイトが記録した時刻を比べる。",
+        "上部に直近のリセットと経過時間を表示。2026年9月以降の履歴は新しい順です。行を開くと時刻、元の投稿、共通の取得元を確認できます。時刻は北京時間です。"
+      ],
+      [
+        "文字を調整して、トレイで監視。",
+        "英語・中国語を選び、本文と小さな文字をまとめて調整できます。Windows起動時に立ち上げ、トレイで監視を継続。利用中のプランの時刻付き自動リセット予告は通知し、近い時刻の通知はまとめます。"
+      ]
+    ],
+    "captions": [
+      "左：通常。右：時刻付きの予告。",
+      "実際の消費、指定周期、個人周期の均等ペース。",
+      "左：1つの時刻。右：複数の時刻の範囲。",
+      "Codex Reset · Did Codex Reset · NextReset · TIBO · Codex Reset Today",
+      "履歴を開いて各サイトの時刻と投稿を比較。",
+      "言語、文字サイズ、自動起動、通知の設定。"
+    ]
+  },
+  "es": {
+    "hero": "Previsiones de reinicio y cuota, juntas.",
+    "intro": "Consulta los anuncios de cinco sitios junto a tu cuota restante de Codex. Cuando se publica una hora, puedes organizar el consumo hasta ese momento.",
+    "eyebrow": "CODEX RESET FORECAST DASHBOARD · WINDOWS",
+    "download": "Descargar para Windows",
+    "code": "Ver en GitHub ↗",
+    "meta": "Windows 10/11 · Aplicación en inglés y chino · GPL-3.0",
+    "startEyebrow": "INSTALACIÓN",
+    "installTitle": "Descarga y abre el panel.",
+    "step1": "Elige el instalador o la versión portátil en Releases.",
+    "step2": "Abre el panel para ver los anuncios. Ajusta el idioma y el tamaño del texto en Configuración.",
+    "step3": "Para ver tu cuota personal, instala el Codex CLI oficial e inicia sesión con codex login.",
+    "installNote": "La guía explica cómo instalar el CLI, los avisos de Windows sobre el editor y dónde se guardan los ajustes.",
+    "guide": "Guía de instalación ↗",
+    "demo": "Las capturas usan datos de demostración.",
+    "privacyLink": "Privacidad",
+    "issues": "Informar de un problema",
+    "features": [
+      [
+        "Un anuncio con hora cambia el panel a naranja.",
+        "La vista habitual es verde oscuro. Un anuncio de reinicio automático con hora para tu plan activa el naranja, la cuenta atrás y la línea roja. Puedes ver cuánto tiempo queda y organizar tu cuota restante."
+      ],
+      [
+        "Compara tu consumo con dos ritmos de referencia.",
+        "Tres barras muestran el consumo real, un reinicio supuesto cada X días y el ritmo uniforme de tu ciclo personal. X empieza en 3 días y se puede cambiar. Arrastra las barras para ordenarlas."
+      ],
+      [
+        "Sigue el ritmo de la línea roja.",
+        "Avanza hacia la derecha y llega al 100 % a la hora anunciada. Compárala con el consumo real. Horas iguales usan una línea; horas distintas, dos líneas y una franja roja entre ellas."
+      ],
+      [
+        "Consulta cinco fuentes en paralelo.",
+        "Cada tarjeta muestra la próxima hora prevista, la publicación original y la última actualización. Abre los detalles para comparar los anuncios. Sin previsión activa, la tarjeta muestra «None»."
+      ],
+      [
+        "Compara la hora registrada por cada fuente.",
+        "El último reinicio y el tiempo transcurrido aparecen arriba. El historial empieza en septiembre de 2026, con lo más reciente primero. Abre una fila para ver horas, publicaciones y fuentes compartidas. Las horas usan la zona de Pekín."
+      ],
+      [
+        "Ajusta el texto y deja el panel en la bandeja.",
+        "Elige inglés o chino, cambia el tamaño del texto y activa el inicio con Windows. Los anuncios de reinicio automático con hora para tu plan generan una notificación que puedes confirmar. Los mensajes con horas similares se agrupan."
+      ]
+    ],
+    "captions": [
+      "Izquierda: modo habitual. Derecha: anuncio con hora.",
+      "Consumo real, ciclo personalizado y ritmo del ciclo personal.",
+      "Izquierda: una hora. Derecha: un intervalo de horas.",
+      "Codex Reset · Did Codex Reset · NextReset · TIBO · Codex Reset Today",
+      "Abre una fila para comparar horas y publicaciones.",
+      "Idioma, texto, inicio y notificaciones."
+    ]
+  },
+  "fr": {
+    "hero": "Prévisions de reset et quota, au même endroit.",
+    "intro": "Consultez les annonces de cinq sites et votre quota Codex restant. Dès qu’un horaire est publié, vous pouvez organiser votre consommation jusqu’au reset.",
+    "eyebrow": "CODEX RESET FORECAST DASHBOARD · WINDOWS",
+    "download": "Télécharger pour Windows",
+    "code": "Voir sur GitHub ↗",
+    "meta": "Windows 10/11 · Application en anglais et chinois · GPL-3.0",
+    "startEyebrow": "INSTALLATION",
+    "installTitle": "Téléchargez et ouvrez le tableau.",
+    "step1": "Choisissez l’installateur ou la version portable dans Releases.",
+    "step2": "Ouvrez le tableau pour consulter les annonces. Réglez la langue et la taille du texte dans les paramètres.",
+    "step3": "Pour afficher votre quota personnel, installez le Codex CLI officiel et connectez-vous avec codex login.",
+    "installNote": "Le guide explique l’installation du CLI, les messages Windows sur l’éditeur et l’emplacement des paramètres.",
+    "guide": "Guide d’installation ↗",
+    "demo": "Les captures utilisent des données de démonstration.",
+    "privacyLink": "Confidentialité",
+    "issues": "Signaler un problème",
+    "features": [
+      [
+        "Un horaire annoncé fait passer le tableau à l’orange.",
+        "La vue habituelle est vert foncé. Une annonce de reset automatique avec un horaire pour votre formule active l’orange, le compte à rebours et la ligne rouge. Vous voyez le temps restant pour utiliser votre quota."
+      ],
+      [
+        "Comparez votre consommation à deux rythmes.",
+        "Trois barres affichent la consommation réelle, un reset supposé tous les X jours et le rythme uniforme de votre cycle personnel. X vaut 3 jours au départ. Modifiez-le et réordonnez les barres par glisser-déposer."
+      ],
+      [
+        "Suivez le rythme de la ligne rouge.",
+        "Elle avance vers la droite et atteint 100 % à l’heure annoncée. Comparez-la à votre consommation réelle. Des horaires identiques donnent une ligne ; des horaires différents donnent deux lignes et une bande rouge."
+      ],
+      [
+        "Consultez cinq sources côte à côte.",
+        "Chaque carte affiche le prochain horaire prévu, la publication originale et la dernière mise à jour. Ouvrez les détails pour comparer les annonces. Sans prévision active, la carte affiche « None »."
+      ],
+      [
+        "Comparez l’heure enregistrée par chaque site.",
+        "Le dernier reset et le temps écoulé sont en haut. L’historique commence en septembre 2026, du plus récent au plus ancien. Dépliez une ligne pour voir les horaires, publications et sources communes. Les heures sont celles de Pékin."
+      ],
+      [
+        "Réglez le texte, puis gardez le tableau dans la zone de notification.",
+        "Choisissez l’anglais ou le chinois, ajustez le texte et activez le démarrage avec Windows. Les annonces de reset automatique avec horaire pour votre formule déclenchent une notification à confirmer. Les messages aux horaires proches sont regroupés."
+      ]
+    ],
+    "captions": [
+      "À gauche : vue habituelle. À droite : annonce avec horaire.",
+      "Consommation réelle, cycle personnalisé et rythme personnel.",
+      "À gauche : un horaire. À droite : une plage horaire.",
+      "Codex Reset · Did Codex Reset · NextReset · TIBO · Codex Reset Today",
+      "Dépliez une ligne pour comparer les horaires et publications.",
+      "Langue, texte, démarrage et notifications."
+    ]
+  },
+  "de": {
+    "hero": "Reset-Prognosen und Kontingent zusammen.",
+    "intro": "Sieh die Reset-Meldungen von fünf Websites neben deinem verbleibenden Codex-Kontingent. Sobald eine Uhrzeit angekündigt ist, kannst du deine Nutzung bis dahin planen.",
+    "eyebrow": "CODEX RESET FORECAST DASHBOARD · WINDOWS",
+    "download": "Für Windows herunterladen",
+    "code": "Auf GitHub ansehen ↗",
+    "meta": "Windows 10/11 · App auf Englisch und Chinesisch · GPL-3.0",
+    "startEyebrow": "INSTALLATION",
+    "installTitle": "Herunterladen und öffnen.",
+    "step1": "Wähle den Installer oder die portable Version unter Releases.",
+    "step2": "Öffne das Dashboard, um Reset-Meldungen zu sehen. Sprache und Schriftgröße findest du in den Einstellungen.",
+    "step3": "Für dein persönliches Kontingent installiere die offizielle Codex CLI und melde dich mit codex login an.",
+    "installNote": "Die Anleitung erklärt die CLI-Einrichtung, Windows-Herausgeberhinweise und den Speicherort der Einstellungen.",
+    "guide": "Installationsanleitung ↗",
+    "demo": "Die Screenshots verwenden Demodaten.",
+    "privacyLink": "Datenschutz",
+    "issues": "Problem melden",
+    "features": [
+      [
+        "Eine Meldung mit Uhrzeit färbt das Dashboard orange.",
+        "Im Alltag ist die Ansicht dunkelgrün. Eine automatische Reset-Ankündigung mit Uhrzeit für deinen Tarif aktiviert Orange, Countdown und rote Ziellinie. So siehst du, wie viel Zeit für das verbleibende Kontingent bleibt."
+      ],
+      [
+        "Vergleiche deinen Verbrauch mit zwei Richtwerten.",
+        "Drei Balken zeigen den tatsächlichen Verbrauch, einen angenommenen Reset alle X Tage und die gleichmäßige Nutzung im persönlichen Zyklus. X ist anfangs 3 Tage. Ändere den Wert und sortiere die Balken per Ziehen."
+      ],
+      [
+        "Halte mit der roten Linie Schritt.",
+        "Die Linie bewegt sich nach rechts und erreicht zur angekündigten Uhrzeit 100 %. Vergleiche sie mit deinem Verbrauch. Gleiche Uhrzeiten ergeben eine Linie; verschiedene Uhrzeiten zwei Linien mit einem roten Band dazwischen."
+      ],
+      [
+        "Lies fünf Quellen nebeneinander.",
+        "Jede Karte zeigt die nächste erwartete Uhrzeit, die Originalmeldung und die letzte Aktualisierung. Öffne die Details zum Vergleichen. Ohne aktive Prognose steht auf der Karte „None“."
+      ],
+      [
+        "Vergleiche die von jeder Quelle erfassten Zeiten.",
+        "Der letzte Reset und die verstrichene Zeit stehen oben. Die Historie beginnt im September 2026, neueste Einträge zuerst. Klappe einen Eintrag auf, um Zeiten, Originalmeldungen und gemeinsame Feeds zu sehen. Alle Zeiten sind Pekinger Zeit."
+      ],
+      [
+        "Stelle die Schrift ein und nutze das Tray.",
+        "Wähle Englisch oder Chinesisch, passe die Schrift an und aktiviere den Start mit Windows. Automatische Reset-Ankündigungen mit Uhrzeit für deinen Tarif lösen eine bestätigbare Benachrichtigung aus. Ähnliche Reset-Zeiten werden zusammengefasst."
+      ]
+    ],
+    "captions": [
+      "Links: normale Ansicht. Rechts: Meldung mit Uhrzeit.",
+      "Verbrauch, eigener Reset-Zyklus und persönlicher Rhythmus.",
+      "Links: eine Uhrzeit. Rechts: ein Zeitbereich.",
+      "Codex Reset · Did Codex Reset · NextReset · TIBO · Codex Reset Today",
+      "Klappe einen Eintrag auf, um Zeiten und Meldungen zu vergleichen.",
+      "Sprache, Schriftgröße, Autostart und Benachrichtigungen."
+    ]
+  },
+  "ko": {
+    "hero": "초기화 예고와 남은 사용량을 한곳에서.",
+    "intro": "다섯 사이트의 초기화 소식과 Codex 잔여 사용량을 함께 확인하세요. 구체적인 시간이 발표되면 그때까지의 사용량을 계획할 수 있습니다.",
+    "eyebrow": "CODEX RESET FORECAST DASHBOARD · WINDOWS",
+    "download": "Windows용 다운로드",
+    "code": "GitHub에서 보기 ↗",
+    "meta": "Windows 10/11 · 앱 영어·중국어 지원 · GPL-3.0",
+    "startEyebrow": "설치",
+    "installTitle": "다운로드하고 실행하세요.",
+    "step1": "Releases에서 설치 파일이나 포터블 버전을 선택하세요.",
+    "step2": "실행하면 초기화 소식을 확인할 수 있습니다. 설정에서 언어와 글자 크기를 선택하세요.",
+    "step3": "개인 잔여 사용량을 표시하려면 공식 Codex CLI를 설치하고 codex login으로 로그인하세요.",
+    "installNote": "CLI 설치, Windows 게시자 알림, 설정 저장 위치는 설치 안내에서 확인할 수 있습니다.",
+    "guide": "설치 안내 ↗",
+    "demo": "스크린샷은 데모 데이터를 사용합니다.",
+    "privacyLink": "개인정보 처리",
+    "issues": "문제 제보",
+    "features": [
+      [
+        "시간이 발표되면 대시보드가 주황색으로 바뀝니다.",
+        "평소에는 검은색과 초록색입니다. 이용 중인 요금제에 시간이 명시된 자동 초기화 예고가 나오면 주황색으로 바뀌고 카운트다운과 빨간 목표선이 나타납니다. 남은 시간과 사용량을 함께 확인할 수 있습니다."
+      ],
+      [
+        "실제 소비를 두 가지 기준과 비교하세요.",
+        "세 막대는 실제 소비, X일마다 초기화된다는 가정, 개인 주기의 균등 소비를 보여줍니다. X는 기본 3일이며 변경할 수 있습니다. 막대를 드래그해 순서도 바꿀 수 있습니다."
+      ],
+      [
+        "빨간 선에 맞춰 사용하세요.",
+        "선은 시간에 따라 오른쪽으로 이동해 예고 시각에 100%에 도달합니다. 실제 소비와 비교해 진행 정도를 확인하세요. 같은 시각은 한 선, 다른 시각은 두 선과 그 사이의 붉은 영역으로 표시합니다."
+      ],
+      [
+        "다섯 출처의 글을 나란히 보세요.",
+        "각 카드에 다음 예상 시각, 원문, 갱신 시각이 표시됩니다. 상세 내용을 열어 발표를 비교할 수 있습니다. 유효한 예고가 없으면 카드에 “None”이 표시됩니다."
+      ],
+      [
+        "각 사이트가 기록한 시각을 비교하세요.",
+        "위쪽에 최근 초기화와 경과 시간이 표시됩니다. 2026년 9월부터의 기록은 최신순으로 정렬됩니다. 기록을 펼쳐 각 시각, 원문, 공통 출처를 비교할 수 있습니다. 시간은 베이징 기준입니다."
+      ],
+      [
+        "글자 크기를 정하고 트레이에서 계속 확인하세요.",
+        "영어·중국어를 선택하고 글자 크기와 Windows 자동 시작을 설정하세요. 이용 중인 요금제의 시간이 있는 자동 초기화 예고는 확인할 때까지 남는 알림으로 표시됩니다. 비슷한 시각의 메시지는 하나로 합칩니다."
+      ]
+    ],
+    "captions": [
+      "왼쪽: 평상시. 오른쪽: 시간이 명시된 예고.",
+      "실제 소비, 사용자 지정 주기, 개인 주기의 균등 소비.",
+      "왼쪽: 하나의 시각. 오른쪽: 여러 시각의 범위.",
+      "Codex Reset · Did Codex Reset · NextReset · TIBO · Codex Reset Today",
+      "기록을 펼쳐 각 출처의 시각과 원문을 비교하세요.",
+      "언어, 글자 크기, 자동 시작, 알림 설정."
+    ]
+  }
 };
 const images=['modes','pace','forecast','sources','history','settings'];
-function renderSite(language){const t=translations[language]||translations.en;document.documentElement.lang=language;document.querySelector('#language').value=language;document.querySelectorAll('[data-text]').forEach(e=>{e.textContent=t[e.dataset.text];});const target=document.querySelector('#features');target.replaceChildren();t.features.forEach(([title,body],i)=>{const section=document.createElement('section');section.className='feature';const copy=document.createElement('div');copy.className='feature-copy';const number=document.createElement('span');number.className='number';number.textContent=`0${i+1}`;const words=document.createElement('div');const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=body;words.append(h,p);copy.append(number,words);const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=`assets/feature-${images[i]}.png`;img.alt=title;img.loading=i?'lazy':'eager';caption.textContent=t.demo;figure.append(img,caption);section.append(copy,figure);target.append(section);});document.title=language==='zh-CN'?'codex重置预测看板':'Codex Reset Forecast Dashboard';}
+function renderSite(language){const t=translations[language]||translations.en;document.documentElement.lang=language;document.querySelector('#language').value=language;document.querySelectorAll('[data-text]').forEach(e=>{e.textContent=t[e.dataset.text];});const target=document.querySelector('#features');target.replaceChildren();t.features.forEach(([title,body],i)=>{const section=document.createElement('section');section.className='feature';const copy=document.createElement('div');copy.className='feature-copy';const number=document.createElement('span');number.className='number';number.textContent=`0${i+1}`;const words=document.createElement('div');const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=body;words.append(h,p);copy.append(number,words);const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=`assets/feature-${images[i]}.png`;img.alt=title;img.loading=i?'lazy':'eager';caption.textContent=t.captions[i];figure.append(img,caption);section.append(copy,figure);target.append(section);});document.title=language==='zh-CN'?'codex重置预测看板':'Codex Reset Forecast Dashboard';}
 let saved;try{saved=localStorage.getItem('site-language');}catch{}
 const browser=navigator.language.startsWith('zh')?'zh-CN':navigator.language.split('-')[0];renderSite(translations[saved]?saved:translations[browser]?browser:'en');
 document.querySelector('#language').addEventListener('change',e=>{renderSite(e.target.value);try{localStorage.setItem('site-language',e.target.value);}catch{}});

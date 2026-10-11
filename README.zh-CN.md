@@ -1,57 +1,101 @@
 # codex重置预测看板
 
-[English](README.md) · [七语言图文宣传页](https://zzy2670.github.io/codex-reset-forecast-dashboard/) · [下载软件](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest)
+[English](README.md) · [图文介绍](https://zzy2670.github.io/codex-reset-forecast-dashboard/) · [下载 Windows 版](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest)
 
-将多源 Codex 重置预告、个人额度消耗节奏、公开完成记录放在同一个 Windows 看板中。软件支持中英双语，宣传页支持中、英、日、西、法、德、韩七种语言。社区独立项目，预告仅供参考，不保证准确时间或个人到账。
+汇总五个网站的 Codex 重置预告，显示本机剩余额度。有具体重置时间时，看板变成橙色，红色“游泳线”随时间推进，方便你安排重置前的使用节奏。
+
+适用于 Windows 10/11 x64。软件支持中英双语，介绍页可切换中、英、日、韩、西、法、德七种语言。
 
 ## 安装
 
-1. 在 [Releases](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest) 下载 Windows 10/11 x64 安装版，双击安装；也可下载免安装便携版。
-2. 打开即可监测公开信源，不需要看板账号或 API 密钥。在设置中选择语言、字号、托盘及开机启动。
-3. 如需本机个人额度，安装官方 [Codex CLI](https://github.com/openai/codex)：`npm install -g @openai/codex`，然后 `codex login` 登录。重启看板或刷新额度。支持 npm 安装或 PATH 中的 `codex.exe`；仅安装 Codex 桌面软件时不保证识别，API 密钥账户也可能不返回 ChatGPT 额度窗口。
+1. 在 [Releases](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest) 下载安装版并双击安装，或直接运行便携版。
+2. 打开看板即可查看公开重置消息。在设置中选择语言、字号、托盘和开机启动。
+3. 要显示个人额度，安装官方 [Codex CLI](https://github.com/openai/codex)，并登录你的 ChatGPT 账户：
 
-当前发行包未进行代码签名，Windows 可能提示未知发布者；可对照发行页 SHA-256 和公开源码后自行决定运行。便携版设置仍位于 Windows 用户目录。升级保留设置和数据；开机启动默认启用，可以关闭。
+```powershell
+npm install -g @openai/codex
+codex login
+```
 
-## 常规模式与加速模式
+登录后刷新额度，或重启看板。
 
-![常规黑绿与预告黑橙对照](docs/assets/feature-modes.png)
+<details>
+<summary>安装与运行说明</summary>
 
-常规监控采用黑绿色调。新鲜、适用、含具体时间的自动重置预告出现后，切换为黑橙色并显示目标节奏。暗示、未定时消息、过期信息及只有重置卡的消息不触发自动重置加速。
+- 看板识别 npm 安装的 CLI 或 PATH 中的 codex.exe。已安装 Codex 桌面版的用户也请按上面的步骤安装 CLI。个人额度来自 ChatGPT 登录后的额度窗口。
+- 发行包未签名，Windows 可能显示未知发布者提示。发行页附有 SHA256SUMS.txt，可用于核对下载文件。
+- 设置和缓存保存在 Windows 用户目录，安装版和便携版均使用此位置。升级会保留数据。
+- 开机启动默认开启，可以在设置中关闭。Windows 的通知开关与勿扰模式会影响通知显示。
 
-## 额度消耗节奏对比
+</details>
 
-![三条节奏与拖动排序](docs/assets/feature-pace.png)
+## 有重置预告时，看板变成橙色
 
-实际消耗、假设每 X 天重置（默认 3 天）、个人周期均匀节奏，使用同一百分比尺度比较。横条可拖动排序并保存偏好；全局预告不会修改个人周期。
+![左侧常规模式，右侧加速模式](docs/assets/feature-modes.png)
 
-## 红色“游泳线”
+平时用黑绿色调显示额度与消耗节奏。适用当前套餐的自动重置预告给出具体时间后，切换为黑橙色，显示倒计时和红色目标线。距离重置还有多久、剩余额度该怎么用，可以一起看。
 
-![单线与荧光范围](docs/assets/feature-forecast.png)
+## 用了多少，和计划比一比
 
-红线随时间推进，在预告截止时刻到达 100%。相同时间合为一条线，不同时间形成快慢双线与红色荧光区域。优先使用已校准的上次全局重置作为起点，缺失时使用真实个人周期起点；无可靠起点不画虚构坐标。已过去端点退出“下次预计”，原始范围保留在依据中；到期不代表已完成重置。
+![三条消耗横条及拖动位置](docs/assets/feature-pace.png)
 
-## 五源并列，依据可查
+三条横条分别显示实际消耗、假设每 X 天重置的节奏，以及个人周期内的均匀节奏。X 默认 3 天，可以手动修改。拖动横条旁的把手即可换顺序，看板会记住你的排列。
 
-![五源及展开依据](docs/assets/feature-sources.png)
+## 跟着红色“游泳线”安排消耗
 
-支持 Codex Reset、Did Codex Reset、NextReset、TIBO、Codex Reset Today。展示预告、原文、源更新时间及本机获取时间，每 30 秒检查；Did Codex Reset 按限流约 3.5 分钟获取。NextReset 与 TIBO 共用上游，Today 独立性未验证，五个网站不等于五个独立确认。站方模型概率不等于验证过的历史命中率。
+![一个预告时间用单线，多个时间用双线和荧光范围](docs/assets/feature-forecast.png)
 
-## 历史重置与多源比对
+红线随时间向右走，在预告重置时刻到达 100%。它贯穿三条横条，便于和实际消耗对照。同一时间合为一条线；不同时间画两条线，中间用红色荧光标出范围。
 
-![历史及来源佐证](docs/assets/feature-history.png)
+## 五个网站的消息，横着看
 
-历史从北京时间 2026 年 9 月 1 日开始，最新在上。展开每条记录比较各站记录时间、原帖及采集链；共享上游去重，时间分歧明确标示。全局、套餐限定重置与重置卡分开说明。
+![五个信源的预计时间、原帖和展开详情](docs/assets/feature-sources.png)
 
-## 中英双语与本机运行
+每个信源各占一列，上方显示下次预计时间，下方显示原帖和更新时间。点击展开详情，可逐站比对。没有有效预告时，时间位置显示“无”；过期时间自动撤下，原始消息留在详情中。
 
-![双语和后台设置](docs/assets/feature-settings.png)
+| 信源 | 获取间隔 | 来源 |
+| --- | --- | --- |
+| [Codex Reset](https://codex-reset.com/) | 30 秒 | Codex Reset |
+| [Did Codex Reset](https://didcodexreset.com/) | 约 3.5 分钟 | Did Codex Reset |
+| [NextReset](https://nextreset.ai/) | 30 秒 | Codex Resets |
+| [TIBO](https://tibo.cc/) | 30 秒 | 与 NextReset 共用上游 |
+| [Codex Reset Today](https://codex-reset.today/) | 30 秒 | 上游待确认 |
 
-软件控件可切换中英文，信源原文保留原语言。正文与更小文字同步调整，大号时间与数字保持尺寸。相关且含具体时间的重置消息使用持续 Windows 通知，通过“确认收到”关闭；相近时间跨信源合并，避免重复弹窗。Windows 通知设置与勿扰模式仍会影响显示。关闭至托盘后继续监控。
+比对时按采集来源分组，NextReset 和 TIBO 归入同一组。
 
-宣传图为真实界面加标注，全部使用明确标示的虚构演示数据。看板不向信源上传个人额度，不读取认证文件、Cookie 或对话内容；官方本机服务可能访问 OpenAI 读取限额，信源可看到请求 IP。详见 [隐私说明](PRIVACY.md)。
+## 上次什么时候重置，各站怎么记的
 
-## 从源码构建与许可证
+![最近一次重置与展开的历史记录](docs/assets/feature-history.png)
 
-Windows x64 + Node.js 24，依次运行 `npm ci`、`npm test`、`npm run check`、`npm run test:ui`、`npm run build`。产物位于 `dist/`。GitHub Actions 使用干净源码完成检查、双目标打包和校验和发布；不需要额外 AI 密钥。
+顶部显示最近一次重置和距今时长。历史从北京时间 2026 年 9 月 1 日开始，最新记录在最上面。展开一条记录，可以查看各站记录到秒的时间、原帖和共用来源，比较时间差异。记录同时标明全局重置、套餐限定重置或重置卡。
 
-采用 **GPL-3.0-only**，分发修改版须按许可证提供对应源码。见 [LICENSE](LICENSE)；依赖版权见 [NOTICE.md](NOTICE.md)。提交问题时请勿上传令牌、本机状态文件或真实额度截图。
+## 设好字号，放到托盘继续看
+
+![语言、字号、后台运行和开机启动设置](docs/assets/feature-settings.png)
+
+界面可切换中英文，信源原帖按原文显示。调整正文字号时，小字一起缩放，大号时间和数字保持尺寸。关闭至托盘后继续监控，也可以随 Windows 启动。
+
+适用当前套餐的定时自动重置预告使用持续通知，点“确认收到”关闭。相近时间的消息合并，跨信源的同类预告也归到一起。
+
+截图使用演示数据。个人额度通过本机官方 Codex 服务读取，设置和缓存保存在本机，具体数据流见 [隐私说明](PRIVACY.md)。
+
+## 从源码运行
+
+使用 Windows x64 和 Node.js 24：
+
+```powershell
+npm ci
+npm test
+npm run check
+npm run test:ui
+npm start
+npm run build
+```
+
+安装包和便携版输出到 dist/。GitHub Actions 负责检查、构建和发布校验和；GitHub Pages 提供图文介绍页。运行 npm run assets 可用演示数据重新生成六张标注图，需要本机安装 Chrome。
+
+## 许可证与反馈
+
+采用 **GPL-3.0-only**。分发修改版时，按 GPL-3.0 提供对应源码。见 [LICENSE](LICENSE) 和 [依赖声明](NOTICE.md)。
+
+遇到问题可以在 [Issues](https://github.com/zzy2670/codex-reset-forecast-dashboard/issues) 留下版本、复现步骤和报错信息。

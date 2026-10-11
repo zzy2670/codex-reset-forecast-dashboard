@@ -1,66 +1,87 @@
 # Codex Reset Forecast Dashboard
 
-[简体中文](README.zh-CN.md) · [Multilingual feature tour](https://zzy2670.github.io/codex-reset-forecast-dashboard/) · [Download](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest)
+[简体中文](README.zh-CN.md) · [Feature tour](https://zzy2670.github.io/codex-reset-forecast-dashboard/) · [Download for Windows](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest)
 
-A Windows dashboard for public Codex reset forecasts, local quota consumption pacing and multi-source evidence. **English + Chinese application**, seven website languages. Independent community project; forecasts are references, not reset guarantees.
+Follow Codex reset announcements from five websites alongside your remaining quota. When a reset time is announced, the dashboard turns orange and a red pacing line helps you plan your usage before then.
+
+For Windows 10/11 x64. The app supports English and Chinese; the feature tour is available in seven languages.
 
 ## Install
 
-1. Open [Releases](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest), download `Codex-Reset-Forecast-Dashboard-Setup-2.0.0-x64.exe` and run the installer. Requires Windows 10/11 x64. The portable `.exe` is available if you prefer no installation.
-2. Open the app. Public sources work without a dashboard account or API key. In Settings, select English or Chinese, adjust text size, and choose tray monitoring / start at sign-in.
-3. For **personal quota**, install the official [Codex CLI](https://github.com/openai/codex) (`npm install -g @openai/codex`) and sign in with `codex login`. Restart the dashboard or refresh quota. A CLI installed through npm or a `codex.exe` on PATH is detected. Desktop-app-only installations are not guaranteed to be detected. An API-key-only account may not return ChatGPT quota windows.
+1. Download the installer from [Releases](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest) and run it, or open the portable executable.
+2. Open the dashboard to see public reset announcements. Choose your language, text size, tray behavior and startup settings.
+3. To show personal quota, install the official [Codex CLI](https://github.com/openai/codex) and sign in with your ChatGPT account:
 
-The current binaries are unsigned, so Windows may show an unknown-publisher warning. Verify the release SHA-256 checksum and source before deciding to run them. Portable settings still use your Windows profile. Upgrades retain settings and local data; the executable/data identity stays compatible with earlier versions. Autostart defaults to enabled and can be turned off in Settings.
+```powershell
+npm install -g @openai/codex
+codex login
+```
 
-## A calm overview, then a visible acceleration signal
+Refresh quota or restart the dashboard after signing in.
 
-![Routine and accelerated modes](docs/assets/feature-modes.png)
+<details>
+<summary>Installation and runtime notes</summary>
 
-Routine monitoring uses dark green. A fresh, applicable announcement with a concrete time switches to amber and displays a target pace. Hints, untimed promises, stale data and reset-credit-only news do not trigger automatic-reset urgency.
+- The dashboard detects an npm-installed CLI or codex.exe on PATH. If you use the Codex desktop app, also install the CLI using the steps above. Personal quota comes from the windows returned for your ChatGPT login.
+- Release binaries are unsigned, so Windows may show an unknown-publisher prompt. SHA256SUMS.txt is included in each release to check your download.
+- Both installed and portable versions save settings and cached data in your Windows profile. Upgrades keep that data.
+- Startup with Windows is enabled by default and can be changed in Settings. Windows notification settings and Do Not Disturb affect notification display.
 
-## Quota consumption pacing
+</details>
 
-![Three comparable consumption tracks](docs/assets/feature-pace.png)
+## A timed reset announcement turns the dashboard orange
 
-Actual consumption, personal-cycle even pace, and an assumed X-day reset rhythm (default three days) share a percentage scale. Drag rows to reorder; your preference is saved locally. Global forecasts do not overwrite your personal cycle.
+![Routine mode on the left and accelerated mode on the right](docs/assets/feature-modes.png)
 
-## The moving red target line
+The usual dark green view shows quota and usage pacing. An automatic-reset announcement with a time for your plan switches the view to orange and adds a countdown and red target line. See how much time and quota you have left together.
 
-![Single deadline and target range](docs/assets/feature-forecast.png)
+## Compare actual usage with two pacing guides
 
-Like a swimming record line, it advances with time: `(now − verified anchor) / (forecast deadline − anchor)`. It reaches 100% at the announced deadline. Identical times use one line; different future times create fast/slow boundaries with a glowing band. A verified global reset is the preferred anchor, with a real personal-cycle start as fallback. Missing anchors produce no invented line. Past endpoints leave the next forecast while original evidence remains available. Reaching the deadline does not confirm replenishment.
+![Usage bars, reorder handles and a custom reset interval](docs/assets/feature-pace.png)
 
-## Five sources and their evidence
+Three bars show actual consumption, an assumed X-day reset cycle and even usage across your personal cycle. X starts at 3 days and can be changed. Drag a bar by its handle to reorder it; the dashboard remembers your layout.
 
-![Five sources with expanded evidence](docs/assets/feature-sources.png)
+## Keep pace with the red line
 
-| Source | Polling | Collection chain |
+![One announced time and a range of times](docs/assets/feature-forecast.png)
+
+The line moves right with time and reaches 100% at the announced reset time. It runs across all three bars, so you can compare it with actual usage. Matching times share one line. Different times create two lines with a glowing red band between them.
+
+## Read five sources side by side
+
+![Expected times and original announcements in five source cards](docs/assets/feature-sources.png)
+
+Each source has a card: expected time at the top, original post and update time below. Expand the details to compare posts. With no active forecast, the card shows “None”. Expired times leave the forecast display while their original posts remain in the details.
+
+| Source | Fetch interval | Feed |
 | --- | --- | --- |
 | [Codex Reset](https://codex-reset.com/) | 30 seconds | Codex Reset |
 | [Did Codex Reset](https://didcodexreset.com/) | About 3.5 minutes | Did Codex Reset |
-| [NextReset](https://nextreset.ai/) | 30 seconds | Codex Resets upstream |
-| [TIBO](https://tibo.cc/) | 30 seconds | Same upstream as NextReset |
-| [Codex Reset Today](https://codex-reset.today/) | 30 seconds | Independence unverified |
+| [NextReset](https://nextreset.ai/) | 30 seconds | Codex Resets |
+| [TIBO](https://tibo.cc/) | 30 seconds | Same feed as NextReset |
+| [Codex Reset Today](https://codex-reset.today/) | 30 seconds | Upstream pending confirmation |
 
-The app compares source update times, next deadlines, original announcements and explanations. Five websites do **not** mean five independent confirmations. Site collection delay and rate limits affect availability. A model probability is not a historically validated accuracy score.
+Comparisons group records by their feed. NextReset and TIBO belong to the same group.
 
-## History with provenance
+## Compare the times recorded by each site
 
-![Calibrated latest reset and historical evidence](docs/assets/feature-history.png)
+![Latest reset and an expanded history record](docs/assets/feature-history.png)
 
-Public completion records from September 1, 2026 onward appear newest first. Expand a row to compare each site's recorded time, original link and collection chain. Shared upstream feeds are deduplicated; disagreements remain visible. Global resets, plan-limited resets and reset credits stay distinct.
+The latest reset and elapsed time appear at the top. History starts on September 1, 2026, newest first. Expand a record to compare each site's timestamp down to the second, original post and shared feed. Times use Beijing time. Records identify global resets, plan-specific resets and reset credits.
 
-## Bilingual and local
+## Adjust the text and keep monitoring in the tray
 
-![Language and background settings](docs/assets/feature-settings.png)
+![Language, text size, startup and background settings](docs/assets/feature-settings.png)
 
-Switch application controls between English and Chinese; original source quotes remain original. Body text and smaller labels scale together while large figures retain their size. Timed reset messages use persistent Windows reminder toasts with **Acknowledge**; near-identical times are grouped across sources to avoid repeated popups. Windows notification settings and Do Not Disturb can affect display. Closing to tray keeps polling active.
+Choose English or Chinese; source posts keep their original wording. Body text and smaller labels resize together, while large times and numbers keep their size. Close to tray to keep monitoring, and enable startup with Windows.
 
-All promotional images use **synthetic demonstration data**, not live forecasts or personal account information. See [privacy](PRIVACY.md) for actual data flows.
+Scheduled automatic resets for your plan use persistent notifications with an **Acknowledge** button. Messages with similar reset times are grouped, including matching announcements from different sites.
 
-## Build from source
+Screenshots use demo data. Personal quota is read through the official local Codex service; settings and cached data are stored on your computer. See [Privacy](PRIVACY.md) for data flows.
 
-Use Node.js 24 on Windows x64, then:
+## Run from source
+
+Use Windows x64 and Node.js 24:
 
 ```powershell
 npm ci
@@ -71,8 +92,10 @@ npm start
 npm run build
 ```
 
-Output goes to ignored `dist/`. CI repeats tests and privacy checks, builds both Windows targets, checks the packaged app and publishes SHA-256 hashes. GitHub Pages serves `docs/`. No AI service key is needed for build or publication. `npm run assets` regenerates the six annotated promotional images using isolated synthetic states and a locally installed Chrome for composition; it does not poll sources or send notifications.
+Installer and portable builds go to dist/. GitHub Actions checks the code, builds the app and publishes checksums. GitHub Pages hosts the feature tour. Run npm run assets to regenerate the six annotated images using demo data; this needs a locally installed Chrome.
 
-## License and contributions
+## License and feedback
 
-**GPL-3.0-only.** Distributed modifications must follow GPL-3.0 and provide corresponding source. See [LICENSE](LICENSE) and [third-party notices](NOTICE.md). Report source-schema changes and reproducible bugs through [Issues](https://github.com/zzy2670/codex-reset-forecast-dashboard/issues); never include tokens, local state files or personal quota screenshots.
+**GPL-3.0-only.** When distributing a modified version, provide the corresponding source under GPL-3.0. See [LICENSE](LICENSE) and [third-party notices](NOTICE.md).
+
+For bugs, include your app version, steps to reproduce and error messages in an [Issue](https://github.com/zzy2670/codex-reset-forecast-dashboard/issues).
