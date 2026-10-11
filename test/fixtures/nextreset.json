@@ -1,0 +1,224 @@
+{
+  "version": "NR-1.7",
+  "asOf": "2026-10-07T14:35:50.816Z",
+  "expiresAt": "2026-10-07T14:50:50.816Z",
+  "state": "forecast",
+  "degraded": false,
+  "checks": {
+    "history": {
+      "ok": true,
+      "at": "2026-10-07T14:35:50.816Z",
+      "source": "https://codex-resets.com/api/v1/resets?limit=100"
+    },
+    "social": {
+      "ok": true,
+      "at": "2026-10-07T14:35:50.816Z",
+      "source": "https://codex-resets.com/api/v1/status"
+    },
+    "context": {
+      "ok": true,
+      "at": "2026-10-07T14:35:50.816Z",
+      "source": "https://status.openai.com/api/v2/incidents.json"
+    }
+  },
+  "windows": [
+    {
+      "hours": 24,
+      "baseline": 0.12010233570559897,
+      "probability": 0.13394648318561111,
+      "probabilityReason": "experimental_forecast",
+      "announcementPrior": 0,
+      "untimedPrior": 0,
+      "rangedPrior": 0,
+      "socialMultiplier": 1,
+      "newsMultiplier": 1,
+      "contextMultiplier": 1.1330975416666667,
+      "directDelta": 1.3877787807814457e-17,
+      "newsDelta": 0,
+      "socialDelta": 1.3877787807814457e-17,
+      "contextDelta": 0.013844147480012128
+    },
+    {
+      "hours": 48,
+      "baseline": 0.2467425789447183,
+      "probability": 0.27069360672169696,
+      "probabilityReason": "experimental_forecast",
+      "announcementPrior": 0,
+      "untimedPrior": 0,
+      "rangedPrior": 0,
+      "socialMultiplier": 1,
+      "newsMultiplier": 1,
+      "contextMultiplier": 1.1330975416666667,
+      "directDelta": -2.7755575615628914e-17,
+      "newsDelta": 0,
+      "socialDelta": -2.7755575615628914e-17,
+      "contextDelta": 0.02395102777697869
+    },
+    {
+      "hours": 72,
+      "baseline": 0.37556307510158937,
+      "probability": 0.40529053298026224,
+      "probabilityReason": "experimental_forecast",
+      "announcementPrior": 0,
+      "untimedPrior": 0,
+      "rangedPrior": 0,
+      "socialMultiplier": 1,
+      "newsMultiplier": 1,
+      "contextMultiplier": 1.1330975416666667,
+      "directDelta": 0,
+      "newsDelta": 0,
+      "socialDelta": 0,
+      "contextDelta": 0.02972745787867287
+    }
+  ],
+  "news": {
+    "events": [
+      {
+        "id": "tibo-swag-2026-09-15",
+        "origin": "https://x.com/thsottiaux/status/2099922755655479624",
+        "kind": "unrelated",
+        "scope": "openai",
+        "status": "active",
+        "title": "Tibo's Tuesday swag post",
+        "reason": "The post shows a swag drop. It contains no reset commitment or concrete model-launch evidence. Replies guessing a reset are not announcements.",
+        "publishedAt": "2026-09-15T18:06:14.000Z",
+        "firstObservedAt": "2026-09-16T02:48:20.967Z",
+        "reviewedAt": "2026-09-16T02:48:20.967Z",
+        "expiresAt": "2026-09-18T18:06:14.000Z",
+        "sources": [
+          {
+            "author": "thsottiaux",
+            "url": "https://x.com/thsottiaux/status/2099922755655479624",
+            "publishedAt": "2026-09-15T18:06:14.000Z",
+            "relation": "primary",
+            "summary": "A Tuesday merchandise drop, with no stated reset."
+          }
+        ],
+        "disposition": "superseded_by_reset",
+        "decay": 0,
+        "multiplier": 1
+      },
+      {
+        "id": "sol-routing-reports-2026-09-15",
+        "origin": "https://x.com/chetaslua/status/2099861782710071424",
+        "kind": "unverified_rumor",
+        "scope": "openai",
+        "status": "active",
+        "title": "Community reports of a Sol rollout",
+        "reason": "The original posts were checked in the browser, but the underlying model routing is not independently verified. No numerical boost; model identity and a reset remain unconfirmed.",
+        "publishedAt": "2026-09-15T14:03:57.000Z",
+        "firstObservedAt": "2026-09-16T02:48:20.967Z",
+        "reviewedAt": "2026-09-16T02:48:20.967Z",
+        "expiresAt": "2026-09-18T14:03:57.000Z",
+        "sources": [
+          {
+            "author": "chetaslua",
+            "url": "https://x.com/chetaslua/status/2099861782710071424",
+            "publishedAt": "2026-09-15T14:03:57.000Z",
+            "relation": "primary",
+            "summary": "Claims a limited routing change; no independently verified session evidence attached."
+          },
+          {
+            "author": "kimmonismus",
+            "url": "https://x.com/kimmonismus/status/2099871125631033843",
+            "publishedAt": "2026-09-15T14:41:04.000Z",
+            "relation": "related_report",
+            "summary": "Relays user reports and says he still needs to test it himself."
+          }
+        ],
+        "disposition": "superseded_by_reset",
+        "decay": 0,
+        "multiplier": 1
+      },
+      {
+        "id": "openai-release-week-2026-09-14",
+        "origin": "https://x.com/thsottiaux/status/2099744972195131850",
+        "kind": "official_launch_hint",
+        "scope": "openai",
+        "status": "active",
+        "title": "Sam and Tibo signal a busy release week",
+        "reason": "Both preview major releases this week. Sam quotes Tibo's announcement, so this counts as one launch event. Neither promises a Codex reset or a reset time.",
+        "publishedAt": "2026-09-15T06:19:47.000Z",
+        "firstObservedAt": "2026-09-16T02:48:20.967Z",
+        "reviewedAt": "2026-09-16T02:48:20.967Z",
+        "expiresAt": "2026-09-18T06:19:47.000Z",
+        "sources": [
+          {
+            "author": "thsottiaux",
+            "url": "https://x.com/thsottiaux/status/2099744972195131850",
+            "publishedAt": "2026-09-15T06:19:47.000Z",
+            "relation": "primary",
+            "summary": "Previews a week of releases comparable in scale to DevDay 2025."
+          },
+          {
+            "author": "sama",
+            "url": "https://x.com/sama/status/2099872600977760451",
+            "publishedAt": "2026-09-15T14:46:56.000Z",
+            "relation": "corroborating_quote",
+            "summary": "Previews major releases this week and at DevDay, quoting Tibo."
+          }
+        ],
+        "summary": "Major releases teased by Sam and Tibo. One shared signal, counted once. A reset is not promised.",
+        "disposition": "superseded_by_reset",
+        "decay": 0,
+        "multiplier": 1
+      }
+    ],
+    "multiplier": 1,
+    "coverage": {
+      "mode": "browser_review",
+      "automatic": false,
+      "completeTimeline": false,
+      "reviewedAt": "2026-09-16T02:48:20.967Z",
+      "state": "review_due",
+      "accounts": [
+        "thsottiaux",
+        "sama"
+      ],
+      "rejected": 0
+    },
+    "policy": {
+      "version": "reviewed-events-v1",
+      "weights": {
+        "official_launch_hint": 2,
+        "confirmed_codex_launch": 2.5,
+        "verified_rollout_report": 1.2,
+        "unverified_rumor": 1,
+        "unrelated": 1
+      },
+      "oddsCap": 3,
+      "fullWeightHours": 24,
+      "expiryHours": 72,
+      "calibrated": false
+    },
+    "suppressedBy": null
+  },
+  "signalAudit": {
+    "needsReview": false,
+    "reason": null,
+    "source": null
+  },
+  "history": {
+    "events": 49,
+    "intervals": 48,
+    "elapsedDays": 0.4588173148148148,
+    "last": {
+      "date": "2026-10-07T03:35:09.000Z",
+      "type": "automatic",
+      "title": "A new Codex reset was recorded",
+      "description": "Catalogued from the public reset feed. Follow the original announcement for eligibility and rollout details.",
+      "scope": "Check the original for eligibility",
+      "source": "https://x.com/thsottiaux/status/2107676072871600470",
+      "review": "catalogued",
+      "timeBasis": "publication",
+      "discoveredAt": "2026-10-07T03:35:47.296Z"
+    }
+  },
+  "social": null,
+  "context": {
+    "title": "Unable to create new ChatGPT Work threads in latest version of desktop app",
+    "resolvedAt": "2026-10-07T11:53:35Z",
+    "source": "https://status.openai.com/incidents/01M4ADHMMBK7K92NJFJ0DXRYJM"
+  },
+  "snapshotId": "1791383750892"
+}

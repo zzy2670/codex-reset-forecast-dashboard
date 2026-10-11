@@ -1,0 +1,188 @@
+{
+  "mode": "model",
+  "updated_at": "2026-10-07T14:37:56.722Z",
+  "probabilities": {
+    "raw_24h": 0.15149727329662524,
+    "raw_48h": 0.2800431227769381,
+    "rounded_24h": 15,
+    "rounded_48h": 28,
+    "model_24h": 15,
+    "model_48h": 28,
+    "tease_tier": null,
+    "tease_floor_24h": null,
+    "tease_floor_48h": null,
+    "commitment": null,
+    "commitment_floor_percent": null,
+    "signal_percent": null,
+    "range_24h": {
+      "lower": 0.08,
+      "upper": 0.269
+    },
+    "range_48h": {
+      "lower": 0.179,
+      "upper": 0.41
+    }
+  },
+  "signal_score": null,
+  "confidence": "low",
+  "confidence_note": "Experimental: walk-forward backtest has not beaten both baselines yet.",
+  "last_reset_at": "2026-10-07T03:35:09.000Z",
+  "age_days": 0.5,
+  "official_signal": null,
+  "teased_window": null,
+  "time_window": {
+    "start_hour": 1,
+    "end_hour": 4,
+    "label": "1 AM - 4 AM",
+    "timezone": "UTC"
+  },
+  "cadence": {
+    "recent_median_days": 6.1,
+    "recent_sample": 5,
+    "weighted_mean_days": 6.1,
+    "accelerating": false
+  },
+  "tease_signal": null,
+  "tease_card_note": null,
+  "tease_post_age": null,
+  "latest_hint": null,
+  "hint_copy": null,
+  "context": {
+    "window_days": 7,
+    "since": "2026-09-30T14:37:56.722Z",
+    "evidence_ids": [
+      "2107676072871600470",
+      "2107577536779870210",
+      "2106845738814849339",
+      "2106845241357824205",
+      "2106131810921136451",
+      "2105843926221660585",
+      "2105672058269212820"
+    ],
+    "effect": "informational_only",
+    "multiplier": 1,
+    "negative_supported": false,
+    "state": "QUIET",
+    "since_reset": true,
+    "reset_at": "2026-10-07T03:35:09.000Z",
+    "primary_post": {
+      "id": "2107676072871600470",
+      "at": "2026-10-07T03:35:09.000Z",
+      "url": "https://x.com/thsottiaux/status/2107676072871600470",
+      "quote": "We shipped four things that were deemed good to great and some math proofs, but the vote is clear and the community demands a reset. I did calibrate it and it …",
+      "signal": "DONE"
+    }
+  },
+  "context_copy": {
+    "en": "Tibo, last 7 days: no new hint since the reset on Oct 7. The number above is history only.",
+    "zh": "Tibo 近 7 天：10 月 7 日重置之后没有新线索。上面的概率只来自历史。",
+    "ja": "Tibo 直近 7 日：10月7日のリセット後、新しい手がかりはありません。上の確率は履歴のみに基づきます。",
+    "es": "Tibo, últimos 7 días: sin pistas nuevas desde el reset del 7 de oct. El número de arriba es solo historial."
+  },
+  "wait_comparison": {
+    "sample": 8,
+    "wait_days": 0.5,
+    "shorter_share": 0,
+    "median_days": 5.8,
+    "mean_days": 6.9,
+    "longest_days": 14.4,
+    "position": "earlier_than_most",
+    "basis": "recent_completed_intervals",
+    "window_intervals": 8,
+    "sample_end_at": "2026-10-07T03:35:09.000Z"
+  },
+  "wait_copy": {
+    "en": "You have waited 0.5 days; 0% of the latest 8 completed reset intervals were shorter. Typical wait 5.8 days, average 6.9, longest 14.4. Recent history, not a schedule. This historical baseline uses up to 8 completed intervals. Ordinary posts and hints are not extra probability factors. Sample through 2026-10-07 03:35:09 UTC.",
+    "zh": "你已等了 0.5 天；最近 8 个完整重置间隔中，0% 短于当前等待。典型间隔 5.8 天，平均 6.9 天，最长 14.4 天。这是近期历史，不是倒计时。历史基准概率使用最近最多 8 个完整间隔，普通推文和暗示未作为额外概率因子。样本截至 2026-10-07 03:35:09 UTC。",
+    "ja": "待ち始めて 0.5 日。直近 8 件の完了したリセット間隔の 0% は、現在の待ち時間より短いものでした。典型 5.8 日、平均 6.9 日、最長 14.4 日。直近の記録であり、予定表ではありません。履歴ベースの確率には直近最大 8 件の完了した間隔を使います。通常の投稿や示唆は追加の確率要因に含めません。サンプルは 2026-10-07 03:35:09 UTC 時点。",
+    "es": "Llevas 0,5 días esperando; el 0 % de los últimos 8 intervalos completos entre reinicios fueron más cortos. Espera típica 5,8 días, media 6,9, la más larga 14,4. Es historia reciente, no un calendario. Esta probabilidad histórica base usa hasta 8 intervalos completos recientes. Los mensajes habituales y las insinuaciones no son factores adicionales de probabilidad. Muestra hasta el 2026-10-07 03:35:09 UTC."
+  },
+  "wait_token": {
+    "en": "wait 0.5d · last 8: 0% shorter",
+    "zh": "已等 0.5 天 · 近8次 0%更短",
+    "ja": "待ち0.5日 · 直近8件 0%が短い",
+    "es": "espera 0,5 d · últ. 8: 0% más cortas"
+  },
+  "model_token": null,
+  "range_aria": {
+    "en": {
+      "h24": "Reset chance in the next 24 hours: 15%, range 8–27%",
+      "h48": "Reset chance by 48 hours: 28%, range 18–41%"
+    },
+    "zh": {
+      "h24": "未来 24 小时重置概率：15%，区间 8–27%",
+      "h48": "48 小时内重置概率：28%，区间 18–41%"
+    },
+    "ja": {
+      "h24": "今後 24 時間のリセット確率：15%、範囲 8–27%",
+      "h48": "48 時間以内のリセット確率：28%、範囲 18–41%"
+    },
+    "es": {
+      "h24": "Probabilidad de reset en las próximas 24 horas: 15 %, rango 8–27 %",
+      "h48": "Probabilidad de reset en 48 horas: 28 %, rango 18–41 %"
+    }
+  },
+  "milestone_watch": null,
+  "evidence": [
+    {
+      "code": "recent_cadence",
+      "params": {
+        "recent_median_days": 6.1,
+        "recent_sample": 5,
+        "weighted_mean_days": 6.1
+      },
+      "label": "Recent cadence",
+      "detail": "a reset every ~6.1d across the last 5 (weighted mean 6.1d)",
+      "href": "/timeline"
+    },
+    {
+      "code": "last_reset",
+      "params": {
+        "date": "2026-10-07",
+        "age_days": 0.5
+      },
+      "label": "Last reset",
+      "detail": "2026-10-07 (0.5d ago)",
+      "href": "https://x.com/thsottiaux/status/2107676072871600470"
+    },
+    {
+      "code": "common_window",
+      "params": {
+        "window_label": "1 AM - 4 AM",
+        "timezone": "UTC"
+      },
+      "label": "Most common window",
+      "detail": "1 AM - 4 AM in UTC",
+      "href": "/timeline"
+    }
+  ],
+  "model": {
+    "version": "rate-v3",
+    "window_intervals": 8,
+    "half_life_days": 60,
+    "effective_sample_size": 27.2,
+    "base_daily_rate": 0.151
+  },
+  "backtest": {
+    "sample_size": 338,
+    "brier": 0.105,
+    "baseline_brier": 0.106,
+    "rate_v2_brier": 0.104,
+    "better_than_naive": true,
+    "better_than_rate_v2": false,
+    "status": "experimental"
+  },
+  "signal_tier": null,
+  "alert_event_id": null,
+  "latest_alert": {
+    "id": "2107676072871600470",
+    "kind": "reset",
+    "state": "confirmed",
+    "source_at": "2026-10-07T03:35:09.000Z",
+    "summary": "Full reset for Codex and ChatGPT Work users, picked by community vote in the 28-day ship-or-reset series: “the reset has been processed. Enjoy!”",
+    "url": "https://x.com/thsottiaux/status/2107676072871600470",
+    "score": null,
+    "window": null,
+    "corrected": false
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "name": "codex-reset-forecast-dashboard",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Codex reset forecasts, local quota pacing and multi-source evidence.",
+  "main": "app/main.cjs",
+  "author": "zzy2670",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.cjs",
+    "check": "node scripts/privacy-check.cjs",
+    "build": "electron-builder --win nsis portable --x64 --publish never",
+    "build:dir": "electron-builder --win dir --x64 --publish never",
+    "test:ui": "node scripts/verify-ui.cjs",
+    "assets": "node scripts/capture-features.cjs"
+  },
+  "devDependencies": {
+    "electron": "44.6.0",
+    "electron-builder": "26.15.3",
+    "playwright-core": "1.58.2"
+  },
+  "build": {
+    "appId": "local.codex.resetdashboard",
+    "productName": "codex重置预测看板",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "app/**/*",
+      "package.json",
+      "LICENSE",
+      "NOTICE.md"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "app/assets/icon.ico",
+      "signExecutable": false
+    },
+    "executableName": "Codex Reset Dashboard",
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "shortcutName": "codex重置预测看板",
+      "installerLanguages": [
+        "en_US",
+        "zh_CN"
+      ],
+      "multiLanguageInstaller": true,
+      "artifactName": "Codex-Reset-Forecast-Dashboard-Setup-2.0.0-x64.exe"
+    },
+    "portable": {
+      "artifactName": "Codex-Reset-Forecast-Dashboard-Portable-2.0.0-x64.exe"
+    }
+  },
+  "license": "GPL-3.0-only",
+  "homepage": "https://zzy2670.github.io/codex-reset-forecast-dashboard/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zzy2670/codex-reset-forecast-dashboard.git"
+  },
+  "overrides": {
+    "sprintf-js": "1.1.4"
+  }
+}

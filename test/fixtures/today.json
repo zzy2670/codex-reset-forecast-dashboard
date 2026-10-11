@@ -1,0 +1,54 @@
+{
+  "data": {
+    "provider": "codex",
+    "latest_reset": {
+      "id": "2107676072871600470",
+      "provider": "codex",
+      "event_type": "reset",
+      "reset_type": "regular",
+      "announced_at": "2026-10-07T03:35:09.000Z",
+      "delivery_timing": {
+        "status": "announced",
+        "expected_by": null,
+        "source_phrase": null,
+        "window_minutes": null
+      },
+      "text": "Synthetic public-source fixture",
+      "source": {
+        "type": "x_post",
+        "author": "thsottiaux",
+        "url": "https://x.com/thsottiaux/status/2107676072871600470"
+      }
+    },
+    "active_watch": null,
+    "freshness": {
+      "state": "fresh",
+      "fetched_at": "2026-10-07T14:39:30.923Z",
+      "age_minutes": 0,
+      "max_age_minutes": 360
+    },
+    "stats": {
+      "total": 58,
+      "last_reset_at": "2026-10-07T03:35:09.000Z",
+      "days_since_last": 0.5,
+      "avg_interval_days": 6.8,
+      "longest_interval_days": 67.7
+    },
+    "next_reset_estimate": {
+      "state": "unlikely",
+      "chance_percent": 3,
+      "confidence": "low",
+      "forecast_window_hours": 48,
+      "forecast_window_ends_at": "2026-10-09T14:39:30.923Z",
+      "expected_by": null,
+      "basis": "reset_context_model",
+      "note": "A 48-hour probability based on public incidents, reset recency and verified interval history; no exact ETA is claimed.",
+      "generated_at": "2026-10-07T14:39:30.923Z"
+    }
+  },
+  "meta": {
+    "api_version": "v1",
+    "generated_at": "2026-10-07T14:39:30.923Z",
+    "provider": "codex"
+  }
+}

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.verification/
+*.log
+.env
+.env.*
+dashboard-state.json*
+*.pfx
+*.pem
+*.key
+Thumbs.db
+Desktop.ini

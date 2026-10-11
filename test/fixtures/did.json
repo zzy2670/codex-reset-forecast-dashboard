@@ -1,0 +1,336 @@
+{
+  "ok": true,
+  "data": {
+    "items": [
+      {
+        "id": "2107676072871600470",
+        "kind": "reset_completed",
+        "resetType": "global",
+        "announcedAt": "2026-10-07T03:35:09.000Z",
+        "effectiveAt": null,
+        "text": "Synthetic public-source fixture",
+        "confidence": 0.88,
+        "scope": {
+          "plans": [
+            "all"
+          ],
+          "windows": [
+            "unknown"
+          ]
+        },
+        "source": {
+          "origin": "x",
+          "postId": "2107676072871600470",
+          "handle": "thsottiaux",
+          "url": "https://x.com/thsottiaux/status/2107676072871600470"
+        },
+        "schedulePrecision": null,
+        "scheduleBasis": null,
+        "scheduleWindow": null,
+        "scheduleState": null,
+        "completedAt": null,
+        "completionRecordId": null,
+        "fulfillmentOrigin": null,
+        "relatedRecordIds": []
+      },
+      {
+        "id": "2106239435461579088",
+        "kind": "reset_completed",
+        "resetType": "global",
+        "announcedAt": "2026-10-03T04:26:28.000Z",
+        "effectiveAt": null,
+        "text": "Synthetic public-source fixture",
+        "confidence": 0.86,
+        "scope": {
+          "plans": [
+            "pro"
+          ],
+          "windows": [
+            "unknown"
+          ]
+        },
+        "source": {
+          "origin": "x",
+          "postId": "2106239435461579088",
+          "handle": "thsottiaux",
+          "url": "https://x.com/thsottiaux/status/2106239435461579088"
+        },
+        "schedulePrecision": null,
+        "scheduleBasis": null,
+        "scheduleWindow": null,
+        "scheduleState": null,
+        "completedAt": null,
+        "completionRecordId": null,
+        "fulfillmentOrigin": null,
+        "relatedRecordIds": [
+          "2106233145163141249"
+        ]
+      },
+      {
+        "id": "2106131810921136451",
+        "kind": "reset_completed",
+        "resetType": "global",
+        "announcedAt": "2026-10-02T21:18:48.000Z",
+        "effectiveAt": null,
+        "text": "Synthetic public-source fixture",
+        "confidence": 0.93,
+        "scope": {
+          "plans": [
+            "all"
+          ],
+          "windows": [
+            "unknown"
+          ]
+        },
+        "source": {
+          "origin": "x",
+          "postId": "2106131810921136451",
+          "handle": "thsottiaux",
+          "url": "https://x.com/thsottiaux/status/2106131810921136451"
+        },
+        "schedulePrecision": null,
+        "scheduleBasis": null,
+        "scheduleWindow": null,
+        "scheduleState": null,
+        "completedAt": null,
+        "completionRecordId": null,
+        "fulfillmentOrigin": null,
+        "relatedRecordIds": [
+          "2105843926221660585"
+        ]
+      },
+      {
+        "id": "op_2465d7eff41403a2d42a1fb4",
+        "kind": "reset_completed",
+        "resetType": "banked",
+        "announcedAt": "2026-09-29T18:10:55.000Z",
+        "effectiveAt": "2026-09-29T18:10:55.000Z",
+        "text": "Synthetic public-source fixture",
+        "confidence": 0.98,
+        "scope": {
+          "plans": [
+            "all"
+          ],
+          "windows": [
+            "unknown"
+          ]
+        },
+        "source": {
+          "origin": "operator",
+          "postId": "op_2465d7eff41403a2d42a1fb4",
+          "handle": null,
+          "url": null
+        },
+        "schedulePrecision": null,
+        "scheduleBasis": null,
+        "scheduleWindow": null,
+        "scheduleState": null,
+        "completedAt": null,
+        "completionRecordId": null,
+        "fulfillmentOrigin": null,
+        "relatedRecordIds": [
+          "2103963215885701493"
+        ]
+      },
+      {
+        "id": "2103911959544610829",
+        "kind": "reset_completed",
+        "resetType": "global",
+        "announcedAt": "2026-09-26T18:17:54.000Z",
+        "effectiveAt": null,
+        "text": "Synthetic public-source fixture",
+        "confidence": 0.9,
+        "scope": {
+          "plans": [
+            "all"
+          ],
+          "windows": [
+            "unknown"
+          ]
+        },
+        "source": {
+          "origin": "x",
+          "postId": "2103911959544610829",
+          "handle": "thsottiaux",
+          "url": "https://x.com/thsottiaux/status/2103911959544610829"
+        },
+        "schedulePrecision": null,
+        "scheduleBasis": null,
+        "scheduleWindow": null,
+        "scheduleState": null,
+        "completedAt": null,
+        "completionRecordId": null,
+        "fulfillmentOrigin": null,
+        "relatedRecordIds": [
+          "2103637477760311522"
+        ]
+      },
+      {
+        "id": "manual:cl_9a2b869655414569a660168963067889",
+        "kind": "reset_completed",
+        "resetType": "banked",
+        "announcedAt": null,
+        "effectiveAt": "2026-09-22T20:37:00.000Z",
+        "text": null,
+        "confidence": null,
+        "scope": {
+          "plans": [
+            "all",
+            "plus",
+            "pro",
+            "business"
+          ],
+          "windows": [
+            "unknown"
+          ]
+        },
+        "source": {
+          "origin": "operator",
+          "postId": null,
+          "handle": null,
+          "url": null
+        },
+        "schedulePrecision": null,
+        "scheduleBasis": null,
+        "scheduleWindow": null,
+        "scheduleState": null,
+        "completedAt": "2026-09-22T20:37:00.000Z",
+        "completionRecordId": null,
+        "fulfillmentOrigin": "manual",
+        "relatedRecordIds": [
+          "2102463847714247142",
+          "2102254445082116335",
+          "2101352781219258527"
+        ]
+      },
+      {
+        "id": "2098685367058612394",
+        "kind": "reset_completed",
+        "resetType": "global",
+        "announcedAt": "2026-09-12T08:09:17.000Z",
+        "effectiveAt": null,
+        "text": "Synthetic public-source fixture",
+        "confidence": 0.96,
+        "scope": {
+          "plans": [
+            "all"
+          ],
+          "windows": [
+            "unknown"
+          ]
+        },
+        "source": {
+          "origin": "x",
+          "postId": "2098685367058612394",
+          "handle": "thsottiaux",
+          "url": "https://x.com/thsottiaux/status/2098685367058612394"
+        },
+        "schedulePrecision": null,
+        "scheduleBasis": null,
+        "scheduleWindow": null,
+        "scheduleState": null,
+        "completedAt": null,
+        "completionRecordId": null,
+        "fulfillmentOrigin": null,
+        "relatedRecordIds": [
+          "2098612714704891959"
+        ]
+      },
+      {
+        "id": "2097183639356489952",
+        "kind": "reset_completed",
+        "resetType": "global",
+        "announcedAt": "2026-09-08T04:41:58.000Z",
+        "effectiveAt": null,
+        "text": "Synthetic public-source fixture",
+        "confidence": null,
+        "scope": null,
+        "source": {
+          "origin": "x",
+          "postId": "2097183639356489952",
+          "handle": "thsottiaux",
+          "url": "https://x.com/thsottiaux/status/2097183639356489952"
+        },
+        "schedulePrecision": null,
+        "scheduleBasis": null,
+        "scheduleWindow": null,
+        "scheduleState": null,
+        "completedAt": null,
+        "completionRecordId": null,
+        "fulfillmentOrigin": null,
+        "relatedRecordIds": []
+      },
+      {
+        "id": "2097174560412246215",
+        "kind": "reset_completed",
+        "resetType": "global",
+        "announcedAt": "2026-09-08T04:05:53.000Z",
+        "effectiveAt": null,
+        "text": "Synthetic public-source fixture",
+        "confidence": null,
+        "scope": null,
+        "source": {
+          "origin": "x",
+          "postId": "2097174560412246215",
+          "handle": "thsottiaux",
+          "url": "https://x.com/thsottiaux/status/2097174560412246215"
+        },
+        "schedulePrecision": null,
+        "scheduleBasis": null,
+        "scheduleWindow": null,
+        "scheduleState": null,
+        "completedAt": null,
+        "completionRecordId": null,
+        "fulfillmentOrigin": null,
+        "relatedRecordIds": [
+          "2097043464538264003"
+        ]
+      },
+      {
+        "id": "manual:cl_a27bd803bd8f4c659f11d30d55bcf005",
+        "kind": "reset_completed",
+        "resetType": "banked",
+        "announcedAt": null,
+        "effectiveAt": "2026-09-05T03:00:00.000Z",
+        "text": null,
+        "confidence": null,
+        "scope": {
+          "plans": [
+            "plus",
+            "business",
+            "pro"
+          ],
+          "windows": [
+            "unknown"
+          ]
+        },
+        "source": {
+          "origin": "operator",
+          "postId": null,
+          "handle": null,
+          "url": null
+        },
+        "schedulePrecision": null,
+        "scheduleBasis": null,
+        "scheduleWindow": null,
+        "scheduleState": null,
+        "completedAt": "2026-09-05T03:00:00.000Z",
+        "completionRecordId": null,
+        "fulfillmentOrigin": "manual",
+        "relatedRecordIds": [
+          "2096035437299237298",
+          "2095979536043401428"
+        ]
+      }
+    ],
+    "page": 1,
+    "pageSize": 10,
+    "total": 60,
+    "totalPages": 6,
+    "hasNext": true
+  },
+  "meta": {
+    "generatedAt": "2026-10-07T14:35:10.918Z",
+    "lastSuccessfulCheckAt": "2026-10-07T14:35:10.918Z"
+  }
+}

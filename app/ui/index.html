@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'">
+  <title>codex重置预测看板</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="dashboard-v12.css">
+</head>
+<body class="dark">
+  <header class="titlebar">
+    <div class="brand"><img src="../assets/icon.png" alt=""><span>codex重置预测看板</span></div>
+    <div class="toolbar">
+      <span id="live-state" class="live-state"><i></i>正在连接</span>
+      <button class="icon-button" id="refresh" title="立即检查" aria-label="立即检查"><svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 18 17"/></svg></button>
+      <button class="icon-button notification-button" id="events-button" title="变化记录" aria-label="变化记录"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i id="unread-dot" hidden></i></button>
+      <button class="icon-button" id="settings-button" title="设置" aria-label="设置"><svg viewBox="0 0 24 24"><path d="m9 3 1-1h4l1 3 3 1 3 1v4l-2 2-1 3 1 3-3 2-3-1-3 1-3-2 1-3-1-3-2-2V7l3-1z"/><circle cx="12" cy="11.5" r="3"/></svg></button>
+    </div>
+    <div class="window-controls"><button data-window="minimize" aria-label="最小化">─</button><button data-window="maximize" aria-label="最大化">□</button><button data-window="close" aria-label="关闭窗口">×</button></div>
+  </header>
+
+  <main>
+    <div class="page-heading"><div><h1>把握下一次重置。</h1><p>预告、确认与额度节奏，放在一起看。</p></div><div class="local-date" id="local-date"></div></div>
+    <button id="change-banner" class="change-banner" hidden></button>
+    <div class="overview">
+      <section class="panel reset-panel" aria-labelledby="last-reset-heading">
+        <div class="section-line"><h2 id="last-reset-heading">上一次全局重置</h2><span id="consensus-status" class="pill muted">核对中</span></div>
+        <div id="last-reset-value" class="last-reset-value"><div class="reset-date">等待信息</div><div class="reset-clock">—<span></span></div></div>
+        <div id="consensus-note" class="consensus-note">正在比对公开完成记录</div>
+        <div id="source-proof" class="source-proof"></div>
+        <div class="panel-bottom"><span id="reset-semantics">公开完成公告时间</span><button class="text-button" id="original-post" disabled>查看原帖 <span>↗</span></button></div>
+      </section>
+      <section class="panel quota-panel" aria-labelledby="quota-heading">
+        <div class="section-line"><h2 id="quota-heading">我的额度</h2><button class="text-button" id="quota-settings">额度明细 <svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></svg></button></div>
+        <div class="quota-top"><div><div class="quota-caption" id="quota-caption">本机 Codex · 剩余额度</div><div class="quota-value" id="quota-value">—<span>%</span></div></div><div class="quota-side" id="quota-side"><button class="primary-button" id="connect-quota">读取本机额度</button><span>跟随本机 Codex 登录账户</span></div></div>
+        <p id="quota-permission" class="quota-permission" role="status" hidden>本机接口报告：当前不允许常规使用，请查看额度明细。</p>
+        <div class="quota-bars">
+          <div class="quota-row" data-bar="actual"><button class="bar-drag-handle" aria-label="调整实际消耗位置" title="按住拖动；也可用↑↓键调整">⠿</button><span>实际消耗</span><div class="track" role="progressbar" aria-label="实际消耗" id="actual-track"><i class="actual-fill" id="actual-fill"></i></div><strong id="actual-percent">—</strong></div>
+          <div class="quota-row" data-bar="hypothetical"><button class="bar-drag-handle" aria-label="调整假设节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><button id="hypothetical-settings" class="pace-label" title="设置假设重置周期">假设 <span id="hypothetical-days-label">3</span> 天</button><div class="track" role="progressbar" aria-label="假设重置节奏" id="hypothetical-track"><i class="hypothetical-fill" id="hypothetical-fill"></i></div><strong id="hypothetical-percent">—</strong></div>
+          <div class="quota-row" data-bar="theory"><button class="bar-drag-handle" aria-label="调整均匀节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><span>均匀节奏</span><div class="track" role="progressbar" aria-label="均匀节奏" id="theory-track"><i class="theory-fill" id="theory-fill"></i></div><strong id="theory-percent">—</strong></div>
+          <div id="forecast-markers" class="forecast-markers" aria-hidden="true" hidden></div>
+          <div class="bar-guides" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <p id="forecast-warning" class="forecast-warning" role="status" hidden></p>
+        <p class="pace-note" id="hypothetical-note">假设节奏以最近已核对的全局重置为起点</p>
+        <p class="bar-sort-hint">拖动左侧把手可调整横条顺序</p><span id="bar-sort-status" class="sr-only" role="status" aria-live="polite"></span>
+        <div class="panel-bottom"><span id="quota-reset">个人周期独立于全局重置预告</span><button class="text-button" id="quota-open">刷新额度</button></div>
+      </section>
+    </div>
+
+    <section class="forecasts-section" aria-labelledby="forecasts-heading">
+      <div class="forecasts-heading"><div><h2 id="forecasts-heading">下一次重置</h2><span id="forecast-subtitle">五个信源 · 北京时间</span></div></div>
+      <div id="sources-grid" class="sources-grid" aria-live="polite"></div>
+    </section>
+    <footer><div><span id="poll-dot" class="status-dot"></span><span id="poll-status">每 30 秒检查</span><span class="footer-separator"></span><span>北京时间 UTC+8</span></div><button id="pause" class="text-button">暂停监控</button></footer>
+    <section class="history-section" aria-labelledby="history-heading"><div class="history-heading"><h2 id="history-heading">历史重置</h2><span id="history-range"></span></div><div id="history-list" class="history-list"></div></section>
+  </main>
+
+  <dialog id="settings-dialog" class="settings-dialog">
+    <div class="dialog-heading"><h2>看板设置</h2><button class="dialog-close" data-close="settings-dialog" aria-label="关闭设置">×</button></div>
+    <div class="settings-section"><h3>变化提醒</h3>
+      <label class="setting-row"><span>Windows 系统通知<small>横幅一直显示，直到手动关闭</small></span><input id="setting-notify" type="checkbox" role="switch"></label>
+      <label class="setting-row"><span>提示音</span><input id="setting-sound" type="checkbox" role="switch"></label>
+      <button class="secondary-button" id="test-notification">发送测试通知</button><p id="notification-status" class="help-text">系统勿扰模式可能将通知收进通知中心。</p>
+    </div>
+    <div class="settings-section"><h3>Language / 语言</h3><label class="field"><select id="setting-language" aria-label="Language / 语言"><option value="zh-CN">简体中文</option><option value="en">English</option></select></label></div>
+    <div class="settings-section"><h3>后台运行</h3>
+      <label class="setting-row"><span>关闭窗口后留在托盘<small>右键托盘图标可以完全退出</small></span><input id="setting-tray" type="checkbox" role="switch"></label>
+      <label class="setting-row"><span>开机启动<small>启动后在托盘安静监控</small></span><input id="setting-autostart" type="checkbox" role="switch"></label>
+      <label class="setting-row"><span>深色外观</span><input id="setting-dark" type="checkbox" role="switch"></label>
+    </div>
+    <div class="settings-section"><h3>本机 Codex 额度</h3><label class="field" id="quota-limit-field" hidden>额度类别<select id="quota-limit-select"></select></label><button class="secondary-button" id="settings-refresh-quota">刷新本机额度</button><p class="help-text">自动读取本机 Codex 当前账户的剩余比例与重置时间。</p></div>
+    <div class="settings-section"><h3>节奏与文字</h3><label class="field">假设每 X 天重置<input id="setting-hypothetical-days" type="number" min="0.25" max="365" step="0.25" value="3"></label><p class="help-text">默认 3 天。以最近已核对的全局重置为起点，到期停在 100%，等待实际重置。</p><label class="field">正文字号 <span id="body-font-value">13 px</span><input id="setting-body-font" type="range" min="11" max="22" step="1" value="13"></label><p class="help-text">正文和更小的文字同步调整，保留字号层次；大号时间、额度和预告数字保持原尺寸。</p></div>
+    <div class="settings-footnote">看板每 30 秒检查。Did Codex Reset 受接口限流，约 3.5 分钟更新。实际新消息还取决于各站的采集频率。</div>
+    <div id="settings-error" class="form-error" role="alert"></div>
+  </dialog>
+
+  <dialog id="quota-dialog" class="quota-dialog">
+    <div class="dialog-heading"><h2>本机额度明细</h2><button class="dialog-close" data-close="quota-dialog" aria-label="关闭额度明细">×</button></div>
+    <div id="quota-details"></div>
+    <p class="help-text">实际消耗来自本机 Codex 额度接口；均匀节奏按接口返回的周期长度及重置时间计算。全局重置公告不会覆盖个人周期。</p>
+    <div class="dialog-actions"><button class="secondary-button" id="quota-details-refresh">刷新本机额度</button></div>
+  </dialog>
+
+  <dialog id="events-dialog" class="events-dialog"><div class="dialog-heading"><h2>变化记录</h2><button class="dialog-close" data-close="events-dialog" aria-label="关闭变化记录">×</button></div><div id="events-list"></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="i18n.js"></script>
+  <script src="pace-timing.js"></script>
+  <script src="bar-order.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

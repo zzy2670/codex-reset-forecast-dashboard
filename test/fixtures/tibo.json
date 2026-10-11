@@ -1,0 +1,685 @@
+{
+  "data": {
+    "latest_reset": {
+      "id": "2107676072871600470",
+      "reset_type": "regular",
+      "announced_at": "2026-10-07T03:35:09.000Z",
+      "text": "Synthetic public-source fixture",
+      "source": {
+        "type": "x_post",
+        "author": "thsottiaux",
+        "url": "https://x.com/thsottiaux/status/2107676072871600470"
+      },
+      "translation": {
+        "text": "Synthetic public-source fixture",
+        "language": "zh-CN",
+        "source_url": "https://codex-resets.com/api/resets?locale=zh-CN",
+        "fetched_at": "2026-10-07T14:37:04.315440+00:00",
+        "stale": false
+      }
+    },
+    "scheduled_reset": null,
+    "active_watch": null,
+    "stats": {
+      "total": 58,
+      "last_reset_at": "2026-10-07T03:35:09.000Z",
+      "days_since_last": 0.5,
+      "avg_interval_days": 6.8
+    }
+  },
+  "source": "Codex Resets（第三方社区数据）",
+  "source_url": "https://codex-resets.com",
+  "upstream_url": "https://codex-resets.com/api/v1/status",
+  "is_official": false,
+  "is_prediction": false,
+  "confidence": null,
+  "fetched_at": "2026-10-07T14:37:04.275050+00:00",
+  "last_successful_update": "2026-10-07T14:37:04.275050+00:00",
+  "last_updated": null,
+  "upstream_generated_at": "2026-10-07T14:36:18.971Z",
+  "stale": false,
+  "cached": true,
+  "upstream_status": "ok",
+  "disclaimer": "本网站展示的是公开社区数据、历史记录或预测信息，不代表 OpenAI 的官方承诺。数据可能存在延迟或误差。",
+  "provenance": {
+    "official_confirmation": "unknown",
+    "confidence_basis": "not_provided",
+    "timestamp_note": "fetched_at 为本站获取时间；generated_at 为来源响应的生成时间，不是事件更新时间。",
+    "scheduled_note": "scheduled 表示公开收录的待执行公告，不代表已经重置或官方保证。",
+    "watch_note": "active_watch 是来源单独发布的观察或预测，不是作者的待执行预告；observed_at 为观察记录时间，expires_at 仅表示观察有效期，不是重置截止时间或执行承诺。观察消息不触发重置通知，也不登记为本站评分预测。",
+    "watch_expired": false,
+    "forecast_chance_percent": null
+  },
+  "raw": {
+    "data": {
+      "latest_reset": {
+        "id": "2107676072871600470",
+        "reset_type": "regular",
+        "announced_at": "2026-10-07T03:35:09.000Z",
+        "text": "Synthetic public-source fixture",
+        "source": {
+          "type": "x_post",
+          "author": "thsottiaux",
+          "url": "https://x.com/thsottiaux/status/2107676072871600470"
+        }
+      },
+      "scheduled_reset": null,
+      "active_watch": null,
+      "stats": {
+        "total": 58,
+        "last_reset_at": "2026-10-07T03:35:09.000Z",
+        "days_since_last": 0.5,
+        "avg_interval_days": 6.8
+      }
+    },
+    "meta": {
+      "api_version": "v1",
+      "generated_at": "2026-10-07T14:36:18.971Z"
+    }
+  },
+  "pagination": null,
+  "error": null,
+  "time_assessment": null,
+  "notice_context": {
+    "record": {
+      "id": "2105843926221660585",
+      "status": "scheduled",
+      "reset_type": "regular",
+      "announced_at": "2026-10-02T02:14:51.000Z",
+      "scheduled_for": "2026-10-02T17:00:00Z",
+      "text": "Synthetic public-source fixture",
+      "source": {
+        "type": "x_post",
+        "author": "thsottiaux",
+        "url": "https://x.com/thsottiaux/status/2105843926221660585"
+      },
+      "translation": {
+        "text": "Synthetic public-source fixture",
+        "language": "zh-CN",
+        "source_url": "https://codex-resets.com/api/resets?locale=zh-CN",
+        "fetched_at": "2026-10-02T21:17:55.912759+00:00",
+        "stale": true
+      },
+      "text_time_conversion": {
+        "method_version": "text-time-v1",
+        "text": "Synthetic public-source fixture",
+        "reference_at": "2026-10-02T02:14:51.000Z",
+        "status": "converted",
+        "precision": "minute",
+        "source_timezone": "PST (UTC-08:00)",
+        "source_date": "2026-10-02",
+        "beijing_start": null,
+        "beijing_end": null,
+        "beijing_time": "2026-10-03T02:00:00+08:00",
+        "end_exclusive": false,
+        "assumptions": [
+          "今天或明天以消息记录时间在原时区的日期为准，不随浏览时间滚动。"
+        ],
+        "reason": "仅将正文明确的日期和时刻换算为北京时间，不推断重置发生时间。"
+      }
+    },
+    "first_seen_at": "2026-10-02T02:17:55.525790+00:00",
+    "last_seen_at": "2026-10-02T21:17:55.877391+00:00",
+    "missing_since": "2026-10-02T21:20:55.897571+00:00",
+    "source_generated_at": "2026-10-02T21:17:26.691Z",
+    "state": "superseded",
+    "show_on_home": false,
+    "is_current": false,
+    "stale": true,
+    "current_status_stale": false,
+    "is_official": false,
+    "is_prediction": false,
+    "source_url": "https://codex-resets.com",
+    "explanation": "此前公告之后已收录同类型的较新重置记录，因此不再作为首页当前线索；时间与类型关系仍不足以证明个人额度到账，也不自动证明两条消息一一对应。",
+    "timeline_relation": {
+      "status": "newer_same_type_record_seen",
+      "newer_record": {
+        "id": "2107676072871600470",
+        "reset_type": "regular",
+        "announced_at": "2026-10-07T03:35:09.000Z",
+        "source_url": "https://x.com/thsottiaux/status/2107676072871600470"
+      },
+      "same_record": null,
+      "same_type_record": {
+        "id": "2107676072871600470",
+        "reset_type": "regular",
+        "announced_at": "2026-10-07T03:35:09.000Z",
+        "source_url": "https://x.com/thsottiaux/status/2107676072871600470"
+      },
+      "same_record_reclassified": false,
+      "same_type_record_seen": true,
+      "fulfillment_confirmed": false
+    },
+    "previous_time_assessment": {
+      "method_version": "attributed-time-v2",
+      "mode": "source_schedule",
+      "state": "source_unlisted",
+      "source_record_id": "2105843926221660585",
+      "source_url": "https://x.com/thsottiaux/status/2105843926221660585",
+      "is_official": false,
+      "is_prediction": false,
+      "confidence": "unknown",
+      "precision": "source_deadline",
+      "window_start": null,
+      "window_end": "2026-10-02T17:00:00+00:00",
+      "end_exclusive": false,
+      "display_timezone": "Asia/Shanghai",
+      "calculation_timezone": "UTC",
+      "timezone_basis": "upstream_timestamp",
+      "stale": true,
+      "computed_at": "2026-10-07T14:39:29.292477+00:00",
+      "reason": "此前公告之后已收录同类型的较新重置记录，因此不再作为首页当前线索；时间与类型关系仍不足以证明个人额度到账，也不自动证明两条消息一一对应。",
+      "assumptions": [
+        "上游给定时间与原帖时间线索分开保留；不把整天观察窗口的终点认作实际重置时刻。"
+      ],
+      "evidence": [
+        {
+          "role": "current_announcement",
+          "record_id": "2105843926221660585",
+          "url": "https://x.com/thsottiaux/status/2105843926221660585",
+          "announced_at": "2026-10-02T02:14:51.000Z",
+          "quote": "Global reset landing tomorrow 10am PST for all paid ChatGPT accounts. Apologies for the slow start with GPT-6.1 Sol, it's now back to running at expected speeds after the massive load spike in the first two days."
+        }
+      ],
+      "timeline_relation": {
+        "status": "newer_same_type_record_seen",
+        "retires_current_schedule": true,
+        "newer_record": {
+          "id": "2107676072871600470",
+          "reset_type": "regular",
+          "announced_at": "2026-10-07T03:35:09.000Z",
+          "source_url": "https://x.com/thsottiaux/status/2107676072871600470"
+        },
+        "same_record": null,
+        "same_type_record": {
+          "id": "2107676072871600470",
+          "reset_type": "regular",
+          "announced_at": "2026-10-07T03:35:09.000Z",
+          "source_url": "https://x.com/thsottiaux/status/2107676072871600470"
+        },
+        "fulfillment_confirmed": false
+      },
+      "disclaimer": "时间内表达参考截止范围，并非必须等到截止时刻才重置；不保证在范围内完成，到点仍须等待新记录，也不代表个人额度到账。",
+      "timestamp_origin": "scheduled_reset.scheduled_for",
+      "source_time_verified": false,
+      "reference_kind": "deadline",
+      "timestamp_semantics": "upstream_deadline_not_execution",
+      "semantics_basis": {
+        "source_url": "https://codex-resets.com/zh-CN",
+        "meaning": "Codex Resets scheduled_for is displayed as By / Within; not a start time or verified completion promise."
+      },
+      "source_scheduled_for": "2026-10-02T17:00:00Z",
+      "text_time_assessment": {
+        "method_version": "attributed-time-v2",
+        "mode": "estimated",
+        "state": "newer_record",
+        "source_record_id": "2105843926221660585",
+        "source_url": "https://x.com/thsottiaux/status/2105843926221660585",
+        "is_official": false,
+        "is_prediction": true,
+        "confidence": "medium",
+        "precision": "day_window",
+        "window_start": "2026-10-02T08:00:00+00:00",
+        "window_end": "2026-10-03T08:00:00+00:00",
+        "end_exclusive": true,
+        "display_timezone": "Asia/Shanghai",
+        "calculation_timezone": "PST (UTC-08:00)",
+        "timezone_basis": "explicit_in_text",
+        "stale": false,
+        "computed_at": "2026-10-07T14:39:29.292477+00:00",
+        "reason": "已有较新的同类重置记录，停止突出旧窗口；两条消息是否对应仍需核查。",
+        "assumptions": [
+          "将今天/明天按发帖当地日期理解。",
+          "时间窗口只用于留意消息，不证明原帖所指一定是重置，也不保证会在窗口内发生。"
+        ],
+        "evidence": [
+          {
+            "role": "current_announcement",
+            "record_id": "2105843926221660585",
+            "url": "https://x.com/thsottiaux/status/2105843926221660585",
+            "announced_at": "2026-10-02T02:14:51.000Z",
+            "quote": "Global reset landing tomorrow 10am PST for all paid ChatGPT accounts. Apologies for the slow start with GPT-6.1 Sol, it's now back to running at expected speeds after the massive load spike in the first two days."
+          }
+        ],
+        "timeline_relation": {
+          "status": "newer_same_type_record_seen",
+          "retires_current_schedule": true,
+          "newer_record": {
+            "id": "2107676072871600470",
+            "reset_type": "regular",
+            "announced_at": "2026-10-07T03:35:09.000Z",
+            "source_url": "https://x.com/thsottiaux/status/2107676072871600470"
+          },
+          "same_record": null,
+          "same_type_record": {
+            "id": "2107676072871600470",
+            "reset_type": "regular",
+            "announced_at": "2026-10-07T03:35:09.000Z",
+            "source_url": "https://x.com/thsottiaux/status/2107676072871600470"
+          },
+          "fulfillment_confirmed": false
+        },
+        "disclaimer": "本站独立推断，仅供观察；不代表已安排或一定发生重置，也不代表个人额度到账时间。"
+      },
+      "probability": {
+        "method_version": "evidence-coverage-v1",
+        "status": "inactive",
+        "event": "pending_reset_occurs_within_window",
+        "source_record_id": "2105843926221660585",
+        "reset_type": "regular",
+        "window_start": null,
+        "window_end": "2026-10-02T17:00:00+00:00",
+        "range_percent": null,
+        "empirical_accuracy_percent": null,
+        "evaluated_forecasts": null,
+        "calibrated": false,
+        "is_official": false,
+        "stale": true,
+        "computed_at": "2026-10-07T14:39:29.292477+00:00",
+        "reason": "公开历史记录的是公告或首次观察时间，缺少预告与实际兑现的配对样本，不能仅凭历史间隔计算本次发生概率；历史预测表现另见 forecast_performance。",
+        "message_basis": {
+          "has_time_window": true,
+          "timezone_basis": "upstream_timestamp",
+          "source_url": "https://x.com/thsottiaux/status/2105843926221660585",
+          "note": "时间线索可以用于换算观察窗口，不等于对是否发生重置的统计概率。"
+        },
+        "history_basis": {
+          "same_type_records": 51,
+          "adjacent_intervals": 50,
+          "average_interval_days": 7.49,
+          "record_ids": [
+            "1968163721034994139",
+            "1986166501435711936",
+            "1992370994028388670",
+            "1995988609896513743",
+            "2001114683047317723",
+            "2002137269134819610",
+            "2004100061933064395",
+            "2028649088594436225",
+            "2029308599835738218",
+            "2030474136024400173",
+            "2031216405266481489",
+            "2031605592352313567",
+            "2037346989244096581",
+            "2039248564967424483",
+            "2041655710346572085",
+            "2042299371602264319",
+            "2044943514832871564",
+            "2046367145588916687",
+            "2048997818673537399",
+            "2055707616605835333",
+            "2058280452851638313",
+            "2061106703446450392",
+            "2062329981548802523",
+            "2067399435009622521",
+            "2070653282440405046",
+            "2071381664853319742",
+            "2071740419030053227",
+            "2075330198887940337",
+            "2075641131002700120",
+            "2075820987833274448",
+            "2076418567143408112",
+            "2076735790567338203",
+            "2077114635308986427",
+            "2077607697487188198",
+            "2078320950488297917",
+            "2079609157934886975",
+            "2081096447718723984",
+            "2081940052154933696",
+            "2082317452755751098",
+            "2083395449814229287",
+            "2086188036493344823",
+            "2086972802457063486",
+            "2087706104814023111",
+            "2091688655828246890",
+            "observed-20260825T143200Z",
+            "2093014447833116908",
+            "2093801758665715784",
+            "2094251180121854309",
+            "observed-2097043464538264003",
+            "2098685367058612394",
+            "2103911959544610829"
+          ],
+          "evidence_cutoff": "2026-10-02T02:14:51+00:00",
+          "history_complete": true,
+          "stale": false,
+          "timestamp_semantics": "announcement_or_first_observation",
+          "source_url": "https://codex-resets.com/api/v1/resets",
+          "note": "只描述已收录的同类历史，公告时间不是实际发放时间；没有记录不等于没有发生。"
+        },
+        "source_forecast": null
+      },
+      "window_state": "newer_record",
+      "is_active": false,
+      "basis": "archived_notice_reconstruction"
+    }
+  },
+  "forecast_performance": {
+    "method": "window-distance-v1",
+    "initial_reference_percent": 100,
+    "is_initial": false,
+    "score_percent": 100,
+    "baseline_count": 54,
+    "baseline_score_per_sample": 100,
+    "scored_sample_count": 56,
+    "aggregation_method": "initial-baseline-weighted-v1",
+    "hit_rate_percent": 100,
+    "evaluated_count": 2,
+    "hit_count": 2,
+    "total": 2,
+    "pending_count": 0,
+    "records": [
+      {
+        "id": "2105843926221660585",
+        "reset_type": "regular",
+        "registered_at": "2026-10-02T02:17:55.542631+00:00",
+        "window_start": "2026-10-02T08:00:00+00:00",
+        "window_end": "2026-10-03T08:00:00+00:00",
+        "end_exclusive": true,
+        "outcome": "hit",
+        "score": 100,
+        "offset_minutes": 0,
+        "matched_record": {
+          "id": "2106131810921136451",
+          "reset_type": "regular",
+          "announced_at": "2026-10-02T21:18:48.000Z",
+          "text": "Synthetic public-source fixture",
+          "source": {
+            "type": "x_post",
+            "author": "thsottiaux",
+            "url": "https://x.com/thsottiaux/status/2106131810921136451"
+          }
+        },
+        "evaluated_at": "2026-10-02T21:20:55.899855+00:00",
+        "method": "window-distance-v1",
+        "revisions": [
+          {
+            "at": "2026-10-02T21:20:55.899855+00:00",
+            "from": "pending",
+            "to": "hit",
+            "reason": "public_record_received"
+          }
+        ],
+        "basis": {
+          "method_version": "attributed-time-v2",
+          "mode": "estimated",
+          "state": "upcoming",
+          "source_record_id": "2105843926221660585",
+          "source_url": "https://x.com/thsottiaux/status/2105843926221660585",
+          "is_official": false,
+          "is_prediction": true,
+          "confidence": "medium",
+          "precision": "day_window",
+          "window_start": "2026-10-02T08:00:00+00:00",
+          "window_end": "2026-10-03T08:00:00+00:00",
+          "end_exclusive": true,
+          "display_timezone": "Asia/Shanghai",
+          "calculation_timezone": "PST (UTC-08:00)",
+          "timezone_basis": "explicit_in_text",
+          "stale": false,
+          "computed_at": "2026-10-02T02:17:55.540871+00:00",
+          "reason": "把原帖提到的当地整天换算成北京时间观察窗口；没有证据缩窄到某个具体小时。",
+          "assumptions": [
+            "将今天/明天按发帖当地日期理解。",
+            "时间窗口只用于留意消息，不证明原帖所指一定是重置，也不保证会在窗口内发生。"
+          ],
+          "evidence": [
+            {
+              "role": "current_announcement",
+              "record_id": "2105843926221660585",
+              "url": "https://x.com/thsottiaux/status/2105843926221660585",
+              "announced_at": "2026-10-02T02:14:51.000Z",
+              "quote": "Global reset landing tomorrow 10am PST for all paid ChatGPT accounts. Apologies for the slow start with GPT-6.1 Sol, it's now back to running at expected speeds after the massive load spike in the first two days."
+            }
+          ],
+          "timeline_relation": {
+            "status": "no_related_reset",
+            "retires_current_schedule": false,
+            "newer_record": null,
+            "same_record": null,
+            "same_type_record": null,
+            "fulfillment_confirmed": false
+          },
+          "disclaimer": "本站独立推断，仅供观察；不代表已安排或一定发生重置，也不代表个人额度到账时间。"
+        },
+        "source_record": {
+          "id": "2105843926221660585",
+          "status": "scheduled",
+          "reset_type": "regular",
+          "announced_at": "2026-10-02T02:14:51.000Z",
+          "scheduled_for": "2026-10-02T17:00:00Z",
+          "text": "Synthetic public-source fixture",
+          "source": {
+            "type": "x_post",
+            "author": "thsottiaux",
+            "url": "https://x.com/thsottiaux/status/2105843926221660585"
+          }
+        }
+      },
+      {
+        "id": "2101352781219258527",
+        "reset_type": "banked",
+        "registered_at": "2026-09-21T13:05:24.068935+00:00",
+        "window_start": "2026-09-22T07:00:00+00:00",
+        "window_end": "2026-09-23T07:00:00+00:00",
+        "end_exclusive": true,
+        "outcome": "hit",
+        "score": 100,
+        "offset_minutes": 0,
+        "matched_record": {
+          "id": "2102463847714247142",
+          "reset_type": "banked",
+          "announced_at": "2026-09-22T18:23:37.000Z",
+          "text": "Synthetic public-source fixture",
+          "source": {
+            "type": "x_post",
+            "author": "thsottiaux",
+            "url": "https://x.com/thsottiaux/status/2102463847714247142"
+          }
+        },
+        "evaluated_at": "2026-09-22T18:29:22.250320+00:00",
+        "method": "window-distance-v1",
+        "revisions": [
+          {
+            "at": "2026-09-22T18:29:22.250320+00:00",
+            "from": "pending",
+            "to": "hit",
+            "reason": "public_record_received"
+          }
+        ],
+        "basis": {
+          "method_version": "weekday-window-v1",
+          "mode": "estimated",
+          "state": "upcoming",
+          "source_record_id": "2101352781219258527",
+          "source_url": "https://x.com/thsottiaux/status/2101352781219258527",
+          "is_official": false,
+          "is_prediction": true,
+          "confidence": "low",
+          "precision": "day_window",
+          "window_start": "2026-09-22T07:00:00+00:00",
+          "window_end": "2026-09-23T07:00:00+00:00",
+          "end_exclusive": true,
+          "display_timezone": "Asia/Shanghai",
+          "calculation_timezone": "America/Los_Angeles",
+          "timezone_basis": "same_author_history_assumption",
+          "stale": false,
+          "computed_at": "2026-09-21T13:05:24.063212+00:00",
+          "reason": "把原帖提到的当地整天换算成北京时间观察窗口；没有证据缩窄到某个具体小时。",
+          "assumptions": [
+            "本条未注明时区，暂沿用同一作者近 180 天公开历史中的时区；历史习惯不能证明本次时区。",
+            "将星期词按发帖当地日期之后最近一次理解；“下周”按下一自然周。日期以发帖时间为基准，不随当前日期滚动。",
+            "时间窗口只用于留意消息，不证明原帖所指一定是重置，也不保证会在窗口内发生。"
+          ],
+          "evidence": [
+            {
+              "role": "current_announcement",
+              "record_id": "2101352781219258527",
+              "url": "https://x.com/thsottiaux/status/2101352781219258527",
+              "announced_at": "2026-09-19T16:48:38.000Z",
+              "quote": "@udiWertheimer OK fine. But it’s also still coming in Tuesday"
+            },
+            {
+              "role": "same_author_timezone_prior",
+              "record_id": "2096035437299237298",
+              "url": "https://x.com/thsottiaux/status/2096035437299237298",
+              "announced_at": "2026-09-05T00:39:25.000Z",
+              "quote": "Because we are beyond happy to have Astra rolled out today ahead of schedule and you have been super patient with us (not really, but it’s ok!)… we will do the full banked reset today too for all Plus, Pro and Business users. Lands end of day.\n\nHappy Astra day and enjoy a phenomenal weekend. \n\nPS: If you create the account or upgrade before 8pm PT you will get it too. Still time!"
+            }
+          ],
+          "disclaimer": "本站独立推断，仅供观察；不代表已安排或一定发生重置，也不代表个人额度到账时间。"
+        },
+        "source_record": {
+          "id": "2101352781219258527",
+          "status": "scheduled",
+          "reset_type": "banked",
+          "announced_at": "2026-09-19T16:48:38.000Z",
+          "scheduled_for": null,
+          "text": "Synthetic public-source fixture",
+          "source": {
+            "type": "x_post",
+            "author": "thsottiaux",
+            "url": "https://x.com/thsottiaux/status/2101352781219258527"
+          },
+          "translation": {
+            "text": "Synthetic public-source fixture",
+            "language": "zh-CN",
+            "source_url": "https://codex-resets.com/api/resets?locale=zh-CN",
+            "fetched_at": "2026-09-21T06:33:43.344567+00:00",
+            "stale": true
+          }
+        }
+      }
+    ],
+    "stale": false,
+    "computed_at": "2026-10-07T14:39:29.293297+00:00",
+    "reset_observations": [
+      {
+        "id": "2107676072871600470",
+        "reset_type": "regular",
+        "announced_at": "2026-10-07T03:35:09.000Z",
+        "source_record": {
+          "id": "2107676072871600470",
+          "reset_type": "regular",
+          "announced_at": "2026-10-07T03:35:09.000Z",
+          "text": "Synthetic public-source fixture",
+          "source": {
+            "type": "x_post",
+            "author": "thsottiaux",
+            "url": "https://x.com/thsottiaux/status/2107676072871600470"
+          }
+        },
+        "forecast_id": null,
+        "outcome": "unscored",
+        "score": null,
+        "reason_code": "no_prospective_forecast",
+        "reason": "这次重置前没有提前锁定的本站预测，不计分，也不算未命中。"
+      },
+      {
+        "id": "2106131810921136451",
+        "reset_type": "regular",
+        "announced_at": "2026-10-02T21:18:48.000Z",
+        "source_record": {
+          "id": "2106131810921136451",
+          "reset_type": "regular",
+          "announced_at": "2026-10-02T21:18:48.000Z",
+          "text": "Synthetic public-source fixture",
+          "source": {
+            "type": "x_post",
+            "author": "thsottiaux",
+            "url": "https://x.com/thsottiaux/status/2106131810921136451"
+          }
+        },
+        "forecast_id": "2105843926221660585",
+        "outcome": "hit",
+        "score": 100,
+        "reason_code": "matched_prospective_forecast",
+        "reason": "已按事前锁定的本站观察窗口核对，结果可查看预测明细。"
+      },
+      {
+        "id": "observed-20260929T190000Z",
+        "reset_type": "banked",
+        "announced_at": "2026-09-29T19:00:00.000Z",
+        "source_record": {
+          "id": "observed-20260929T190000Z",
+          "reset_type": "banked",
+          "announced_at": "2026-09-29T19:00:00.000Z",
+          "text": "Synthetic public-source fixture",
+          "source": {
+            "type": "observed",
+            "url": "https://x.com/thsottiaux/status/2105120226027450685"
+          }
+        },
+        "forecast_id": null,
+        "outcome": "unscored",
+        "score": null,
+        "reason_code": "no_prospective_forecast",
+        "reason": "这次重置前没有提前锁定的本站预测，不计分，也不算未命中。"
+      },
+      {
+        "id": "2103911959544610829",
+        "reset_type": "regular",
+        "announced_at": "2026-09-26T18:17:54.000Z",
+        "source_record": {
+          "id": "2103911959544610829",
+          "reset_type": "regular",
+          "announced_at": "2026-09-26T18:17:54.000Z",
+          "text": "Synthetic public-source fixture",
+          "source": {
+            "type": "x_post",
+            "author": "thsottiaux",
+            "url": "https://x.com/thsottiaux/status/2103911959544610829"
+          }
+        },
+        "forecast_id": null,
+        "outcome": "unscored",
+        "score": null,
+        "reason_code": "no_prospective_forecast",
+        "reason": "这次重置前没有提前锁定的本站预测，不计分，也不算未命中。"
+      },
+      {
+        "id": "2102463847714247142",
+        "reset_type": "banked",
+        "announced_at": "2026-09-22T18:23:37.000Z",
+        "source_record": {
+          "id": "2102463847714247142",
+          "reset_type": "banked",
+          "announced_at": "2026-09-22T18:23:37.000Z",
+          "text": "Synthetic public-source fixture",
+          "source": {
+            "type": "x_post",
+            "author": "thsottiaux",
+            "url": "https://x.com/thsottiaux/status/2102463847714247142"
+          }
+        },
+        "forecast_id": "2101352781219258527",
+        "outcome": "hit",
+        "score": 100,
+        "reason_code": "matched_prospective_forecast",
+        "reason": "已按事前锁定的本站观察窗口核对，结果可查看预测明细。"
+      }
+    ],
+    "coverage": {
+      "observed_reset_count": 5,
+      "matched_reset_count": 2,
+      "unscored_reset_count": 3,
+      "awaiting_evaluation_count": 0,
+      "available_history_count": 58,
+      "observation_since": "2026-09-21T13:05:24.068935+00:00",
+      "observation_scope": "since_first_locked_forecast",
+      "latest_reset_at": "2026-10-07T03:35:09.000Z",
+      "history_complete": true,
+      "stale": false
+    },
+    "current_forecast_status": {
+      "record_id": null,
+      "forecast_id": null,
+      "state": "no_notice",
+      "reason": "当前没有下一次预告，等待新的时间线索。"
+    },
+    "timestamp_semantics": "announcement_or_first_observation",
+    "matching_rule": "first_unmatched_same_type_record_after_registration_within_window_plus_or_minus_24h",
+    "note": "总分包含54条按100分计入的初始基准；基准不是逐条实测预测。后续实测命中率单列，不含初始基准。公开记录时间不等于个人到账时间。"
+  },
+  "fresh_until": "2026-10-07T14:42:04.275050+00:00"
+}

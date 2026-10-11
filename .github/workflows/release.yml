@@ -1,0 +1,42 @@
+name: Publish Windows release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=moderate
+      - run: npm test
+      - run: npm run check
+      - run: npm run test:ui
+      - run: npm run build
+      - run: node scripts/verify-package.cjs
+      - name: Verify packaged interface
+        shell: pwsh
+        run: |
+          $env:DASHBOARD_TEST_EXE = Join-Path $PWD 'dist/win-unpacked/Codex Reset Dashboard.exe'
+          npm run test:ui
+      - name: Publish installers and checksums
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $releaseVersion = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($env:GITHUB_REF_NAME -ne "v$releaseVersion") { throw 'Tag does not match package version' }
+          $releaseFiles = @(Get-ChildItem dist/*.exe)
+          if ($releaseFiles.Count -ne 2) { throw 'Expected installer and portable executable' }
+          $releaseFiles | ForEach-Object { "$(($_ | Get-FileHash -Algorithm SHA256).Hash.ToLower())  $($_.Name)" } | Set-Content dist/SHA256SUMS.txt -Encoding ascii
+          gh release create "$env:GITHUB_REF_NAME" --title "Codex Reset Forecast Dashboard $releaseVersion" --notes-file .github/RELEASE_NOTES.md --draft --verify-tag
+          gh release upload "$env:GITHUB_REF_NAME" dist/*.exe dist/SHA256SUMS.txt LICENSE
+          gh release edit "$env:GITHUB_REF_NAME" --draft=false --latest

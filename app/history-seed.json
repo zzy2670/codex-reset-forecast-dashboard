@@ -1,0 +1,295 @@
+[
+  {
+    "id": "2108040921044639779",
+    "at": "2026-10-08T03:44:55.000Z",
+    "url": "https://x.com/thsottiaux/status/2108040921044639779",
+    "type": "banked",
+    "kindLabel": "重置卡",
+    "scope": {
+      "plans": [
+        "all"
+      ],
+      "windows": [
+        "unknown"
+      ]
+    },
+    "text": "",
+    "timeBasis": "announcement",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "2107676072871600470",
+    "at": "2026-10-07T03:35:09.000Z",
+    "url": "https://x.com/thsottiaux/status/2107676072871600470",
+    "type": "global",
+    "kindLabel": "全局重置",
+    "scope": {
+      "plans": [
+        "all"
+      ],
+      "windows": [
+        "unknown"
+      ]
+    },
+    "text": "",
+    "timeBasis": "announcement",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "2106239435461579088",
+    "at": "2026-10-03T04:26:28.000Z",
+    "url": "https://x.com/thsottiaux/status/2106239435461579088",
+    "type": "global",
+    "kindLabel": "全局重置",
+    "scope": {
+      "plans": [
+        "pro"
+      ],
+      "windows": [
+        "unknown"
+      ]
+    },
+    "text": "",
+    "timeBasis": "announcement",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "2106131810921136451",
+    "at": "2026-10-02T21:18:48.000Z",
+    "url": "https://x.com/thsottiaux/status/2106131810921136451",
+    "type": "global",
+    "kindLabel": "全局重置",
+    "scope": {
+      "plans": [
+        "all"
+      ],
+      "windows": [
+        "unknown"
+      ]
+    },
+    "text": "",
+    "timeBasis": "announcement",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "did:op_2465d7eff41403a2d42a1fb4",
+    "at": "2026-09-29T18:10:55.000Z",
+    "url": null,
+    "type": "banked",
+    "kindLabel": "重置卡",
+    "scope": {
+      "plans": [
+        "all"
+      ],
+      "windows": [
+        "unknown"
+      ]
+    },
+    "text": "",
+    "timeBasis": "effective",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "2103911959544610829",
+    "at": "2026-09-26T18:17:54.000Z",
+    "url": "https://x.com/thsottiaux/status/2103911959544610829",
+    "type": "global",
+    "kindLabel": "全局重置",
+    "scope": null,
+    "text": "",
+    "timeBasis": "announcement",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "did:manual:2026-09-22T20:37:00.000Z",
+    "at": "2026-09-22T20:37:00.000Z",
+    "url": null,
+    "type": "banked",
+    "kindLabel": "重置卡",
+    "scope": {
+      "plans": [
+        "all",
+        "plus",
+        "pro",
+        "business"
+      ],
+      "windows": [
+        "unknown"
+      ]
+    },
+    "text": "",
+    "timeBasis": "effective",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "2098685367058612394",
+    "at": "2026-09-12T08:09:17.000Z",
+    "url": "https://x.com/thsottiaux/status/2098685367058612394",
+    "type": "global",
+    "kindLabel": "全局重置",
+    "scope": null,
+    "text": "",
+    "timeBasis": "announcement",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "2097183639356489952",
+    "at": "2026-09-08T04:41:58.000Z",
+    "url": "https://x.com/thsottiaux/status/2097183639356489952",
+    "type": "global",
+    "kindLabel": "全局重置",
+    "scope": null,
+    "text": "",
+    "timeBasis": "announcement",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "2097174560412246215",
+    "at": "2026-09-08T04:05:53.000Z",
+    "url": "https://x.com/thsottiaux/status/2097174560412246215",
+    "type": "global",
+    "kindLabel": "全局重置",
+    "scope": null,
+    "text": "",
+    "timeBasis": "announcement",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "did:manual:2026-09-05T03:00:00.000Z",
+    "at": "2026-09-05T03:00:00.000Z",
+    "url": null,
+    "type": "banked",
+    "kindLabel": "重置卡",
+    "scope": {
+      "plans": [
+        "plus",
+        "business",
+        "pro"
+      ],
+      "windows": [
+        "unknown"
+      ]
+    },
+    "text": "",
+    "timeBasis": "effective",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  },
+  {
+    "id": "did:manual:2095651088502591861",
+    "at": "2026-09-04T02:30:00.000Z",
+    "url": null,
+    "type": "banked",
+    "kindLabel": "重置卡",
+    "scope": {
+      "plans": [
+        "plus",
+        "pro",
+        "team",
+        "business",
+        "enterprise"
+      ],
+      "windows": [
+        "unknown"
+      ]
+    },
+    "text": "",
+    "timeBasis": "effective",
+    "sources": [
+      {
+        "id": "did",
+        "name": "Did Codex Reset",
+        "family": "didcodexreset",
+        "observedAt": "2026-10-08T06:52:07.079Z"
+      }
+    ],
+    "familyCount": 1
+  }
+]
