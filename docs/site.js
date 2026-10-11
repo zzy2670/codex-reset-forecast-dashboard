@@ -29,7 +29,7 @@ const translations={
         "Compare actual usage with even usage across your personal cycle and an assumed X-day reset cycle. X starts at 3 days; click its label to change it. Drag a handle to reorder the bars."
       ],
       [
-        "The red pacing line",
+        "The red reset pacing line",
         "The line moves right and reaches 100% at the announced reset time. Compare it with your usage bar. Matching times share a line; different times create two lines and a red band."
       ],
       [
@@ -89,7 +89,7 @@ const translations={
         "三条横条分别是实际消耗、个人周期的均匀节奏，以及假设每 X 天重置一次的节奏。X 默认 3 天，点击横条上的标签就能修改；拖动左侧把手可以调整顺序。"
       ],
       [
-        "红色游泳线",
+        "红色重置节奏线",
         "红线随时间向右推进，在预告重置时刻到达 100%。拿它和实际消耗对照，可以安排重置前的使用。各站时间相同就合成一条线，时间不同则显示两条线和中间的红色范围。"
       ],
       [
@@ -149,7 +149,7 @@ const translations={
         "実際の使用量、個人サイクルでの均等ペース、X日ごとのリセットを仮定したペースを比較できます。Xは初期値3日。ラベルで日数を変更し、ハンドルでバーを並べ替えます。"
       ],
       [
-        "赤いペースライン",
+        "赤いリセットペースライン",
         "予告時刻に100%に達するよう、線が時間とともに右へ進みます。実際の使用量と比べて消費ペースを調整できます。同じ時刻は1本、異なる時刻は2本の線と赤い帯で表示します。"
       ],
       [
@@ -209,7 +209,7 @@ const translations={
         "Compara el consumo real con un ritmo uniforme durante tu ciclo personal y un ciclo de reinicio supuesto de X días. X empieza en 3 días; pulsa la etiqueta para cambiarlo. Arrastra los controles para ordenar las barras."
       ],
       [
-        "La línea roja de ritmo",
+        "La línea roja de ritmo hasta el reinicio",
         "La línea avanza hasta llegar al 100 % a la hora anunciada. Compárala con tu consumo. Las horas coincidentes comparten una línea; las distintas forman dos líneas y una franja roja."
       ],
       [
@@ -269,7 +269,7 @@ const translations={
         "Comparez la consommation réelle au rythme régulier de votre cycle personnel et à un cycle supposé de X jours. X vaut 3 jours par défaut ; cliquez sur son libellé pour le changer. Faites glisser les poignées pour réordonner les barres."
       ],
       [
-        "La ligne rouge de rythme",
+        "La ligne rouge de rythme jusqu’à la réinitialisation",
         "La ligne progresse vers la droite et atteint 100 % à l’heure annoncée. Comparez-la à votre consommation. Une heure commune donne une seule ligne ; plusieurs horaires donnent deux lignes avec une zone rouge entre elles."
       ],
       [
@@ -329,7 +329,7 @@ const translations={
         "Vergleiche den tatsächlichen Verbrauch mit einer gleichmäßigen Nutzung im persönlichen Zyklus und einem angenommenen Reset alle X Tage. X startet bei 3 Tagen; klicke auf die Beschriftung, um es zu ändern. Ziehe die Griffe, um die Balken zu sortieren."
       ],
       [
-        "Die rote Tempolinie",
+        "Die rote Tempolinie bis zum Reset",
         "Die Linie wandert nach rechts und erreicht zur angekündigten Zeit 100 %. Vergleiche sie mit deinem Verbrauch. Gleiche Zeiten teilen sich eine Linie; verschiedene Zeiten ergeben zwei Linien mit einem roten Bereich dazwischen."
       ],
       [
@@ -389,7 +389,7 @@ const translations={
         "실제 사용량을 개인 주기의 균등 사용 속도 및 X일마다 초기화한다고 가정한 속도와 비교합니다. X는 기본 3일이며 라벨을 눌러 바꿀 수 있습니다. 핸들을 끌어 막대 순서를 바꿉니다."
       ],
       [
-        "빨간 기준선",
+        "빨간 초기화 페이스라인",
         "선은 시간에 따라 오른쪽으로 이동해 예고 시각에 100%에 도달합니다. 실제 사용량과 비교하며 속도를 조절할 수 있습니다. 같은 시각은 한 줄로, 다른 시각은 두 줄과 그 사이의 빨간 영역으로 표시합니다."
       ],
       [
@@ -422,7 +422,7 @@ const translations={
   }
 };
 const images=['overview','modes','pace','forecast','sources','history','notifications','settings'];
-function renderSite(language){const t=translations[language]||translations.en;document.documentElement.lang=language;document.querySelector('#language').value=language;document.querySelectorAll('[data-text]').forEach(e=>{e.textContent=t[e.dataset.text];});const target=document.querySelector('#features');target.replaceChildren();t.features.forEach(([title,body],i)=>{const section=document.createElement('section');section.className='feature';const copy=document.createElement('div');copy.className='feature-copy';const number=document.createElement('span');number.className='number';number.textContent=`0${i+1}`;const words=document.createElement('div');const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=body;words.append(h,p);copy.append(number,words);const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=`assets/feature-${images[i]}.png?v=alerts-20261011`;img.alt=title;img.loading=i?'lazy':'eager';caption.textContent=t.captions[i];figure.append(img,caption);section.append(copy,figure);target.append(section);});document.title=language==='zh-CN'?'codex重置预测看板':'Codex Reset Forecast Dashboard';}
+function renderSite(language){const t=translations[language]||translations.en;document.documentElement.lang=language;document.querySelector('#language').value=language;document.querySelectorAll('[data-text]').forEach(e=>{e.textContent=t[e.dataset.text];});const target=document.querySelector('#features');target.replaceChildren();t.features.forEach(([title,body],i)=>{const section=document.createElement('section');section.className='feature';const copy=document.createElement('div');copy.className='feature-copy';const number=document.createElement('span');number.className='number';number.textContent=`0${i+1}`;const words=document.createElement('div');const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=body;words.append(h,p);copy.append(number,words);const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=`assets/feature-${images[i]}.png?v=reset-pace-20261011`;img.alt=title;img.loading=i?'lazy':'eager';caption.textContent=t.captions[i];figure.append(img,caption);section.append(copy,figure);target.append(section);});document.title=language==='zh-CN'?'codex重置预测看板':'Codex Reset Forecast Dashboard';}
 let saved;try{saved=localStorage.getItem('site-language');}catch{}
 const browser=navigator.language.startsWith('zh')?'zh-CN':navigator.language.split('-')[0];renderSite(translations[saved]?saved:translations[browser]?browser:'en');
 document.querySelector('#language').addEventListener('change',e=>{renderSite(e.target.value);try{localStorage.setItem('site-language',e.target.value);}catch{}});

@@ -43,7 +43,7 @@ Routine mode shows your quota in green. A timed automatic-reset announcement for
 
 Compare actual usage with even usage across your personal cycle and an assumed X-day reset cycle. X starts at 3 days; click its label to change it. Drag a handle to reorder the bars.
 
-## The red pacing line
+## The red reset pacing line
 
 ![One reset time on the left; a time range on the right.](docs/assets/feature-forecast.png)
 
