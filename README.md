@@ -2,9 +2,11 @@
 
 [简体中文](README.zh-CN.md) · [Feature tour](https://zzy2670.github.io/codex-reset-forecast-dashboard/) · [Download for Windows](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest)
 
-Follow Codex reset announcements from five websites alongside your remaining quota. When a reset time is announced, the dashboard turns orange and a red pacing line helps you plan your usage before then.
+A Windows dashboard for your remaining Codex quota and reset announcements from five websites. Check upcoming reset times, compare your usage and browse past resets.
 
-For Windows 10/11 x64. The app supports English and Chinese; the feature tour is available in seven languages.
+Windows 10/11 x64. The app supports English and Chinese; the feature tour supports seven languages.
+
+![The complete Codex dashboard](docs/assets/feature-overview.png)
 
 ## Install
 
@@ -29,29 +31,29 @@ Refresh quota or restart the dashboard after signing in.
 
 </details>
 
-## A timed reset announcement turns the dashboard orange
+## Routine and accelerated modes
 
-![Routine mode on the left and accelerated mode on the right](docs/assets/feature-modes.png)
+![Routine mode on the left; accelerated mode on the right.](docs/assets/feature-modes.png)
 
-The usual dark green view shows quota and usage pacing. An automatic-reset announcement with a time for your plan switches the view to orange and adds a countdown and red target line. See how much time and quota you have left together.
+Routine mode shows your quota in green. A timed automatic-reset announcement for your plan switches the dashboard to coral orange and adds a countdown.
 
-## Compare actual usage with two pacing guides
+## Quota usage
 
-![Usage bars, reorder handles and a custom reset interval](docs/assets/feature-pace.png)
+![Usage bars, drag handle and assumed reset interval.](docs/assets/feature-pace.png)
 
-Three bars show actual consumption, an assumed X-day reset cycle and even usage across your personal cycle. X starts at 3 days and can be changed. Drag a bar by its handle to reorder it; the dashboard remembers your layout.
+Compare actual usage with even usage across your personal cycle and an assumed X-day reset cycle. X starts at 3 days; click its label to change it. Drag a handle to reorder the bars.
 
-## Keep pace with the red line
+## The red pacing line
 
-![One announced time and a range of times](docs/assets/feature-forecast.png)
+![One reset time on the left; a time range on the right.](docs/assets/feature-forecast.png)
 
-The line moves right with time and reaches 100% at the announced reset time. It runs across all three bars, so you can compare it with actual usage. Matching times share one line. Different times create two lines with a glowing red band between them.
+The line moves right and reaches 100% at the announced reset time. Compare it with your usage bar. Matching times share a line; different times create two lines and a red band.
 
-## Read five sources side by side
+## Five reset sources
 
-![Expected times and original announcements in five source cards](docs/assets/feature-sources.png)
+![Forecasts and expanded source details.](docs/assets/feature-sources.png)
 
-Each source has a card: expected time at the top, original post and update time below. Expand the details to compare posts. With no active forecast, the card shows “None”. Expired times leave the forecast display while their original posts remain in the details.
+Each card shows the site’s next reset time, announcement and update time. Expand the details to read the post and open its link. NextReset and TIBO share a feed.
 
 | Source | Fetch interval | Feed |
 | --- | --- | --- |
@@ -61,21 +63,17 @@ Each source has a card: expected time at the top, original post and update time 
 | [TIBO](https://tibo.cc/) | 30 seconds | Same feed as NextReset |
 | [Codex Reset Today](https://codex-reset.today/) | 30 seconds | Upstream pending confirmation |
 
-Comparisons group records by their feed. NextReset and TIBO belong to the same group.
+## Reset history
 
-## Compare the times recorded by each site
+![Latest reset and an expanded history record.](docs/assets/feature-history.png)
 
-![Latest reset and an expanded history record](docs/assets/feature-history.png)
+Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard.
 
-The latest reset and elapsed time appear at the top. History starts on September 1, 2026, newest first. Expand a record to compare each site's timestamp down to the second, original post and shared feed. Times use Beijing time. Records identify global resets, plan-specific resets and reset credits.
+## Notifications and display settings
 
-## Adjust the text and keep monitoring in the tray
+![Language, tray, startup, text size and notifications.](docs/assets/feature-settings.png)
 
-![Language, text size, startup and background settings](docs/assets/feature-settings.png)
-
-Choose English or Chinese; source posts keep their original wording. Body text and smaller labels resize together, while large times and numbers keep their size. Close to tray to keep monitoring, and enable startup with Windows.
-
-Scheduled automatic resets for your plan use persistent notifications with an **Acknowledge** button. Messages with similar reset times are grouped, including matching announcements from different sites.
+Choose English or Chinese, adjust text size, and enable tray monitoring or startup with Windows. Timed automatic-reset alerts stay until acknowledged; similar reset times are grouped.
 
 Personal quota is read through the official local Codex service; settings and cached data are stored on your computer. See [Privacy](PRIVACY.md) for data flows.
 
@@ -92,7 +90,7 @@ npm start
 npm run build
 ```
 
-Installer and portable builds go to dist/. GitHub Actions checks the code, builds the app and publishes checksums. GitHub Pages hosts the feature tour. Run npm run assets to regenerate the six annotated images using demo data; this needs a locally installed Chrome.
+Installer and portable builds go to dist/. GitHub Actions checks the code, builds the app and publishes checksums. GitHub Pages hosts the feature tour. Run npm run assets to regenerate the seven annotated images using demo data; this needs a locally installed Chrome.
 
 ## License and feedback
 
