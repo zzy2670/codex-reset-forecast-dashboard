@@ -64,6 +64,6 @@
     "url": "https://github.com/zzy2670/codex-reset-forecast-dashboard.git"
   },
   "overrides": {
-    "sprintf-js": "1.1.4"
+    "global-agent": "4.1.3"
   }
 }
