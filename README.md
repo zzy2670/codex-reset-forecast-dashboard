@@ -69,11 +69,17 @@ Each card shows the site’s next reset time, announcement and update time. Expa
 
 Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard.
 
-## Notifications and display settings
+## Automatic Windows notifications
+
+![Windows notification illustration: reset time, plan and Acknowledge button.](docs/assets/feature-notifications.png)
+
+When a source reports an automatic-reset announcement or confirmation for your plan with a specific time, Windows shows a notification. It stays until you click Acknowledge. Similar reset times are grouped.
+
+## Display and background settings
 
 ![Language, tray, startup, text size and notifications.](docs/assets/feature-settings.png)
 
-Choose English or Chinese, adjust text size, and enable tray monitoring or startup with Windows. Timed automatic-reset alerts stay until acknowledged; similar reset times are grouped.
+Choose English or Chinese, adjust text size, and enable notifications, tray monitoring or startup with Windows.
 
 Personal quota is read through the official local Codex service; settings and cached data are stored on your computer. See [Privacy](PRIVACY.md) for data flows.
 
@@ -90,7 +96,7 @@ npm start
 npm run build
 ```
 
-Installer and portable builds go to dist/. GitHub Actions checks the code, builds the app and publishes checksums. GitHub Pages hosts the feature tour. Run npm run assets to regenerate the seven annotated images using demo data; this needs a locally installed Chrome.
+Installer and portable builds go to dist/. GitHub Actions checks the code, builds the app and publishes checksums. GitHub Pages hosts the feature tour. Run npm run assets to regenerate the eight feature images using demo data; this needs a locally installed Chrome.
 
 ## License and feedback
 

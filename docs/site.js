@@ -2,7 +2,7 @@
 const translations={
   "en": {
     "hero": "Codex quota and reset forecasts",
-    "intro": "A Windows dashboard for your remaining Codex quota and reset announcements from five websites. Check upcoming reset times, compare your usage and browse past resets.",
+    "intro": "A Windows dashboard for your remaining Codex quota and reset announcements from five websites. Check upcoming reset times, compare your usage and browse past resets. Timed reset messages trigger Windows notifications.",
     "eyebrow": "CODEX RESET FORECAST DASHBOARD · WINDOWS",
     "download": "Download for Windows",
     "code": "View on GitHub ↗",
@@ -41,8 +41,12 @@ const translations={
         "Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard."
       ],
       [
-        "Notifications and display settings",
-        "Choose English or Chinese, adjust text size, and enable tray monitoring or startup with Windows. Timed automatic-reset alerts stay until acknowledged; similar reset times are grouped."
+        "Automatic Windows notifications",
+        "When a source reports an automatic-reset announcement or confirmation for your plan with a specific time, Windows shows a notification. It stays until you click Acknowledge. Similar reset times are grouped."
+      ],
+      [
+        "Display and background settings",
+        "Choose English or Chinese, adjust text size, and enable notifications, tray monitoring or startup with Windows."
       ]
     ],
     "captions": [
@@ -52,12 +56,13 @@ const translations={
       "One reset time on the left; a time range on the right.",
       "Forecasts and expanded source details.",
       "Latest reset and an expanded history record.",
+      "Windows notification illustration: reset time, plan and Acknowledge button.",
       "Language, tray, startup, text size and notifications."
     ]
   },
   "zh-CN": {
     "hero": "Codex 额度与重置预告",
-    "intro": "一款 Windows 桌面看板，用来查看 Codex 剩余额度、跟踪五个网站的重置预告，并比较历史重置时间。",
+    "intro": "一款 Windows 桌面看板，用来查看 Codex 剩余额度、跟踪五个网站的重置预告，并比较历史重置时间。 有具体时间的重置消息，会自动弹出 Windows 通知。",
     "eyebrow": "CODEX 重置预测看板 · WINDOWS",
     "download": "下载 Windows 版",
     "code": "在 GitHub 查看 ↗",
@@ -96,8 +101,12 @@ const translations={
         "从 2026 年 9 月开始收录，最新记录排在最上面。展开一条记录，可以逐站比较时间并查看原帖。最近一次已核对的重置时间和距今时长，也会显示在看板顶部。"
       ],
       [
-        "通知与显示设置",
-        "可切换中英文、调节字号、开机启动或关闭至托盘。适用当前套餐的定时自动重置预告会发出持续通知，点“确认收到”关闭；相近时间的消息合并提醒。"
+        "Windows 自动弹窗",
+        "检测到适用当前套餐、带具体时间的自动重置预告或完成消息时，Windows 自动弹窗。点“确认收到”关闭；相近时间的消息合并提醒。"
+      ],
+      [
+        "显示与后台设置",
+        "可切换中英文、调节字号、开关通知、开机启动或关闭至托盘。"
       ]
     ],
     "captions": [
@@ -107,6 +116,7 @@ const translations={
       "左侧一个预告时间，右侧多个时间形成的范围。",
       "五个信源的预计时间和展开详情。",
       "最近一次重置，以及展开的历史记录。",
+      "Windows 通知示意：重置时间、适用套餐与“确认收到”按钮。",
       "语言、托盘、开机启动、字号与通知。"
     ]
   },
@@ -151,8 +161,12 @@ const translations={
         "2026年9月以降の記録を新しい順に表示します。記録を開くと各サイトの時刻と原文を比較できます。直近の照合済みリセットと経過時間は上部にも表示します。"
       ],
       [
-        "通知と表示設定",
-        "英語・中国語、文字サイズ、トレイ常駐、Windows起動時の自動起動を設定できます。適用プランの定時自動リセット通知は確認するまで残り、近い時刻の通知はまとめます。"
+        "Windows の自動通知",
+        "現在のプランに適用される、具体的な時刻付きの自動リセット予告や完了情報を検出すると、Windows に通知を表示します。確認ボタンを押すまで表示され、近い時刻の情報はまとめて通知します。"
+      ],
+      [
+        "表示とバックグラウンド設定",
+        "英語・中国語、文字サイズ、通知のオン・オフ、トレイ常駐、Windows起動時の自動起動を設定できます。"
       ]
     ],
     "captions": [
@@ -162,6 +176,7 @@ const translations={
       "左は1つの時刻、右は時刻の範囲。",
       "5つの情報源と展開した詳細。",
       "直近のリセットと展開した履歴。",
+      "Windows 通知のイメージ：リセット時刻、対象プラン、確認ボタン。",
       "言語、トレイ、自動起動、文字サイズ、通知。"
     ]
   },
@@ -206,8 +221,12 @@ const translations={
         "Consulta los registros desde septiembre de 2026, del más reciente al más antiguo. Despliega uno para comparar las horas y publicaciones de cada sitio. El último reinicio contrastado y el tiempo transcurrido también aparecen arriba."
       ],
       [
-        "Notificaciones y ajustes",
-        "Elige inglés o chino, ajusta el tamaño de texto y activa la bandeja o el inicio con Windows. Los avisos de reinicio automático de tu plan permanecen hasta confirmarlos; las horas cercanas se agrupan."
+        "Notificaciones automáticas de Windows",
+        "Al detectar un anuncio o una confirmación de reinicio automático para tu plan con una hora concreta, Windows muestra una notificación. Permanece hasta que pulsas Confirmar recepción. Los horarios cercanos se agrupan."
+      ],
+      [
+        "Ajustes de pantalla y segundo plano",
+        "Elige inglés o chino, ajusta el tamaño del texto y configura las notificaciones, la bandeja del sistema y el inicio con Windows."
       ]
     ],
     "captions": [
@@ -217,6 +236,7 @@ const translations={
       "Una hora a la izquierda; un intervalo a la derecha.",
       "Cinco fuentes con los detalles desplegados.",
       "Último reinicio y registro histórico desplegado.",
+      "Ejemplo de notificación de Windows: hora, plan y botón de confirmación.",
       "Idioma, bandeja, inicio, texto y notificaciones."
     ]
   },
@@ -261,8 +281,12 @@ const translations={
         "Les événements depuis septembre 2026 sont classés du plus récent au plus ancien. Dépliez une entrée pour comparer les horaires et publications de chaque site. La dernière réinitialisation recoupée et le temps écoulé figurent aussi en haut."
       ],
       [
-        "Notifications et affichage",
-        "Choisissez l’anglais ou le chinois, la taille du texte, la zone de notification et le démarrage avec Windows. Les alertes de réinitialisation automatique de votre forfait restent jusqu’à confirmation ; les horaires proches sont regroupés."
+        "Notifications automatiques de Windows",
+        "Quand une source annonce ou confirme une réinitialisation automatique pour votre forfait à une heure précise, Windows affiche une notification. Elle reste jusqu’à confirmation. Les horaires proches sont regroupés."
+      ],
+      [
+        "Affichage et fonctionnement en arrière-plan",
+        "Choisissez l’anglais ou le chinois, la taille du texte, les notifications, la zone de notification et le démarrage avec Windows."
       ]
     ],
     "captions": [
@@ -272,6 +296,7 @@ const translations={
       "Un horaire à gauche, une plage à droite.",
       "Cinq sources et leurs détails ouverts.",
       "Dernière réinitialisation et entrée d’historique ouverte.",
+      "Illustration de notification Windows : heure, forfait et bouton de confirmation.",
       "Langue, zone de notification, démarrage, texte et alertes."
     ]
   },
@@ -316,8 +341,12 @@ const translations={
         "Die Einträge ab September 2026 erscheinen mit dem neuesten zuerst. Klappe einen Eintrag auf, um Zeiten und Beiträge der einzelnen Websites zu vergleichen. Der letzte abgeglichene Reset und die vergangene Zeit stehen auch oben."
       ],
       [
-        "Benachrichtigungen und Anzeige",
-        "Wähle Englisch oder Chinesisch, die Schriftgröße, den Infobereich und den Windows-Autostart. Hinweise auf automatische Resets für deinen Tarif bleiben bis zur Bestätigung sichtbar; ähnliche Zeiten werden zusammengefasst."
+        "Automatische Windows-Benachrichtigungen",
+        "Meldet eine Quelle eine automatische Rücksetzung für deinen Tarif mit konkreter Uhrzeit oder bestätigt sie diese, zeigt Windows eine Benachrichtigung. Sie bleibt bis zur Bestätigung sichtbar. Nahe beieinanderliegende Zeiten werden zusammengefasst."
+      ],
+      [
+        "Anzeige und Hintergrundbetrieb",
+        "Wähle Englisch oder Chinesisch, passe die Textgröße an und konfiguriere Benachrichtigungen, Infobereich und Windows-Autostart."
       ]
     ],
     "captions": [
@@ -327,6 +356,7 @@ const translations={
       "Links eine Zeit, rechts ein Zeitbereich.",
       "Fünf Quellen mit geöffneten Details.",
       "Letzter Reset und aufgeklappter Verlaufseintrag.",
+      "Beispiel einer Windows-Benachrichtigung: Uhrzeit, Tarif und Bestätigung.",
       "Sprache, Infobereich, Autostart, Schriftgröße und Hinweise."
     ]
   },
@@ -371,8 +401,12 @@ const translations={
         "2026년 9월부터의 기록을 최신순으로 표시합니다. 기록을 펼치면 사이트별 시각과 원문을 비교할 수 있습니다. 대조한 최근 초기화와 경과 시간은 화면 위에도 표시합니다."
       ],
       [
-        "알림과 표시 설정",
-        "영어·중국어, 글자 크기, 트레이 실행, Windows 시작 시 실행을 설정합니다. 현재 요금제의 자동 초기화 알림은 확인할 때까지 표시되며, 비슷한 시각의 알림은 합칩니다."
+        "Windows 자동 알림",
+        "현재 요금제에 해당하는 자동 초기화 예고나 완료 소식에 구체적인 시각이 있으면 Windows 알림을 표시합니다. 확인 버튼을 누를 때까지 표시되며, 비슷한 시각의 소식은 묶어서 알립니다."
+      ],
+      [
+        "표시 및 백그라운드 설정",
+        "영어·중국어, 글자 크기, 알림 켜기·끄기, 트레이 실행, Windows 시작 시 실행을 설정합니다."
       ]
     ],
     "captions": [
@@ -382,12 +416,13 @@ const translations={
       "왼쪽은 한 시각, 오른쪽은 시간 범위.",
       "다섯 출처와 펼친 상세 정보.",
       "최근 초기화와 펼친 기록.",
+      "Windows 알림 예시: 초기화 시각, 대상 요금제, 확인 버튼.",
       "언어, 트레이, 자동 실행, 글자 크기, 알림."
     ]
   }
 };
-const images=['overview','modes','pace','forecast','sources','history','settings'];
-function renderSite(language){const t=translations[language]||translations.en;document.documentElement.lang=language;document.querySelector('#language').value=language;document.querySelectorAll('[data-text]').forEach(e=>{e.textContent=t[e.dataset.text];});const target=document.querySelector('#features');target.replaceChildren();t.features.forEach(([title,body],i)=>{const section=document.createElement('section');section.className='feature';const copy=document.createElement('div');copy.className='feature-copy';const number=document.createElement('span');number.className='number';number.textContent=`0${i+1}`;const words=document.createElement('div');const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=body;words.append(h,p);copy.append(number,words);const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=`assets/feature-${images[i]}.png?v=tour-20261011`;img.alt=title;img.loading=i?'lazy':'eager';caption.textContent=t.captions[i];figure.append(img,caption);section.append(copy,figure);target.append(section);});document.title=language==='zh-CN'?'codex重置预测看板':'Codex Reset Forecast Dashboard';}
+const images=['overview','modes','pace','forecast','sources','history','notifications','settings'];
+function renderSite(language){const t=translations[language]||translations.en;document.documentElement.lang=language;document.querySelector('#language').value=language;document.querySelectorAll('[data-text]').forEach(e=>{e.textContent=t[e.dataset.text];});const target=document.querySelector('#features');target.replaceChildren();t.features.forEach(([title,body],i)=>{const section=document.createElement('section');section.className='feature';const copy=document.createElement('div');copy.className='feature-copy';const number=document.createElement('span');number.className='number';number.textContent=`0${i+1}`;const words=document.createElement('div');const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=body;words.append(h,p);copy.append(number,words);const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src=`assets/feature-${images[i]}.png?v=alerts-20261011`;img.alt=title;img.loading=i?'lazy':'eager';caption.textContent=t.captions[i];figure.append(img,caption);section.append(copy,figure);target.append(section);});document.title=language==='zh-CN'?'codex重置预测看板':'Codex Reset Forecast Dashboard';}
 let saved;try{saved=localStorage.getItem('site-language');}catch{}
 const browser=navigator.language.startsWith('zh')?'zh-CN':navigator.language.split('-')[0];renderSite(translations[saved]?saved:translations[browser]?browser:'en');
 document.querySelector('#language').addEventListener('change',e=>{renderSite(e.target.value);try{localStorage.setItem('site-language',e.target.value);}catch{}});
