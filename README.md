@@ -96,7 +96,7 @@ npm start
 npm run build
 ```
 
-Installer and portable builds go to dist/. GitHub Actions checks the code, builds the app and publishes checksums. GitHub Pages hosts the feature tour. Run npm run assets to regenerate the eight feature images using demo data; this needs a locally installed Chrome.
+Installer and portable builds go to dist/. GitHub Actions checks the code, builds the app and publishes checksums. GitHub Pages hosts the feature tour. Run npm run assets to regenerate both sets of eight feature images in English and Chinese using demo data; this needs a locally installed Chrome.
 
 ## License and feedback
 

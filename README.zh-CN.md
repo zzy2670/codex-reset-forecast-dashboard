@@ -6,7 +6,7 @@
 
 适用于 Windows 10/11 x64。软件支持中英双语，介绍页可切换中、英、日、韩、西、法、德七种语言。
 
-![完整看板](docs/assets/feature-overview.png)
+![完整看板](docs/assets/zh-CN/feature-overview.png)
 
 ## 安装
 
@@ -33,25 +33,25 @@ codex login
 
 ## 常规模式与加速模式
 
-![左侧为常规模式，右侧为加速模式。](docs/assets/feature-modes.png)
+![左侧为常规模式，右侧为加速模式。](docs/assets/zh-CN/feature-modes.png)
 
 平时用绿色显示额度。当信源给出适用当前套餐的定时自动重置预告时，看板切换成珊瑚橙，并显示距离重置还有多久。
 
 ## 额度消耗进度
 
-![消耗横条、拖动把手与假设重置周期。](docs/assets/feature-pace.png)
+![消耗横条、拖动把手与假设重置周期。](docs/assets/zh-CN/feature-pace.png)
 
 三条横条分别是实际消耗、个人周期的均匀节奏，以及假设每 X 天重置一次的节奏。X 默认 3 天，点击横条上的标签就能修改；拖动左侧把手可以调整顺序。
 
 ## 红色重置节奏线
 
-![左侧一个预告时间，右侧多个时间形成的范围。](docs/assets/feature-forecast.png)
+![左侧一个预告时间，右侧多个时间形成的范围。](docs/assets/zh-CN/feature-forecast.png)
 
 红线随时间向右推进，在预告重置时刻到达 100%。拿它和实际消耗对照，可以安排重置前的使用。各站时间相同就合成一条线，时间不同则显示两条线和中间的红色范围。
 
 ## 五个重置信源
 
-![五个信源的预计时间和展开详情。](docs/assets/feature-sources.png)
+![五个信源的预计时间和展开详情。](docs/assets/zh-CN/feature-sources.png)
 
 每列显示该网站的下次重置时间、公告和更新时间。展开详情可以阅读原文、打开原帖。NextReset 和 TIBO 共用一个上游，核对时归为同一组。
 
@@ -65,19 +65,19 @@ codex login
 
 ## 历史重置记录
 
-![最近一次重置，以及展开的历史记录。](docs/assets/feature-history.png)
+![最近一次重置，以及展开的历史记录。](docs/assets/zh-CN/feature-history.png)
 
 从 2026 年 9 月开始收录，最新记录排在最上面。展开一条记录，可以逐站比较时间并查看原帖。最近一次已核对的重置时间和距今时长，也会显示在看板顶部。
 
 ## Windows 自动弹窗
 
-![Windows 通知示意：重置时间、适用套餐与“确认收到”按钮。](docs/assets/feature-notifications.png)
+![Windows 通知示意：重置时间、适用套餐与“确认收到”按钮。](docs/assets/zh-CN/feature-notifications.png)
 
 检测到适用当前套餐、带具体时间的自动重置预告或完成消息时，Windows 自动弹窗。点“确认收到”关闭；相近时间的消息合并提醒。
 
 ## 显示与后台设置
 
-![语言、托盘、开机启动、字号与通知。](docs/assets/feature-settings.png)
+![语言、托盘、开机启动、字号与通知。](docs/assets/zh-CN/feature-settings.png)
 
 可切换中英文、调节字号、开关通知、开机启动或关闭至托盘。
 
@@ -96,7 +96,7 @@ npm start
 npm run build
 ```
 
-安装包和便携版输出到 dist/。GitHub Actions 负责检查、构建和发布校验和；GitHub Pages 提供图文介绍页。运行 npm run assets 可用演示数据重新生成八张功能图，需要本机安装 Chrome。
+安装包和便携版输出到 dist/。GitHub Actions 负责检查、构建和发布校验和；GitHub Pages 提供图文介绍页。运行 npm run assets 可用演示数据重新生成中英文两套各八张功能图，需要本机安装 Chrome。
 
 ## 许可证与反馈
 
