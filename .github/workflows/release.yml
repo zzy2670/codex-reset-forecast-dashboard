@@ -20,6 +20,7 @@ jobs:
       - run: npm test
       - run: npm run check
       - run: npm run test:ui
+      - run: npm run test:language
       - run: npm run build
       - run: node scripts/verify-package.cjs
       - name: Verify packaged interface
@@ -27,6 +28,11 @@ jobs:
         run: |
           $env:DASHBOARD_TEST_EXE = Join-Path $PWD 'dist/win-unpacked/Codex Reset Dashboard.exe'
           npm run test:ui
+      - name: Verify packaged language switching
+        shell: pwsh
+        run: |
+          $env:DASHBOARD_TEST_EXE = Join-Path $PWD 'dist/win-unpacked/Codex Reset Dashboard.exe'
+          npm run test:language
       - name: Publish installers and checksums
         shell: pwsh
         env:
@@ -38,5 +44,8 @@ jobs:
           if ($releaseFiles.Count -ne 2) { throw 'Expected installer and portable executable' }
           $releaseFiles | ForEach-Object { "$(($_ | Get-FileHash -Algorithm SHA256).Hash.ToLower())  $($_.Name)" } | Set-Content dist/SHA256SUMS.txt -Encoding ascii
           gh release create "$env:GITHUB_REF_NAME" --title "Codex Reset Forecast Dashboard $releaseVersion" --notes-file .github/RELEASE_NOTES.md --draft --verify-tag
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           gh release upload "$env:GITHUB_REF_NAME" dist/*.exe dist/SHA256SUMS.txt LICENSE
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           gh release edit "$env:GITHUB_REF_NAME" --draft=false --latest
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

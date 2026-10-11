@@ -1,5 +1,8 @@
 ## Codex 重置预测看板
 
+- 修复套餐限定重置完成消息的系统提醒；保留套餐筛选与同类消息合并。
+- 验证中英文切换、设置保存和重启恢复，补充英文变化记录翻译。
+
 一款 Windows 桌面看板，用来查看 Codex 剩余额度、跟踪五个网站的重置预告，并比较历史重置时间。
 
 - 三条消耗横条：实际消耗、个人周期均匀节奏、假设每 X 天重置一次的节奏。可拖动排序，X 默认 3 天。
@@ -11,6 +14,9 @@
 [图文介绍](https://zzy2670.github.io/codex-reset-forecast-dashboard/) · [安装说明](https://github.com/zzy2670/codex-reset-forecast-dashboard/blob/main/README.zh-CN.md)
 
 ## English
+
+- Fixed notifications for plan-specific reset completions, with plan matching and related-message grouping.
+- Verified English/Chinese switching, saved preferences and language restoration after restart; completed translations for update records.
 
 A Windows dashboard for your remaining Codex quota and reset announcements from five websites. Check upcoming reset times, compare your usage and browse past resets.
 

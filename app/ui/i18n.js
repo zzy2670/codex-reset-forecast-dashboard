@@ -1,6 +1,13 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
+ '查看 ›':'View ›',
+ '信源报告重置已完成':'Source reports a completed reset','已收录重置完成记录。':'Reset completion record captured.',
+ ' 天额度':'-day quota',' 小时额度':'-hour quota',' 分钟额度':'-minute quota',
+ '已收录全局重置预告，未给出具体时刻':'Global reset forecast captured; no specific time provided.',
+ '已收录重置卡预告，未给出具体时刻':'Reset-credit forecast captured; no specific time provided.',
+ '已收录重置预告，未给出具体时刻':'Reset forecast captured; no specific time provided.',
+ '已收录范围待核实预告，未给出具体时刻':'Forecast captured; scope and time unverified.',
  '设置':'Settings','正在读取本机 Codex':'Reading local Codex',
  '时间未注明':'Time not specified','正在读取公开信息…':'Reading public information…','上次核对':'Previous cross-check','额度读取':'Quota fetched',
  '100%额度':'100% of quota','完成公告已更新，个人额度请看本机数据。':'Completion announcement updated. Check the local API for your personal quota.',

@@ -64,7 +64,7 @@ function normalize(id, raw, fetchedAt = new Date().toISOString()) {
     if (!raw?.ok || !Array.isArray(raw?.data?.items)) throw new Error('站方数据格式已变化');
     updatedAt = iso(raw.meta?.lastSuccessfulCheckAt || raw.meta?.generatedAt);
     const items = raw.data.items;
-    historyEvents = items.filter(i => i.kind === 'reset_completed').map(i => {const e=event({id:i.id,at:i.effectiveAt || i.announcedAt || i.completedAt,url:i.source?.url,text:i.text,type:i.resetType,scope:i.scope,timeBasis:i.effectiveAt ? 'effective' : 'announcement'});return e?{...e,recordKind:i.kind,relatedRecordIds:i.relatedRecordIds||[]}:null;}).filter(Boolean);
+    historyEvents = items.filter(i => i.kind === 'reset_completed').map(i => {const e=event({id:i.id,at:i.effectiveAt || i.announcedAt || i.completedAt,url:i.source?.url,text:i.text,type:i.resetType || 'unknown',scope:i.scope,timeBasis:i.effectiveAt ? 'effective' : 'announcement'});return e?{...e,recordKind:i.kind,relatedRecordIds:i.relatedRecordIds||[]}:null;}).filter(Boolean);
     const completed = items.filter(i => i.kind === 'reset_completed' && isAutomatic(i.resetType) && (!i.scope?.plans?.length || i.scope.plans.includes('all')));
     completed.sort((a,b) => Date.parse(b.effectiveAt || b.announcedAt) - Date.parse(a.effectiveAt || a.announcedAt));
     const c = completed[0];
@@ -87,7 +87,7 @@ function normalize(id, raw, fetchedAt = new Date().toISOString()) {
     updatedAt = iso(raw.asOf); expiresAt = iso(raw.expiresAt);
     stale = raw.degraded === true || raw.checks?.history?.ok === false;
     const l = raw.history?.last;
-    if (l) last = event({ at: l.date, url: l.source, type: l.type, text: l.description || l.title });
+    if (l) last = event({ at: l.date, url: l.source, type: l.type, scope:l.scope, text: l.description || l.title });
     const s = raw.social;
     if (s && typeof s === 'object') {
       const signal = { ...scheduleFields(s), id: s.id || s.postId, text: s.text || s.quote || s.summary, url: s.url || s.source?.url || (typeof s.source === 'string' ? s.source : null), issuedAt: s.announced_at || s.publishedAt, type: s.reset_type || 'global',scope:s.scope,timingKind:s.timingKind==='next_week'?'inferred':'announcement', basis: s.timingKind === 'next_week' ? '站方按太平洋日历推断的下周窗口，非原帖明确时刻' : 'NextReset 对公开信号的解释，非已验证的预测准确率' };
@@ -102,7 +102,7 @@ function normalize(id, raw, fetchedAt = new Date().toISOString()) {
     if (!raw?.data || !('scheduled_reset' in raw.data)) throw new Error('站方数据格式已变化');
     updatedAt = iso(raw.last_successful_update || raw.fetched_at); expiresAt = iso(raw.fresh_until); stale = raw.stale === true;
     const l = raw.data.latest_reset;
-    if (l && isAutomatic(l.reset_type)) last = event({ id: l.id, at: l.announced_at, text: l.translation?.text || l.text, url: l.source?.url, type: l.reset_type });
+    if (l && isAutomatic(l.reset_type)) last = event({ id: l.id, at: l.announced_at, text: l.translation?.text || l.text, url: l.source?.url, type: l.reset_type, scope:l.scope });
     const s = raw.data.scheduled_reset;
     const assessment = raw.time_assessment;
     if (s && !assessment?.timeline_relation?.retires_current_schedule) upcoming = { id: s.id, start: assessment?.window_start, end: assessment?.window_end || s.scheduled_for, text: s.translation?.text || s.text, url: s.source?.url, type: s.reset_type,scope:s.scope, issuedAt: s.announced_at, basis: assessment?.reason || '上游预告，时间精度以原帖为准' };
@@ -112,7 +112,7 @@ function normalize(id, raw, fetchedAt = new Date().toISOString()) {
     if (!raw?.data?.next_reset_estimate) throw new Error('站方数据格式已变化');
     updatedAt = iso(raw.data.freshness?.fetched_at || raw.meta?.generated_at); stale = raw.data.freshness?.state !== 'fresh';
     const l = raw.data.latest_reset;
-    if (l && isAutomatic(l.reset_type)) last = event({ id: l.id, at: l.announced_at, url: l.source?.url, text: l.text, type: l.reset_type });
+    if (l && isAutomatic(l.reset_type)) last = event({ id: l.id, at: l.announced_at, url: l.source?.url, text: l.text, type: l.reset_type, scope:l.scope });
     const e = raw.data.next_reset_estimate;
     const s = raw.data.active_watch;
     if (s || e.expected_by) upcoming = { id: s?.id, ...scheduleFields(s), end: e.expected_by || scheduleFields(s).end, text: s?.text || e.note, url: s?.source?.url, type: s?.reset_type || 'global',scope:s?.scope,timingKind:s?'announcement':'model', basis: '只有明确公开时间才展示 ETA' };
@@ -165,6 +165,15 @@ function changes(previous, next, now = Date.now()) {
     const key=forecastKey(f);if(after.has(key)||latest.some(n=>n.id===f.id)||f.timingKind==='hint')continue;
     const disposition=next.dispositions?.find(d=>d.id===f.id),cancelled=['cancelled','revoked'].includes(disposition?.outcome);
     events.push({key:`${cancelled?'cancelled':'removed'}:${next.id}:${key}`,transition:{entity:`forecast:${f.id}`,signature:`${cancelled?'cancelled':'removed'}:${key}`},kind:cancelled?'cancelled':'removed',title:cancelled?'站方已撤销一条重置预告':'一条预告已从当前列表移除',body:cancelled?`${next.name} 已标记原预告取消或撤回，请按更新后的信息调整节奏。`:`${next.name} 暂未列出原预告，请查看后续确认；移除不等于取消。`,start:f.start,end:f.end,resetType:f.type,scope:f.scope,timingKind:f.timingKind,sourceId:next.id,url:disposition?.url||f.url||next.url,at:new Date(now).toISOString()});
+  }
+  const completions=s=>[s.lastReset,...(s.historyEvents||[])].filter(e=>e&&isAutomatic(e.type));
+  const completionKey=e=>`${e.id}|${e.at}|${e.type}|${[...(e.scope?.plans||[])].map(p=>String(p).toLowerCase()).sort().join(',')}`;
+  const completedBefore=new Set(completions(previous).map(completionKey)),completedSent=new Set();
+  for(const e of completions(next)){
+    const key=completionKey(e),at=Date.parse(e.at);
+    if(completedBefore.has(key)||completedSent.has(key)||!Number.isFinite(at)||at>now+60000||at<now-86400000)continue;
+    completedSent.add(key);
+    events.push({key:`completion:${key}`,transition:{entity:`completion:${e.id}`,signature:key},kind:'confirmed',title:'信源报告重置已完成',body:`${next.name}：已收录重置完成记录。`,start:e.at,end:e.at,resetType:e.type,scope:e.scope,timingKind:'announcement',sourceId:next.id,url:e.url||next.url,at:new Date(now).toISOString()});
   }
   return events;
 }
