@@ -1,17 +1,19 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const {SOURCES,normalize,changes,calibratedReset}=require('../app/core.cjs');
-const {mergeMessage,shouldNotify}=require('../app/notification-policy.cjs');
+const {mergeMessage,shouldNotify,isQuiet}=require('../app/notification-policy.cjs');
 const I18n=require('../app/ui/i18n.js');
+const {projectAfterReset}=require('../app/ui/pace-timing.js');
 const now=Date.parse('2026-10-11T06:00:00Z'),iso=t=>new Date(t).toISOString();
 const record=(id,plans=['pro'],type='regular',at=now-60000)=>({id,kind:'reset_completed',effectiveAt:iso(at),announcedAt:iso(at),resetType:type,scope:{plans},source:{url:`https://x.com/example/status/${id}`},text:'Reset completed'});
 const did=(records)=>({ok:true,meta:{generatedAt:iso(now)},data:{items:records}});
 function mainSandbox(old,raw,plan='pro',baseline=true){
  const main=fs.readFileSync(path.join(__dirname,'../app/main.cjs'),'utf8');
  const state={sources:[old],seen:[],events:[],settings:{notify:true},baseline,confirmedId:null,paused:false},popups=[];
- const sandbox={state,Date:class extends Date{constructor(...a){super(...(a.length?a:[now]));}static now(){return now;}},SOURCES:SOURCES.filter(s=>s.id==='did'),normalize,changes:(o,n)=>changes(o,n,now),calibratedReset:s=>calibratedReset(s,now),mergeMessage,shouldNotify,quotaView:()=>({planType:plan}),safeWrite:()=>{},publish:()=>{},smoke:false,running:false,snapshot:()=>state,checkedThisRun:new Set(),resetHistory:()=>[],fetchJson:async()=>raw,notifyUser:(title,body,key)=>{popups.push({title,body,key});const g=state.notificationGroups.find(g=>g.id===key);g.delivered=true;g.pending=false;}};
+ const sandbox={state,Date:class extends Date{constructor(...a){super(...(a.length?a:[now]));}static now(){return now;}},SOURCES:SOURCES.filter(s=>s.id==='did'),normalize,changes:(o,n)=>changes(o,n,now),calibratedReset:s=>calibratedReset(s,now),mergeMessage,shouldNotify,isQuiet,quotaView:()=>({planType:plan}),safeWrite:()=>{},publish:()=>{},smoke:false,running:false,snapshot:()=>state,checkedThisRun:new Set(),resetHistory:()=>[],fetchJson:async()=>raw,notifyUser:(title,body,key)=>{popups.push({title,body,key});const g=state.notificationGroups.find(g=>g.id===key);g.delivered=true;g.pending=false;}};
+ sandbox.projectAfterReset=(s,q,r)=>projectAfterReset(s,q,r,now);
  vm.createContext(sandbox);
- vm.runInContext(main.slice(main.indexOf('function addEvent('),main.indexOf('\nfunction notifyUser('))+main.slice(main.indexOf('async function refresh('),main.indexOf('\nasync function refreshQuota(')),sandbox);
+ vm.runInContext(main.slice(main.indexOf('function addEvent('),main.indexOf('\nasync function notifyUser('))+main.slice(main.indexOf('async function refresh('),main.indexOf('\nasync function refreshQuota(')),sandbox);
  return {sandbox,state,popups};
 }
 test('production polling generates one applicable completion notification from scoped Did history',async()=>{
@@ -48,5 +50,13 @@ test('a Did completion without an explicit reset type remains unknown and cannot
  const old=normalize('did',did([]),iso(now));old.nextCheckAt=null;
  assert.deepEqual(changes(old,source,now),[]);
  const {sandbox,popups}=mainSandbox(old,did([r]));await sandbox.refresh();assert.equal(popups.length,0);
+});
+test('production polling cannot notify an old forecast already fulfilled by the local quota cycle',async()=>{
+ const raw=did([{id:'1000000000000000009',kind:'reset_scheduled',resetType:'global',scheduleBasis:'explicit',announcedAt:iso(now-2*3600000),scheduleWindow:{startAt:iso(now+1800000),endAt:iso(now+1800000)},source:{url:'https://x.com/example/status/1000000000000000009'}}]);
+ const old=normalize('did',did([]),iso(now));old.nextCheckAt=null;const {sandbox,popups,state}=mainSandbox(old,raw);
+ const resetsAt=iso(now+7*86400000-1800000);
+ sandbox.quotaView=()=>({source:'local-codex',state:'ok',bucketId:'codex',key:'secondary',planType:'pro',durationMins:10080,resetsAt,usedPercent:2,fetchedAt:iso(now)});
+ state.localReset={kind:'quota-reset',bucketId:'codex',windowKey:'secondary',resetsAt,observedAt:iso(now-1799000)};
+ await sandbox.refresh();assert.equal(popups.length,0);assert.equal(state.events.length,0);assert.equal(state.sources[0].forecast.state,'scheduled');
 });
 

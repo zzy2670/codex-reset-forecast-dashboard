@@ -69,11 +69,15 @@ Each card shows the site’s next reset time, announcement and update time. Expa
 
 Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard.
 
+After a reset, the dashboard assumes a six-hour gap and clears older forecasts within it. New explicit announcements after the reset take priority.
+
 ## Automatic Windows notifications
 
 ![Windows notification illustration: reset time, plan and Acknowledge button.](docs/assets/feature-notifications.png)
 
 When a source reports an automatic-reset announcement or confirmation for your plan with a specific time, Windows shows a notification. It stays until you click Acknowledge. Similar reset times are grouped.
+
+After a local quota reset, click Acknowledge to mute reset notifications for six hours. The timer continues across restarts.
 
 ## Display and background settings
 

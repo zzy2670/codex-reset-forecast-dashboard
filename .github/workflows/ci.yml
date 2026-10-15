@@ -20,6 +20,7 @@ jobs:
       - run: npm run check
       - run: npm run test:ui
       - run: npm run test:language
+      - run: npm run test:reset
       - run: npm run build
       - run: node scripts/verify-package.cjs
       - name: Verify packaged language switching
@@ -27,6 +28,11 @@ jobs:
         run: |
           $env:DASHBOARD_TEST_EXE = Join-Path $PWD 'dist/win-unpacked/Codex Reset Dashboard.exe'
           npm run test:language
+      - name: Verify packaged reset lifecycle
+        shell: pwsh
+        run: |
+          $env:DASHBOARD_TEST_EXE = Join-Path $PWD 'dist/win-unpacked/Codex Reset Dashboard.exe'
+          npm run test:reset
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: windows-installers

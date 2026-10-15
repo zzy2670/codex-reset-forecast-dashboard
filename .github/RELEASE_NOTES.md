@@ -1,5 +1,10 @@
 ## Codex 重置预测看板
 
+- 重置后默认 6 小时内不再重置，自动清理这段时间内的旧预告；重置后新发布的明确预告优先。
+
+- 本机额度重置后，点“确认收到”可将重置系统通知静默 6 小时；重启后继续计时。
+- 修复重置后旧预告仍显示红色重置节奏线的问题；重置后的新预告继续正常显示。
+
 - 修复套餐限定重置完成消息的系统提醒；保留套餐筛选与同类消息合并。
 - 验证中英文切换、设置保存和重启恢复，补充英文变化记录翻译。
 
@@ -14,6 +19,11 @@
 [图文介绍](https://zzy2670.github.io/codex-reset-forecast-dashboard/) · [安装说明](https://github.com/zzy2670/codex-reset-forecast-dashboard/blob/main/README.zh-CN.md)
 
 ## English
+
+- After a reset, the dashboard assumes a six-hour gap and clears older forecasts within it. New explicit announcements after the reset take priority.
+
+- After a local quota reset, click Acknowledge to mute reset notifications for six hours. The timer continues across restarts.
+- Fixed old forecasts keeping the red reset pacing line visible after a reset. New announcements after the reset remain active.
 
 - Fixed notifications for plan-specific reset completions, with plan matching and related-message grouping.
 - Verified English/Chinese switching, saved preferences and language restoration after restart; completed translations for update records.

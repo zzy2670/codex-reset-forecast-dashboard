@@ -32,6 +32,7 @@ function cardMarkup(s) {
     else value=esc(full(f.end || f.start));
     note=f.state==='elapsed'?'预告时间已过，等待完成确认':`${f.kindLabel || '重置'} · ${f.precision==='point'?'预计时刻':f.start && f.end && f.start!==f.end?'预计窗口':'参考截止时间'}`;
     if(f.clippedStart)note+=' · 起点已过，只显示截止';
+    if(f.resetGapClipped)note+=' · 默认间隔 6 小时，仅显示原截止';
     if(f.timingKind==='hint')note='站方推断的观察窗口 · 非明确承诺';
     const plans=f.scope?.plans;if(plans?.length&&!plans.includes('all'))note+=` · ${plans.map(p=>p.toUpperCase()).join('、')} 专属`;
     if (!fresh) note+=' · 数据待更新';
@@ -46,13 +47,13 @@ function cardMarkup(s) {
   const bankedHtml=bankedNews?`<div class="source-news"><strong>有重置卡消息</strong><p>${news.recordKind==='reset_completed'?`站方补发完成记录：${esc(full(news.at))}`:newsTime?`站方参考截止：${esc(full(newsTime))}${Date.parse(newsTime)>Date.now()?' 前':' · 已过，待到账确认'}`:'到账时间未定'}${!fresh?' · 数据待更新':''}</p><p class="news-caveat">${/EOD\s+PST/i.test(`${news.text} ${news.context?.text||''}`)?'原文 EOD PST；站方按太平洋日历换算，时区与到账时刻需核实。':'补发重置卡，不表示自动清空当前额度。'}</p></div>`:'';
   const details=s.notes || [], extraSignals=s.signals || [];
   const oldForecasts=[...(s.archivedForecasts||[]),...(f.state==='elapsed'?[f]:[])];
-  const oldHtml=oldForecasts.length?`<div class="additional-forecast"><strong>历史排期（不作为下次预计）</strong>${oldForecasts.map(a=>`<p>${esc(full(a.start||a.end))}${a.start&&a.end&&a.start!==a.end?` 至 ${esc(full(a.end))}`:''} · ${['fulfilled'].includes(a.retiredReason)?'已有完成记录':['cancelled','revoked'].includes(a.retiredReason)?'已撤销':'已过期'}<br><span data-original>${esc(a.text)}</span>${a.scope?.plans?.length?`<br>适用范围：${esc(a.scope.plans.join('、').toUpperCase())}`:''}${a.basis?`<br>${esc(a.basis)}`:''}</p>${a.url?`<button class="text-button" data-link="${esc(a.url)}">查看历史预告原帖 ↗</button>`:''}`).join('')}</div>`:'';
+  const oldHtml=oldForecasts.length?`<div class="additional-forecast"><strong>历史排期（不作为下次预计）</strong>${oldForecasts.map(a=>`<p>${esc(full(a.start||a.end))}${a.start&&a.end&&a.start!==a.end?` 至 ${esc(full(a.end))}`:''} · ${['fulfilled','completed','local-reset'].includes(a.retiredReason)?'已有完成记录':['cancelled','revoked'].includes(a.retiredReason)?'已撤销':'已过期'}<br><span data-original>${esc(a.text)}</span>${a.scope?.plans?.length?`<br>适用范围：${esc(a.scope.plans.join('、').toUpperCase())}`:''}${a.basis?`<br>${esc(a.basis)}`:''}</p>${a.url?`<button class="text-button" data-link="${esc(a.url)}">查看历史预告原帖 ↗</button>`:''}`).join('')}</div>`:'';
   const recentEvent=state.events?.find(e=>e.sourceId===s.id && !e.read);
   return `<article class="source-card ${recentEvent?'highlight':''}" data-source="${esc(s.id)}" style="--source-color:${esc(s.color)}">
     <div class="source-header"><span class="source-logo">${esc(s.symbol)}</span><span class="source-title">${esc(s.name)}</span><span class="pill ${status[1]}">${status[0]}</span></div>
     <div class="forecast-value-area"><p class="eyebrow">${f.timingKind==='hint'?'站方观察窗口':'下次自动重置'}</p><div class="forecast-value ${valueClass}">${value}</div><div class="forecast-note ${!fresh || f.state==='elapsed'?'source-warning':''}">${esc(note)}</div>${probabilityHtml}${bankedHtml}</div>
     <div class="source-details"><h3>${f.timingKind==='hint'?'观察依据':f.state!=='none'?'预告依据':'最近公开消息'}${news?.at&&f.state==='none'?` · ${esc(full(news.at))}`:''}</h3><p class="source-quote"${hasOriginal?' data-original':''}>${esc(text)}</p>${news?.url&&f.state==='none'?`<button class="text-button" data-link="${esc(news.url)}">查看最新原帖 ↗</button>`:''}
-      <details class="source-more" data-details="${esc(s.id)}" ${detailsExpanded?'open':''}><summary>查看依据与说明</summary><p${hasOriginal?' data-original':''}>${esc(text)}</p>${f.url?`<button class="text-button" data-link="${esc(f.url)}">查看预告原帖 ↗</button>`:news?.url?`<button class="text-button" data-link="${esc(news.url)}">查看消息原帖 ↗</button>`:s.lastReset?.url?`<button class="text-button" data-link="${esc(s.lastReset.url)}">查看完成原帖 ↗</button>`:''}${f.issuedAt?`<p>原帖发布：${esc(full(f.issuedAt))}</p>`:''}${f.clippedStart?`<p>原始窗口：${esc(full(f.originalStart))} 至 ${esc(full(f.end))}；起点已过去，不再作为下次预计。</p>`:''}${news?.context?.url?`<button class="text-button" data-link="${esc(news.context.url)}">查看前文公告 ↗</button>`:''}<ul>${details.map(n=>`<li>${esc(n)}</li>`).join('')}${p.length?'<li>百分比为站方模型估计，不代表已验证的命中率。</li>':''}${f.basis?`<li>${esc(f.basis)}</li>`:''}</ul><p>${esc(s.familyLabel)}</p>${(s.additionalForecasts||[]).map(a=>PaceTiming.remainingSchedule(a)).map(a=>`<div class="additional-forecast"><p><strong>其他预告 · ${esc(a.kindLabel||'重置')}</strong><br>${esc(a.start?full(a.start):full(a.end))}${a.start&&a.end&&a.start!==a.end?` 至 ${esc(full(a.end))}`:''} · ${scheduleLabel(a)}${a.scope?.plans?.length?` · ${esc(a.scope.plans.join('、').toUpperCase())}`:''}</p><p data-original>${esc(a.text)}</p>${a.clippedStart?`<p>原始窗口：${esc(full(a.originalStart))} 至 ${esc(full(a.end))}；起点已过去，不再作为下次预计。</p>`:''}${a.url?`<button class="text-button" data-link="${esc(a.url)}">查看该预告原帖 ↗</button>`:''}</div>`).join('')}${oldHtml}${extraSignals.map(n=>`<p data-original>${esc(n.text)}</p>${n.url?`<button class="text-button" data-link="${esc(n.url)}">查看信号原帖 ↗</button>`:''}`).join('')}</details>
+      <details class="source-more" data-details="${esc(s.id)}" ${detailsExpanded?'open':''}><summary>查看依据与说明</summary><p${hasOriginal?' data-original':''}>${esc(text)}</p>${f.url?`<button class="text-button" data-link="${esc(f.url)}">查看预告原帖 ↗</button>`:news?.url?`<button class="text-button" data-link="${esc(news.url)}">查看消息原帖 ↗</button>`:s.lastReset?.url?`<button class="text-button" data-link="${esc(s.lastReset.url)}">查看完成原帖 ↗</button>`:''}${f.issuedAt?`<p>原帖发布：${esc(full(f.issuedAt))}</p>`:''}${f.clippedStart?`<p>原始窗口：${esc(full(f.originalStart))} 至 ${esc(full(f.end))}；起点已过去，不再作为下次预计。</p>`:''}${f.resetGapClipped?`<p>原始窗口：${esc(full(f.originalStart))} 至 ${esc(full(f.end))}；按重置后 6 小时间隔，已略去窗口起点。</p>`:''}${news?.context?.url?`<button class="text-button" data-link="${esc(news.context.url)}">查看前文公告 ↗</button>`:''}<ul>${details.map(n=>`<li>${esc(n)}</li>`).join('')}${p.length?'<li>百分比为站方模型估计，不代表已验证的命中率。</li>':''}${f.basis?`<li>${esc(f.basis)}</li>`:''}</ul><p>${esc(s.familyLabel)}</p>${(s.additionalForecasts||[]).map(a=>PaceTiming.remainingSchedule(a)).map(a=>`<div class="additional-forecast"><p><strong>其他预告 · ${esc(a.kindLabel||'重置')}</strong><br>${esc(a.start?full(a.start):full(a.end))}${a.start&&a.end&&a.start!==a.end?` 至 ${esc(full(a.end))}`:''} · ${scheduleLabel(a)}${a.scope?.plans?.length?` · ${esc(a.scope.plans.join('、').toUpperCase())}`:''}</p><p data-original>${esc(a.text)}</p>${a.clippedStart?`<p>原始窗口：${esc(full(a.originalStart))} 至 ${esc(full(a.end))}；起点已过去，不再作为下次预计。</p>`:''}${a.resetGapClipped?`<p>原始窗口：${esc(full(a.originalStart))} 至 ${esc(full(a.end))}；按重置后 6 小时间隔，已略去窗口起点。</p>`:''}${a.url?`<button class="text-button" data-link="${esc(a.url)}">查看该预告原帖 ↗</button>`:''}</div>`).join('')}${oldHtml}${extraSignals.map(n=>`<p data-original>${esc(n.text)}</p>${n.url?`<button class="text-button" data-link="${esc(n.url)}">查看信号原帖 ↗</button>`:''}`).join('')}</details>
     </div><div class="source-footer"><div class="source-times">源更新 ${esc(clock(s.updatedAt))}<br>本地获取 ${esc(clock(s.fetchedAt))}${s.id==='did'?' · 约3.5分钟':''}</div><button class="text-button" data-link="${esc(s.url)}">打开原站 ↗</button></div>
   </article>`;
 }
@@ -86,7 +87,6 @@ function render(next) {
   $('pause').textContent=state.paused?'继续监控':'暂停监控';
   $('poll-dot').style.background=state.paused?'#bb9863':ok?'#50a996':'#bb9863';
   if (!$('settings-dialog').open) syncSettings();
-  $('notification-status').textContent=state.notificationStatus || '系统勿扰模式可能将通知收进通知中心。';
   tick();
 }
 function renderQuota(refreshDetails=true) {
@@ -135,7 +135,7 @@ function renderHypothetical(now=Date.now()) {
  $('hypothetical-note').textContent=known?progress>=1?'假设周期已到期 · 等待实际重置':`假设 ${days} 天 · 从最近全局重置起算 · 参考到期 ${full(new Date(at+days*86400000).toISOString())}`:'等待已核对的全局重置，以显示假设节奏';
 }
 function renderForecastWarning(now=Date.now()) {
- const w=PaceTiming.warning(state.sources,state.quotaDisplay,state.consensus,state.settings.hypotheticalDays||3,now);
+ const w=PaceTiming.warning(state.sources,state.quotaDisplay,state.consensus,state.settings.hypotheticalDays||3,now,state.localReset);
  document.body.classList.toggle('reset-alert',w.active);
  $('forecast-warning').hidden=!w.active; $('forecast-markers').hidden=!w.active||!w.mapped;
  if(!w.active){$('forecast-markers').replaceChildren();return;}
@@ -162,6 +162,7 @@ function tick() {
   }
   let countdown=state.nextPollAt?Math.max(0,Math.ceil((Date.parse(state.nextPollAt)-Date.now())/1000)):30;
   $('poll-status').textContent=state.paused?'监控已暂停':state.refreshing?'正在获取信源信息…':`每 30 秒检查 · ${countdown || 30} 秒后再次检查`;
+  $('notification-status').textContent=Date.parse(state.resetQuietUntil)>Date.now()?`重置系统通知已静默至 ${full(state.resetQuietUntil)}（北京时间）`:state.notificationStatus || '系统勿扰模式可能将通知收进通知中心。';
   applyLocale();
 }
 function syncSettings() {

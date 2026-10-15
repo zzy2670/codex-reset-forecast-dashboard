@@ -45,7 +45,7 @@ function quotaView(quota,settings={},now=Date.now()){
  const w=bucket[key];if(!w)return null;
  const end=w.resetsAt?Date.parse(w.resetsAt):NaN;
  const theoretical=Number.isFinite(end)?Math.max(0,Math.min(1,(now-(end-w.durationMins*60000))/(w.durationMins*60000))):null;
- return {...w,bucketId:bucket.id,name:bucket.name,planType:bucket.planType,key,actual:w.usedPercent/100,remainingPercent:100-w.usedPercent,theoretical,delta:theoretical===null?null:w.usedPercent-theoretical*100,
+ return {...w,source:'local-codex',state:quota.state,bucketId:bucket.id,name:bucket.name,planType:bucket.planType,key,actual:w.usedPercent/100,remainingPercent:100-w.usedPercent,theoretical,delta:theoretical===null?null:w.usedPercent-theoretical*100,
   primary:bucket.primary,secondary:bucket.secondary,resetCredits:quota.resetCredits,ordinaryUsageAllowed:quota.ordinaryUsageAllowed,
   stale:quota.state!=='ok'||now-Date.parse(quota.fetchedAt)>120000||(Number.isFinite(end)&&end<=now),fetchedAt:quota.fetchedAt};
 }
@@ -54,7 +54,7 @@ function quotaChanges(previous,next,settings={},now=Date.now()){
  const priorAge=now-Date.parse(previous?.fetchedAt);
  if(!a||!b||previous.state!=='ok'||!Number.isFinite(priorAge)||priorAge<0||priorAge>120000||b.stale||a.bucketId!==b.bucketId||a.key!==b.key)return [];
  const events=[],at=new Date(now).toISOString();
- if(Date.parse(b.resetsAt)>Date.parse(a.resetsAt)+60000&&b.usedPercent<a.usedPercent-.5)events.push({key:`quota-reset:${b.bucketId}:${b.key}:${b.resetsAt}`,kind:'quota_reset',title:'本机额度已补充',body:`当前周期剩余 ${b.remainingPercent.toFixed(0)}%。个人重置时间已更新，请查看看板。`,at,sourceId:null,url:null});
+ if(Date.parse(b.resetsAt)>Date.parse(a.resetsAt)+60000&&b.usedPercent<a.usedPercent-.5)events.push({key:`quota-reset:${b.bucketId}:${b.key}:${b.resetsAt}`,kind:'quota_reset',bucketId:b.bucketId,windowKey:b.key,resetsAt:b.resetsAt,title:'本机额度已补充',body:`当前周期剩余 ${b.remainingPercent.toFixed(0)}%。个人重置时间已更新，请查看看板。`,at,sourceId:null,url:null});
  if(a.ordinaryUsageAllowed===true&&b.ordinaryUsageAllowed===false)events.push({key:`quota-denied:${b.bucketId}:${b.resetsAt}`,kind:'quota_denied',title:'本机额度状态发生变化',body:'本机接口报告当前不允许常规使用，请查看额度明细。',at,sourceId:null,url:null});
  return events;
 }

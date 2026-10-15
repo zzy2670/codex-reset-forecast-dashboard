@@ -21,6 +21,7 @@ jobs:
       - run: npm run check
       - run: npm run test:ui
       - run: npm run test:language
+      - run: npm run test:reset
       - run: npm run build
       - run: node scripts/verify-package.cjs
       - name: Verify packaged interface
@@ -33,6 +34,11 @@ jobs:
         run: |
           $env:DASHBOARD_TEST_EXE = Join-Path $PWD 'dist/win-unpacked/Codex Reset Dashboard.exe'
           npm run test:language
+      - name: Verify packaged reset lifecycle
+        shell: pwsh
+        run: |
+          $env:DASHBOARD_TEST_EXE = Join-Path $PWD 'dist/win-unpacked/Codex Reset Dashboard.exe'
+          npm run test:reset
       - name: Publish installers and checksums
         shell: pwsh
         env:

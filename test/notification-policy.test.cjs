@@ -29,8 +29,8 @@ test('dedup survives restart and receipt; cancellation and completion remain dis
  assert.equal(mergeMessage(groups,{...event('cancel2'),kind:'cancelled'},now).first,false);
  assert.equal(mergeMessage(groups,{...event('done',now-100),kind:'confirmed'},now).first,true);
 });
-test('Windows XML has one system dismiss receipt action and escapes untrusted text',()=>{
- const xml=toastXml('Reset & <title>','text "quote" <img>', 'safeid');assert.ok(xml.includes('scenario="reminder"'));assert.ok(xml.includes('content="确认收到"'));assert.ok(xml.includes('activationType="system" arguments="dismiss"'));assert.equal((xml.match(/<action /g)||[]).length,1);assert.ok(xml.includes('&amp;'));assert.ok(xml.includes('&lt;img&gt;'));assert.equal(xml.includes('<img>'),false);
+test('Windows XML has one routed receipt action and escapes untrusted text',()=>{
+ const xml=toastXml('Reset & <title>','text "quote" <img>', 'safeid');assert.ok(xml.includes('scenario="reminder"'));assert.ok(xml.includes('content="确认收到"'));assert.ok(xml.includes('activationType="foreground" arguments="type=action&amp;action=0&amp;tag=safeid"'));assert.equal((xml.match(/<action /g)||[]).length,1);assert.ok(xml.includes('&amp;'));assert.ok(xml.includes('&lt;img&gt;'));assert.equal(xml.includes('<img>'),false);
 });
 test('scope matching excludes unknown accounts and disjoint plans while preserving merged evidence',()=>{
  const pro={...event('pro'),scope:{plans:['PRO']}};assert.equal(interval(pro,now,null),null);

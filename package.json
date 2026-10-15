@@ -1,6 +1,6 @@
 {
   "name": "codex-reset-forecast-dashboard",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "private": true,
   "description": "Codex reset forecasts, local quota pacing and multi-source evidence.",
   "main": "app/main.cjs",
@@ -13,6 +13,7 @@
     "build:dir": "electron-builder --win dir --x64 --publish never",
     "test:ui": "node scripts/verify-ui.cjs",
     "test:language": "node scripts/verify-language.cjs",
+    "test:reset": "node scripts/verify-reset-quiet.cjs",
     "assets": "node scripts/capture-features.cjs"
   },
   "devDependencies": {

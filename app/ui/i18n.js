@@ -1,6 +1,10 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
+ '默认间隔 6 小时，仅显示原截止':'Default six-hour gap; showing the original deadline',
+ '；按重置后 6 小时间隔，已略去窗口起点。':'; the original start is skipped under the six-hour post-reset default.',
+ '重置系统通知已静默至':'Reset notifications muted until','本机确认时间':'Confirmed locally at',
+ '当前周期剩余':'Remaining this cycle','个人重置时间已更新，请查看看板。':'Your personal reset time has changed. See the dashboard.',
  '查看 ›':'View ›',
  '信源报告重置已完成':'Source reports a completed reset','已收录重置完成记录。':'Reset completion record captured.',
  ' 天额度':'-day quota',' 小时额度':'-hour quota',' 分钟额度':'-minute quota',

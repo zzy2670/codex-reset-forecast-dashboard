@@ -6,13 +6,12 @@ const { SOURCES, normalize, calibratedReset, changes, freshness, safeUrl } = req
 
 const { LocalCodexQuota, quotaView,quotaChanges } = require('./codex-quota.cjs');
 const {historyStart,hypotheticalPace,resetHistory}=require('./dashboard-model.cjs');
-const {projectForecasts}=require('./ui/pace-timing.js');
+const {projectForecasts,projectAfterReset}=require('./ui/pace-timing.js');
 const BarOrder=require('./ui/bar-order.js');
 const I18n=require('./ui/i18n.js');
-const crypto = require('node:crypto');
 const localQuota = new LocalCodexQuota();
 const activeNotifications = new Map();
-const {mergeMessage,toastXml,shouldNotify}=require('./notification-policy.cjs');
+const {mergeMessage,toastXml,shouldNotify,isQuiet,notificationId,acknowledgeReset,recoverLocalReset}=require('./notification-policy.cjs');
 
 const verification=process.argv.includes('--verification-test');
 const smoke = process.argv.includes('--smoke-test')||verification;
@@ -25,7 +24,7 @@ if (smoke) {
   app.setPath('userData', verification?path.join(app.getPath('temp'),'CodexResetDashboard-verification',profile&&/^[a-zA-Z0-9-]+$/.test(profile)?profile:String(process.pid)):path.join(app.getPath('temp'),'CodexResetDashboard-smoke'));
 }
 const dataFile = path.join(app.getPath('userData'), 'dashboard-state.json');
-let win, tray, quitting = false, running = false, quotaRunning = false, refreshTimer, quotaTimer;
+let win, tray, quitting = false, running = false, quotaRunning = false, quotaFlight=null, refreshTimer, quotaTimer;
 const defaults = { language:Intl.DateTimeFormat().resolvedOptions().locale.startsWith('zh')?'zh-CN':'en', notify: true, sound: false, closeToTray: true, autoStart: true, quotaLimitId: 'codex', quotaWindow: 'secondary', theme: 'dark', hypotheticalDays:3, bodyFontSize:13,barOrder:BarOrder.defaults };
 let state = { settings: { ...defaults }, sources: [], quota: null, quotaOptions: [], events: [], seen: [], paused: false, lastPollAt: null, nextPollAt: null, notificationStatus: null, baseline: false, confirmedId: null };
 try {
@@ -57,6 +56,7 @@ if(!Array.isArray(state.notificationGroups)){
   }
 }
 const tr=value=>I18n.text(value,state.settings.language);
+recoverLocalReset(state,quotaView(state.quota,state.settings));
 const checkedThisRun = new Set();
 const safeWrite = () => {
   fs.mkdirSync(path.dirname(dataFile), { recursive: true });
@@ -71,14 +71,16 @@ const safeWrite = () => {
 };
 function snapshot() {
   const now = Date.now();
-  const sources = SOURCES.map(s => {
+  let sources = SOURCES.map(s => {
     const cached = state.sources.find(x => x.id === s.id);
     if (!cached) return { ...s, status: 'loading', forecast: { state: 'none' }, notes: [], probabilities: [], signals: [] };
     const status = cached.status === 'ok' && !freshness(cached, now) ? 'stale' : cached.status;
     return projectForecasts({ ...cached, status },now);
   });
+  const quotaDisplay=quotaView(state.quota,state.settings,now);
+  sources=projectAfterReset(sources,quotaDisplay,state.localReset,now);
   const consensus=calibratedReset(sources,now);
-  return { ...state, sources, consensus, history:resetHistory(sources,state.history||[],now),historyStart:new Date(historyStart()).toISOString(),hypothetical:hypotheticalPace(consensus,state.settings.hypotheticalDays,now), quotaDisplay: quotaView(state.quota, state.settings, now), now: new Date(now).toISOString(), refreshing: running, version: app.getVersion(), notificationSupported: Notification.isSupported() };
+  return { ...state, sources, consensus, history:resetHistory(sources,state.history||[],now),historyStart:new Date(historyStart()).toISOString(),hypothetical:hypotheticalPace(consensus,state.settings.hypotheticalDays,now), quotaDisplay, now: new Date(now).toISOString(), refreshing: running, version: app.getVersion(), notificationSupported: Notification.isSupported() };
 }
 function publish() { if (win && !win.isDestroyed()) win.webContents.send('dashboard:state', snapshot()); }
 function showWindow() { if (!win || win.isDestroyed()) return; if (win.isMinimized()) win.restore(); win.show(); win.focus(); }
@@ -90,6 +92,7 @@ function addEvent(e, notify = true) {
     state.transitions=Object.fromEntries(Object.entries(state.transitions).slice(-400));
   }else if (state.seen.includes(e.key)) return;
   state.seen.push(e.key);
+  if(e.kind==='quota_reset'&&e.bucketId&&e.windowKey&&e.resetsAt)state.localReset={key:e.key,bucketId:e.bucketId,windowKey:e.windowKey,resetsAt:e.resetsAt,observedAt:e.at,kind:'quota-reset'};
   state.notificationGroups=state.notificationGroups||[];
   const grouped=mergeMessage(state.notificationGroups,e,Date.now(),quotaView(state.quota,state.settings)?.planType);
   state.notificationGroups=state.notificationGroups.slice(-200);
@@ -97,17 +100,27 @@ function addEvent(e, notify = true) {
   if(grouped&&existing>=0)state.events[existing]={...grouped.event,read:state.events[existing].read};
   else state.events.unshift({...grouped?.event||e,read:false});
   state.events = state.events.slice(0, 150);
-  if (notify && shouldNotify(grouped?.group,state.settings.notify) && !smoke) {
+  if(grouped&&isQuiet(state.resetQuietUntil)&&!grouped.group.delivered){grouped.group.suppressedAt=new Date().toISOString();grouped.group.pending=false;}
+  if (notify && shouldNotify(grouped?.group,state.settings.notify,state.resetQuietUntil) && !smoke) {
     grouped.group.pending=true;
     notifyUser(grouped.event.title,grouped.event.body,grouped.group.id);
   }
   safeWrite(); publish();
 }
-function notifyUser(title, body, key = `test:${Date.now()}`) {
-  title=tr(title);body=tr(body);
+async function notifyUser(title, body, key = `test:${Date.now()}`) {
+  if(isQuiet(state.resetQuietUntil))return;
+  const cached=quotaView(state.quota,state.settings);
+  if(!cached||cached.stale)await refreshQuota();
   const delivery=state.notificationGroups?.find(g=>g.id===key);
+  if(delivery&&!state.settings.notify){delivery.pending=false;safeWrite();publish();return;}
+  if(isQuiet(state.resetQuietUntil)){
+    if(delivery&&!delivery.delivered){delivery.pending=false;delivery.suppressedAt=new Date().toISOString();safeWrite();publish();}
+    return;
+  }
+  title=tr(title);body=tr(body);
+  if(delivery)delivery.localResetKeyAtDelivery=state.localReset?.key||null;
   try {
-    const id = crypto.createHash('sha256').update(key).digest('hex').slice(0,16);
+    const id = notificationId(key);
     const n = new Notification({ id, groupId: 'codex-resets', groupTitle: tr('codex重置预测看板'), title, body, icon: path.join(__dirname, 'assets', 'icon.png'), silent: !state.settings.sound, timeoutType: 'never',toastXml:toastXml(title,body,id,!state.settings.sound,tr('确认收到')) });
     activeNotifications.set(id, n);
     n.on('close', details => { if (details?.reason !== 'timedOut' && activeNotifications.get(id) === n) activeNotifications.delete(id); });
@@ -116,11 +129,31 @@ function notifyUser(title, body, key = `test:${Date.now()}`) {
     n.on('failed', () => {
       if(delivery){delivery.pending=false;safeWrite();}
       state.notificationStatus = 'Windows 通知不可用，已保留看板提醒';
-      if (tray) tray.displayBalloon({ title, content: body, iconType: 'info', noSound: !state.settings.sound });
+      if (tray&&!isQuiet(state.resetQuietUntil)) tray.displayBalloon({ title, content: body, iconType: 'info', noSound: !state.settings.sound });
       publish();
     });
     n.show();
   } catch { if(delivery)delivery.pending=false;state.notificationStatus = '通知未送达，看板内记录已保留'; publish(); }
+}
+async function handleNotificationActivation(details) {
+  if(details.type==='action'&&details.actionIndex===0){
+    const clickedAt=Date.now();
+    const tag=new URLSearchParams(details.arguments).get('tag');
+    const group=state.notificationGroups?.find(g=>notificationId(g.id)===tag);
+    if(!group?.delivered||group.acknowledgedAt)return;
+    const cached=quotaView(state.quota,state.settings);
+    if(!cached||cached.stale)await refreshQuota();
+    const current=quotaView(state.quota,state.settings);
+    if(!current||current.stale)return;
+    const result=acknowledgeReset(state,tag,current,clickedAt);
+    if(result.received){
+      const notices=result.quietStarted?[...activeNotifications.entries()]:[[tag,activeNotifications.get(tag)]];
+      for(const [id,n] of notices){activeNotifications.delete(id);n?.close();}
+      safeWrite();publish();
+    }
+    return;
+  }
+  if(details.type==='click')showWindow();
 }
 async function fetchJson(url) {
   const controller = new AbortController();
@@ -162,7 +195,12 @@ async function refresh(manual=false) {
         failures: (old?.failures || 0) + 1, lastAttemptAt: new Date().toISOString(), nextCheckAt: block ? null : new Date(Date.now()+wait).toISOString(), notes: old?.notes || [], probabilities: old?.probabilities || [], signals: old?.signals || [], forecast: old?.forecast || { state: 'none' } };
     }
     state.sources = [...state.sources.filter(s => s.id !== spec.id), next];
-    if (state.baseline) for (const e of changes(old, next)) addEvent(e, e.kind !== 'removed');
+    if (state.baseline) {
+      const quota=quotaView(state.quota,state.settings);
+      const visibleNext=projectAfterReset(state.sources,quota,state.localReset).find(s=>s.id===spec.id);
+      const visibleOld=old&&projectAfterReset([...state.sources.filter(s=>s.id!==spec.id),old],quota,state.localReset).find(s=>s.id===spec.id);
+      for (const e of changes(visibleOld,visibleNext)) addEvent(e,e.kind!=='removed');
+    }
     publish();
   }));
   const consensus = calibratedReset(state.sources);
@@ -178,11 +216,15 @@ async function refresh(manual=false) {
 }
 
 async function refreshQuota() {
-  if (smoke || state.paused || quotaRunning) return;
+  if (smoke || state.paused) return;
+  if(quotaRunning)return quotaFlight;
   quotaRunning = true;
-  try { const previous=state.quota;state.quota=await localQuota.read();for(const e of quotaChanges(previous,state.quota,state.settings))addEvent(e); }
-  catch (error) { state.quota = { ...state.quota, source: 'local-codex', state: 'error', message: error.message }; }
-  finally { quotaRunning = false; safeWrite(); publish(); }
+  quotaFlight=(async()=>{
+    try { const previous=state.quota;state.quota=await localQuota.read();for(const e of quotaChanges(previous,state.quota,state.settings))addEvent(e);recoverLocalReset(state,quotaView(state.quota,state.settings)); }
+    catch (error) { state.quota = { ...state.quota, source: 'local-codex', state: 'error', message: error.message }; }
+    finally { quotaRunning = false; safeWrite(); publish(); }
+  })();
+  return quotaFlight;
 }
 function trayMenu() {
   if (!tray) return;
@@ -269,7 +311,7 @@ else {
     if (!smoke) {
       tray = new Tray(nativeImage.createFromPath(path.join(__dirname,'assets','icon.ico'))); tray.on('click',showWindow); trayMenu(); installShortcut();
       if(app.isPackaged)app.setLoginItemSettings({openAtLogin:state.settings.autoStart,path:process.env.PORTABLE_EXECUTABLE_FILE||process.execPath,args:['--hidden']});
-      Notification.handleActivation(showWindow);
+      Notification.handleActivation(handleNotificationActivation);
       refresh(); refreshQuota();
       refreshTimer=setInterval(refresh,30000); quotaTimer=setInterval(refreshQuota,30000);
       powerMonitor.on('resume', () => { refresh(); refreshQuota(); });
