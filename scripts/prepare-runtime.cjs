@@ -1,0 +1,13 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict'),{createRequire}=require('node:module');
+const root=path.resolve(__dirname,'..'),manifest=require('../third_party/codex/runtime.json');
+const entry=require.resolve('@openai/codex/package.json'),lookup=createRequire(entry);
+assert.equal(JSON.parse(fs.readFileSync(entry,'utf8')).version,manifest.version,'Unexpected Codex package version');
+const platform=lookup.resolve('@openai/codex-win32-x64/package.json');
+const binary=path.join(path.dirname(platform),'vendor','x86_64-pc-windows-msvc','bin','codex.exe');
+const bytes=fs.readFileSync(binary);assert.equal(bytes.subarray(0,2).toString(),'MZ');
+assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),manifest.sha256,'Codex runtime checksum mismatch');
+const output=path.join(root,'.verification','runtime','codex');fs.mkdirSync(output,{recursive:true});
+fs.writeFileSync(path.join(output,'codex.exe'),bytes);
+for(const name of ['LICENSE','NOTICE','runtime.json'])fs.copyFileSync(path.join(root,'third_party','codex',name),path.join(output,name));
+console.log(`Prepared official Codex ${manifest.version}; runtime checksum verified.`);

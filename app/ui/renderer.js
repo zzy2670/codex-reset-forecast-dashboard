@@ -11,7 +11,7 @@ const clock = x => date(x) ? timeFormat.format(date(x)) : '—';
 const full = x => date(x) ? new Intl.DateTimeFormat(DashboardI18n.locale(state?.settings.language),{timeZone:zone,month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(date(x)) : '时间未注明';
 const precise = x => date(x) ? new Intl.DateTimeFormat(DashboardI18n.locale(state?.settings.language),{timeZone:zone,month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(date(x)) : '时间未注明';
 const applyLocale=()=>DashboardI18n.apply(document,state?.settings.language||'zh-CN');
-let state, toastTimer, detailsExpanded=false, temporalKey='',barDrag=null,barSaving=false;
+let state, toastTimer, detailsExpanded=false, temporalKey='',barDrag=null,barSaving=false,lastConnectionMarkup='';
 function toast(message) { $('toast').textContent=message; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true,3600);applyLocale(); }
 async function call(fn) { try { return await fn(); } catch(error) { toast(error.message?.replace(/^Error invoking remote method '[^']+': Error: /,'') || '操作未完成，请重试'); return null; } }
 function isFresh(s) { return PaceTiming.isFresh(s); }
@@ -19,7 +19,7 @@ function scheduleLabel(f) {const status=PaceTiming.forecastState(f);return statu
 function cardMarkup(s) {
   s=PaceTiming.projectForecasts(s);
   const raw=s.forecast||{state:'none'},remaining=PaceTiming.remainingSchedule(raw),f={...remaining,state:PaceTiming.forecastState(raw)},fresh=isFresh(s);
-  const status={ok:['已更新',''],stale:['待更新','warn'],error:['连接异常','error'],blocked:['已暂停','error'],loading:['读取中','muted']}[!fresh&&s.status==='ok'?'stale':s.status] || ['待更新','muted'];
+  const status={retrying:['重试中','warn'],ok:['已更新',''],stale:['待更新','warn'],error:['连接异常','error'],blocked:['已暂停','error'],loading:['读取中','muted']}[!fresh&&s.status==='ok'?'stale':s.status] || ['待更新','muted'];
   let value='无', valueClass='', note=s.archivedForecasts?.length?'旧排期时间已过或已有完成记录，尚无有效的下次预告':'尚无明确的下次重置预告';
   if (!fresh && f.state==='none') { value=s.status==='loading'?'读取中':'待核实'; valueClass='unknown'; note=s.error || '等待新数据，暂不判断是否有预告'; }
   else if(f.state==='invalid'){value='时间待核实';valueClass='unknown';note='站方窗口起止时间有矛盾，请核对原帖';}
@@ -62,7 +62,7 @@ function render(next) {
   document.body.style.setProperty('--body-font-size',`${state.settings.bodyFontSize||13}px`);
   if(!barDrag&&!barSaving)applyBarOrder(state.settings.barOrder);
   const sources=state.sources || [], c=state.consensus || {};
-  const ok=sources.filter(isFresh).length;
+  const ok=sources.filter(s=>s.status==='ok'&&isFresh(s)).length;
   $('live-state').innerHTML=`<i></i>${state.paused?'监控已暂停':state.refreshing?'正在检查':`${ok}/${sources.length} 信源在线`}`;
   $('live-state').classList.toggle('paused',state.paused || !ok); $('refresh').classList.toggle('spinning',state.refreshing); $('refresh').disabled=state.refreshing || state.paused;
   const cs={confirmed:['已交叉核对',''],pending:['待交叉核对','warn'],conflict:['时间有分歧','error'],unavailable:['待更新','muted']}[c.state] || ['核对中','muted'];
@@ -89,13 +89,20 @@ function render(next) {
   if (!$('settings-dialog').open) syncSettings();
   tick();
 }
+function quotaConnectionMarkup(){
+ const c=state.quotaConnection||{},connected=state.quotaDisplay&&!state.quotaDisplay.stale&&state.quota?.state==='ok';
+ if(connected)return '<strong>额度已连接</strong>';
+ const note=c.loginPending?'已打开登录页，完成授权后自动读取额度。':c.checking?'正在验证额度…':c.errorCode?'连接未完成，请重试。':c.requiresAccountSwitch?'为看板单独登录 ChatGPT，以读取个人额度。':'内置 Codex 已就绪，登录后即可显示个人额度。';
+ return `<p>${esc(note)}</p><div class="connection-actions"><button class="primary-button" data-connect-quota>${c.loginPending?'重新打开登录页':'登录 ChatGPT 并接入额度'}</button>${c.loginPending?'<button class="text-button" data-cancel-quota-login>取消本次登录</button>':''}</div>`;
+}
 function renderQuota(refreshDetails=true) {
   const stored=state.quotaDisplay,now=Date.now();
   const end=Date.parse(stored?.resetsAt),duration=stored?.durationMins*60000;
   const q=stored?{...stored,theoretical:Number.isFinite(end)&&duration>0?Math.max(0,Math.min(1,(now-end+duration)/duration)):null,stale:stored.stale||state.quota?.state!=='ok'||now-Date.parse(stored.fetchedAt)>120000||end<=now}:null;
+  const connectionPanel=$('quota-connection');connectionPanel.hidden=!!q&&!q.stale;if(!connectionPanel.hidden){const markup=quotaConnectionMarkup();if(markup!==lastConnectionMarkup){connectionPanel.innerHTML=markup;lastConnectionMarkup=markup;}}
   if (!q) {
     $('quota-value').innerHTML='—<span>%</span>';
-    $('quota-side').innerHTML=`<button class="primary-button" data-refresh-quota>刷新额度</button><span>${esc(state.quota?.message || '正在读取本机 Codex')}</span>`;
+    $('quota-side').innerHTML=`<button class="text-button" data-refresh-quota>刷新额度</button>`;
     $('actual-fill').style.width='0%'; $('theory-fill').style.width='0%'; $('actual-percent').textContent='—'; $('theory-percent').textContent='—';
     $('quota-permission').hidden=true;$('quota-reset').textContent='个人周期独立于全局重置预告'; return;
   }
@@ -112,7 +119,7 @@ function renderQuota(refreshDetails=true) {
 }
 function renderQuotaDetails() {
  const buckets=state.quota?.limits || [];
- $('quota-details').innerHTML=buckets.length?buckets.map(b=>`<div class="event-row"><h3>${esc(b.name)}</h3>${['primary','secondary'].filter(k=>b[k]).map(k=>{const w=b[k];return `<p>${esc(period(w.durationMins))}额度 · 剩余 ${esc((100-w.usedPercent).toFixed(0))}%<br>重置 ${esc(full(w.resetsAt))}</p><button class="text-button" data-quota-bucket="${esc(b.id)}" data-quota-window="${k}">在看板显示此周期</button>`;}).join('')}</div>`).join(''):`<p class="help-text">${esc(state.quota?.message || '正在读取本机额度…')}</p>`;
+ $('quota-details').innerHTML=quotaConnectionMarkup()+(buckets.length?buckets.map(b=>`<div class="event-row"><h3>${esc(b.name)}</h3>${['primary','secondary'].filter(k=>b[k]).map(k=>{const w=b[k];return `<p>${esc(period(w.durationMins))}额度 · 剩余 ${esc((100-w.usedPercent).toFixed(0))}%<br>重置 ${esc(full(w.resetsAt))}</p><button class="text-button" data-quota-bucket="${esc(b.id)}" data-quota-window="${k}">在看板显示此周期</button>`;}).join('')}</div>`).join(''):`<p class="help-text">${esc(state.quota?.message || '正在读取本机额度…')}</p>`);
 }
 function renderHistory(now=Date.now()) {
  const cutoff=PaceTiming.historyStart(now),rows=(state.history||[]).filter(r=>Date.parse(r.at)>=cutoff&&Date.parse(r.at)<=now).sort((a,b)=>Date.parse(b.at)-Date.parse(a.at));
@@ -233,6 +240,8 @@ document.addEventListener('click',event=>{
   const close=event.target.closest('[data-close]'); if(close) $(close.dataset.close).close();
   const link=event.target.closest('[data-link]'); if(link?.dataset.link) call(()=>window.dashboard.openLink(link.dataset.link));
   const control=event.target.closest('[data-window]'); if(control) call(()=>window.dashboard.window(control.dataset.window));
+  if(event.target.closest('[data-connect-quota]')) call(()=>window.dashboard.connectQuota());
+  if(event.target.closest('[data-cancel-quota-login]')) call(()=>window.dashboard.cancelQuotaLogin());
   if(event.target.closest('[data-refresh-quota]')) call(()=>window.dashboard.refreshQuota());
   const quotaChoice=event.target.closest('[data-quota-bucket]');
   if(quotaChoice) call(()=>window.dashboard.saveSettings({quotaLimitId:quotaChoice.dataset.quotaBucket,quotaWindow:quotaChoice.dataset.quotaWindow}));

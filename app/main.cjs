@@ -8,20 +8,25 @@ const { LocalCodexQuota, quotaView,quotaChanges } = require('./codex-quota.cjs')
 const {historyStart,hypotheticalPace,resetHistory}=require('./dashboard-model.cjs');
 const {projectForecasts,projectAfterReset}=require('./ui/pace-timing.js');
 const BarOrder=require('./ui/bar-order.js');
+const {REQUEST_TIMEOUT_MS,buildFailure}=require('./source-retry.cjs');
 const I18n=require('./ui/i18n.js');
-const localQuota = new LocalCodexQuota();
+const isolatedDeploymentHome=process.argv.includes('--deployment-check')?(process.argv.find(a=>a.startsWith('--deployment-isolated-home='))?.slice('--deployment-isolated-home='.length)||process.env.DASHBOARD_DEPLOYMENT_ISOLATED_HOME):null;
+const connectionHome=isolatedDeploymentHome&&path.isAbsolute(isolatedDeploymentHome)?isolatedDeploymentHome:path.join(app.getPath('appData'),'Codex Reset Dashboard');
+const localQuota = new LocalCodexQuota({managedHome:path.join(connectionHome,'codex-account')});
 const activeNotifications = new Map();
 const {mergeMessage,toastXml,shouldNotify,isQuiet,notificationId,acknowledgeReset,recoverLocalReset}=require('./notification-policy.cjs');
 
 const verification=process.argv.includes('--verification-test');
-const smoke = process.argv.includes('--smoke-test')||verification;
+const deploymentCheck=process.argv.includes('--deployment-check');
+const smoke = process.argv.includes('--smoke-test')||verification||deploymentCheck;
+let connection={checking:true},connectionFlight=null;
 const APP_ID = 'local.codex.resetdashboard';
 app.setPath('userData',path.join(app.getPath('appData'),'Codex Reset Dashboard'));
 app.setName('codex重置预测看板');
 app.setAppUserModelId(APP_ID);
 if (smoke) {
   const profile=process.argv.find(a=>a.startsWith('--verification-profile='))?.split('=')[1];
-  app.setPath('userData', verification?path.join(app.getPath('temp'),'CodexResetDashboard-verification',profile&&/^[a-zA-Z0-9-]+$/.test(profile)?profile:String(process.pid)):path.join(app.getPath('temp'),'CodexResetDashboard-smoke'));
+  app.setPath('userData', verification||deploymentCheck?path.join(app.getPath('temp'),'CodexResetDashboard-verification',profile&&/^[a-zA-Z0-9-]+$/.test(profile)?profile:String(process.pid)):path.join(app.getPath('temp'),'CodexResetDashboard-smoke'));
 }
 const dataFile = path.join(app.getPath('userData'), 'dashboard-state.json');
 let win, tray, quitting = false, running = false, quotaRunning = false, quotaFlight=null, refreshTimer, quotaTimer;
@@ -80,7 +85,7 @@ function snapshot() {
   const quotaDisplay=quotaView(state.quota,state.settings,now);
   sources=projectAfterReset(sources,quotaDisplay,state.localReset,now);
   const consensus=calibratedReset(sources,now);
-  return { ...state, sources, consensus, history:resetHistory(sources,state.history||[],now),historyStart:new Date(historyStart()).toISOString(),hypothetical:hypotheticalPace(consensus,state.settings.hypotheticalDays,now), quotaDisplay, now: new Date(now).toISOString(), refreshing: running, version: app.getVersion(), notificationSupported: Notification.isSupported() };
+  return { ...state, quotaConnection:smoke&&!deploymentCheck?{checking:false,authenticated:true,needsLogin:false}:connection, sources, consensus, history:resetHistory(sources,state.history||[],now),historyStart:new Date(historyStart()).toISOString(),hypothetical:hypotheticalPace(consensus,state.settings.hypotheticalDays,now), quotaDisplay, now: new Date(now).toISOString(), refreshing: running, version: app.getVersion(), notificationSupported: Notification.isSupported() };
 }
 function publish() { if (win && !win.isDestroyed()) win.webContents.send('dashboard:state', snapshot()); }
 function showWindow() { if (!win || win.isDestroyed()) return; if (win.isMinimized()) win.restore(); win.show(); win.focus(); }
@@ -157,7 +162,7 @@ async function handleNotificationActivation(details) {
 }
 async function fetchJson(url) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 18000);
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
     const response = await session.defaultSession.fetch(url, { signal: controller.signal, headers: { Accept: 'application/json' }, cache: 'no-store' });
     if (!response.ok) {
@@ -189,10 +194,7 @@ async function refresh(manual=false) {
       next.nextCheckAt = new Date(now + spec.interval).toISOString();
       checkedThisRun.add(spec.id);
     } catch (error) {
-      const block = error.status === 403 || error.status === 401;
-      const wait = error.status === 429 ? Math.max(error.retryMs || 3600000, spec.interval) : Math.min(900000, spec.interval * 2 ** Math.min((old?.failures || 0) + 1, 4));
-      next = { ...spec, ...old, status: block ? 'blocked' : 'error', error: block ? '站点暂时拒绝访问，点击立即检查可重试；也可打开原站核查。' : error.status === 429 ? '站方限流，已延后请求。' : error.message === 'HTTP 404' ? '接口暂不可用，请打开原站核查。' : '获取失败，保留上次信息；稍后自动重试。',
-        failures: (old?.failures || 0) + 1, lastAttemptAt: new Date().toISOString(), nextCheckAt: block ? null : new Date(Date.now()+wait).toISOString(), notes: old?.notes || [], probabilities: old?.probabilities || [], signals: old?.signals || [], forecast: old?.forecast || { state: 'none' } };
+      next=buildFailure(spec,old,error,Date.now());
     }
     state.sources = [...state.sources.filter(s => s.id !== spec.id), next];
     if (state.baseline) {
@@ -236,6 +238,28 @@ function trayMenu() {
   ]));
   tray.setToolTip(tr(state.paused ? 'codex重置预测看板 · 已暂停' : 'codex重置预测看板 · 每 30 秒检查'));
 }
+async function refreshConnection(){
+  if(connectionFlight)return connectionFlight;
+  connectionFlight=(async()=>{try{connection={...(await localQuota.setupStatus()),checking:false};}catch{connection={checking:false,errorCode:'CONNECTION_CLOSED'};}finally{connectionFlight=null;publish();}})();
+  return connectionFlight;
+}
+async function beginQuotaLogin(){
+  if(smoke)return snapshot();
+  try{
+    const result=await localQuota.login();
+    if(result.alreadyConnected){await refreshQuota();await refreshConnection();return snapshot();}
+    const url=new URL(result.authUrl);
+    if(url.protocol!=='https:'||url.username||url.password||url.port&&!['443'].includes(url.port)||!['auth.openai.com','chatgpt.com'].includes(url.hostname))throw new Error('LOGIN_RESPONSE_INVALID');
+    await refreshConnection();await shell.openExternal(url.href);return snapshot();
+  }catch{connection={...connection,checking:false,loginPending:false,errorCode:'LOGIN_FAILED'};publish();return snapshot();}
+}
+localQuota.on('login-completed',async result=>{
+  if(smoke)return;
+  if(result.success)await refreshQuota();
+  await refreshConnection();
+  if(!result.success){connection={...connection,errorCode:'LOGIN_FAILED'};publish();}
+});
+localQuota.on('account-updated',()=>{if(!smoke)refreshConnection().then(()=>refreshQuota());});
 function installShortcut() {
   if (smoke) return;
   const stableExecutable=process.env.PORTABLE_EXECUTABLE_FILE||process.execPath;
@@ -273,7 +297,9 @@ function registerIpc() {
     const checked = safeUrl(url); if (!checked || !allowed.has(new URL(checked).hostname)) throw new Error('仅允许打开已核对的信源网站');
     return shell.openExternal(checked);
   });
-  handle('dashboard:quota', async () => { await refreshQuota(); return snapshot(); });
+  handle('dashboard:quota', async () => { await refreshQuota();if(!smoke)await refreshConnection();return snapshot(); });
+  handle('dashboard:connect-quota',beginQuotaLogin);
+  handle('dashboard:cancel-quota-login',async()=>{if(!smoke){await localQuota.cancelLogin();await refreshConnection();}return snapshot();});
   handle('dashboard:test-notification', () => { if (!smoke) notifyUser('codex重置预测看板 · 测试通知', '这条测试提醒会一直挂着，直到你点击关闭。新预告和重置确认也采用此方式。'); return Notification.isSupported(); });
   handle('dashboard:read-events', () => { state.events.forEach(e => e.read = true); safeWrite(); publish(); });
   handle('dashboard:settings', patch => {
@@ -303,16 +329,24 @@ function registerIpc() {
 }
 
 
-if (!smoke && !app.requestSingleInstanceLock()) app.quit();
+if(deploymentCheck){
+  app.whenReady().then(async()=>{
+    const {deploymentReport,writeDeploymentReport,stopClient}=require('./deployment-check.cjs');
+    const output=process.argv.find(a=>a.startsWith('--deployment-result='))?.slice('--deployment-result='.length);
+    let report=await deploymentReport(localQuota,app.getVersion());
+    try{if(!output)throw new Error('RESULT_PATH_INVALID');writeDeploymentReport(output,report);}catch{report={version:app.getVersion(),status:'error',quotaConnected:false,reasonCode:'RESULT_WRITE_FAILED'};}
+    await stopClient(localQuota);app.exit(report.status==='ready'?0:report.status==='login_required'?2:1);
+  });
+}else if (!smoke && !app.requestSingleInstanceLock()) app.quit();
 else {
-  app.on('second-instance', (_e,args) => { if (!args.includes('--hidden')) showWindow(); });
+  app.on('second-instance', (_e,args) => { if (!args.includes('--hidden')) showWindow();if(args.includes('--connect-quota'))beginQuotaLogin(); });
   app.whenReady().then(async () => {
     Menu.setApplicationMenu(null); registerIpc(); createWindow();
     if (!smoke) {
       tray = new Tray(nativeImage.createFromPath(path.join(__dirname,'assets','icon.ico'))); tray.on('click',showWindow); trayMenu(); installShortcut();
       if(app.isPackaged)app.setLoginItemSettings({openAtLogin:state.settings.autoStart,path:process.env.PORTABLE_EXECUTABLE_FILE||process.execPath,args:['--hidden']});
       Notification.handleActivation(handleNotificationActivation);
-      refresh(); refreshQuota();
+      refresh(); refreshQuota();refreshConnection().then(()=>{if(process.argv.includes('--connect-quota')&&connection.needsLogin)beginQuotaLogin();});
       refreshTimer=setInterval(refresh,30000); quotaTimer=setInterval(refreshQuota,30000);
       powerMonitor.on('resume', () => { refresh(); refreshQuota(); });
       powerMonitor.on('unlock-screen', () => { refresh(); refreshQuota(); });

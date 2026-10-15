@@ -12,19 +12,20 @@ Windows 10/11 x64. The app supports English and Chinese; the feature tour suppor
 
 1. Download the installer from [Releases](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest) and run it, or open the portable executable.
 2. Open the dashboard to see public reset announcements. Choose your language, text size, tray behavior and startup settings.
-3. To show personal quota, install the official [Codex CLI](https://github.com/openai/codex) and sign in with your ChatGPT account:
+3. Codex is included. The dashboard checks for an existing local Codex sign-in with ChatGPT and reads your quota. If you are signed out, follow the sign-in prompt.
 
-```powershell
-npm install -g @openai/codex
-codex login
-```
+### Ask an AI to deploy it
 
-Refresh quota or restart the dashboard after signing in.
+Send this to an AI that can operate your computer:
+
+> Deploy https://github.com/zzy2670/codex-reset-forecast-dashboard and connect my Codex quota.
+
+The AI follows [AGENTS.md](AGENTS.md) and runs `scripts/install.ps1` to install the app and check the quota connection. If you are signed out, it opens the official sign-in flow and checks again after authorization. Deployment is complete when it reads your quota.
 
 <details>
 <summary>Installation and runtime notes</summary>
 
-- The dashboard detects an npm-installed CLI or codex.exe on PATH. If you use the Codex desktop app, also install the CLI using the steps above. Personal quota comes from the windows returned for your ChatGPT login.
+- Both builds include the official Codex runtime; Node.js, npm and a separate CLI installation are not required. If you use another provider, the dashboard connects to ChatGPT separately for quota.
 - Release binaries are unsigned, so Windows may show an unknown-publisher prompt. SHA256SUMS.txt is included in each release to check your download.
 - Both installed and portable versions save settings and cached data in your Windows profile. Upgrades keep that data.
 - Startup with Windows is enabled by default and can be changed in Settings. Windows notification settings and Do Not Disturb affect notification display.

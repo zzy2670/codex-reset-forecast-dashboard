@@ -4,6 +4,8 @@ contextBridge.exposeInMainWorld('dashboard', {
   refresh: () => ipcRenderer.invoke('dashboard:refresh'),
   pause: () => ipcRenderer.invoke('dashboard:pause'),
   openLink: url => ipcRenderer.invoke('dashboard:link',url),
+  connectQuota: () => ipcRenderer.invoke('dashboard:connect-quota'),
+  cancelQuotaLogin: () => ipcRenderer.invoke('dashboard:cancel-quota-login'),
   refreshQuota: () => ipcRenderer.invoke('dashboard:quota'),
   saveSettings: patch => ipcRenderer.invoke('dashboard:settings',patch),
   testNotification: () => ipcRenderer.invoke('dashboard:test-notification'),

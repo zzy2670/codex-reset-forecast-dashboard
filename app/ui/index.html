@@ -35,6 +35,7 @@
         <div class="section-line"><h2 id="quota-heading">我的额度</h2><button class="text-button" id="quota-settings">额度明细 <svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></svg></button></div>
         <div class="quota-top"><div><div class="quota-caption" id="quota-caption">本机 Codex · 剩余额度</div><div class="quota-value" id="quota-value">—<span>%</span></div></div><div class="quota-side" id="quota-side"><button class="primary-button" id="connect-quota">读取本机额度</button><span>跟随本机 Codex 登录账户</span></div></div>
         <p id="quota-permission" class="quota-permission" role="status" hidden>本机接口报告：当前不允许常规使用，请查看额度明细。</p>
+        <div id="quota-connection" class="quota-connection" hidden></div>
         <div class="quota-bars">
           <div class="quota-row" data-bar="actual"><button class="bar-drag-handle" aria-label="调整实际消耗位置" title="按住拖动；也可用↑↓键调整">⠿</button><span>实际消耗</span><div class="track" role="progressbar" aria-label="实际消耗" id="actual-track"><i class="actual-fill" id="actual-fill"></i></div><strong id="actual-percent">—</strong></div>
           <div class="quota-row" data-bar="hypothetical"><button class="bar-drag-handle" aria-label="调整假设节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><button id="hypothetical-settings" class="pace-label" title="设置假设重置周期">假设 <span id="hypothetical-days-label">3</span> 天</button><div class="track" role="progressbar" aria-label="假设重置节奏" id="hypothetical-track"><i class="hypothetical-fill" id="hypothetical-fill"></i></div><strong id="hypothetical-percent">—</strong></div>

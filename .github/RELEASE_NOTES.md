@@ -1,5 +1,9 @@
 ## Codex 重置预测看板
 
+- 内置官方 Codex 运行程序，自动检测本机授权；未登录时在看板完成 ChatGPT 登录，随后自动读取额度。
+- 新增 AI 部署入口，自动下载、校验、安装并检查额度，实际读到额度才报告部署完成。
+- 请求超时调整为 30 秒；连续 3 次临时失败才显示获取失败，前两次自动重试，缓存按原有效期使用。
+
 - 重置后默认 6 小时内不再重置，自动清理这段时间内的旧预告；重置后新发布的明确预告优先。
 
 - 本机额度重置后，点“确认收到”可将重置系统通知静默 6 小时；重启后继续计时。
@@ -19,6 +23,10 @@
 [图文介绍](https://zzy2670.github.io/codex-reset-forecast-dashboard/) · [安装说明](https://github.com/zzy2670/codex-reset-forecast-dashboard/blob/main/README.zh-CN.md)
 
 ## English
+
+- Includes the official Codex runtime and detects existing local authorization. Sign in with ChatGPT from the dashboard to connect your quota.
+- Adds an AI deployment entry that downloads, verifies and installs the app, then checks that quota can actually be read.
+- Requests time out after 30 seconds. The first two temporary failures retry automatically; the third displays an error. Cached data keeps its original expiry.
 
 - After a reset, the dashboard assumes a six-hour gap and clears older forecasts within it. New explicit announcements after the reset take priority.
 

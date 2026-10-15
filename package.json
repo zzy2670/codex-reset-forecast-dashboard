@@ -1,6 +1,6 @@
 {
   "name": "codex-reset-forecast-dashboard",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "private": true,
   "description": "Codex reset forecasts, local quota pacing and multi-source evidence.",
   "main": "app/main.cjs",
@@ -14,9 +14,14 @@
     "test:ui": "node scripts/verify-ui.cjs",
     "test:language": "node scripts/verify-language.cjs",
     "test:reset": "node scripts/verify-reset-quiet.cjs",
-    "assets": "node scripts/capture-features.cjs"
+    "assets": "node scripts/capture-features.cjs",
+    "prebuild": "node scripts/prepare-runtime.cjs",
+    "prebuild:dir": "node scripts/prepare-runtime.cjs",
+    "test:onboarding": "node scripts/verify-onboarding.cjs",
+    "test:deployment": "node scripts/verify-deployment.cjs"
   },
   "devDependencies": {
+    "@openai/codex": "0.159.2",
     "electron": "44.6.0",
     "electron-builder": "26.15.3",
     "playwright-core": "1.58.2"
@@ -57,7 +62,19 @@
     },
     "portable": {
       "artifactName": "Codex-Reset-Forecast-Dashboard-Portable-${version}-x64.exe"
-    }
+    },
+    "extraResources": [
+      {
+        "from": ".verification/runtime/codex",
+        "to": "codex",
+        "filter": [
+          "codex.exe",
+          "LICENSE",
+          "NOTICE",
+          "runtime.json"
+        ]
+      }
+    ]
   },
   "license": "GPL-3.0-only",
   "homepage": "https://zzy2670.github.io/codex-reset-forecast-dashboard/",

@@ -5,3 +5,5 @@ Copyright (C) 2026 zzy2670. Application source is licensed under GPL-3.0-only; s
 The distributed executable includes Electron, Chromium, Node.js and their dependencies under their respective licenses. Their notices are shipped alongside the executable, including LICENSE.electron.txt and LICENSES.chromium.html. GPL licensing of this application does not replace those notices.
 
 Public source websites, source names, announcements and linked material remain the property of their authors. Codex is an OpenAI product name. This dashboard is an independent community project.
+
+The Windows distribution includes the official OpenAI Codex native runtime, version 0.159.2, under Apache-2.0. Its LICENSE, NOTICE, pinned source reference and executable checksum are shipped in resources/codex/. Source and provenance: https://github.com/openai/codex/tree/rust-v0.159.2 .

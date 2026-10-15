@@ -1,6 +1,18 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
+ '重试中':'Retrying','站方数据格式已变化，请打开原站核查。':'The source format changed. Open its website to check.','站方请求未成功，请打开原站核查。':'The source request failed. Open its website to check.',
+ "连接 Codex 额度":"Connect Codex quota",
+ "登录 ChatGPT 并接入额度":"Sign in with ChatGPT",
+ "已打开登录页，完成授权后自动读取额度。":"Complete sign-in in your browser. Your quota will connect automatically.",
+ "正在验证额度…":"Checking quota…",
+ "额度已连接":"Quota connected",
+ "内置 Codex 已就绪，登录后即可显示个人额度。":"Codex is included. Sign in to see your quota.",
+ "取消本次登录":"Cancel sign-in",
+ "重新打开登录页":"Reopen sign-in page",
+ "连接未完成，请重试。":"Connection incomplete. Try again.",
+ "为看板单独登录 ChatGPT，以读取个人额度。":"Sign in with ChatGPT for this dashboard to read your quota.",
+
  '默认间隔 6 小时，仅显示原截止':'Default six-hour gap; showing the original deadline',
  '；按重置后 6 小时间隔，已略去窗口起点。':'; the original start is skipped under the six-hour post-reset default.',
  '重置系统通知已静默至':'Reset notifications muted until','本机确认时间':'Confirmed locally at',

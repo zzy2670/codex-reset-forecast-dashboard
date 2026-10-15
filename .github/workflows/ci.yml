@@ -21,17 +21,37 @@ jobs:
       - run: npm run test:ui
       - run: npm run test:language
       - run: npm run test:reset
+      - run: npm run test:onboarding
       - run: npm run build
       - run: node scripts/verify-package.cjs
+      - name: Install release on a clean Windows runner
+        shell: pwsh
+        run: |
+          $installer = @(Get-ChildItem dist/*Setup*-x64.exe)
+          if ($installer.Count -ne 1) { throw 'Expected one setup executable' }
+          $installDir = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install'
+          $setup = Start-Process -FilePath $installer[0].FullName -ArgumentList "/S /currentuser /D=$installDir" -WindowStyle Hidden -Wait -PassThru
+          if ($setup.ExitCode -ne 0) { throw 'Silent installation failed' }
+          if (-not (Test-Path -LiteralPath (Join-Path $installDir 'Codex Reset Dashboard.exe'))) { throw 'Installed executable missing' }
+      - name: Verify packaged first-run connection
+        shell: pwsh
+        run: |
+          $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
+          npm run test:onboarding
+      - name: Verify deployment without an external CLI or sign-in
+        shell: pwsh
+        run: |
+          $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
+          npm run test:deployment
       - name: Verify packaged language switching
         shell: pwsh
         run: |
-          $env:DASHBOARD_TEST_EXE = Join-Path $PWD 'dist/win-unpacked/Codex Reset Dashboard.exe'
+          $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
           npm run test:language
       - name: Verify packaged reset lifecycle
         shell: pwsh
         run: |
-          $env:DASHBOARD_TEST_EXE = Join-Path $PWD 'dist/win-unpacked/Codex Reset Dashboard.exe'
+          $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
           npm run test:reset
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

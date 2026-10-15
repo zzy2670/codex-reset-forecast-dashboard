@@ -12,19 +12,20 @@
 
 1. 在 [Releases](https://github.com/zzy2670/codex-reset-forecast-dashboard/releases/latest) 下载安装版并双击安装，或直接运行便携版。
 2. 打开看板即可查看公开重置消息。在设置中选择语言、字号、托盘和开机启动。
-3. 要显示个人额度，安装官方 [Codex CLI](https://github.com/openai/codex)，并登录你的 ChatGPT 账户：
+3. 看板内置官方 Codex 运行程序，会自动检测本机 Codex 的 ChatGPT 登录。已有本机授权直接读取额度，首次使用按提示登录即可。
 
-```powershell
-npm install -g @openai/codex
-codex login
-```
+### 让 AI 帮你部署
 
-登录后刷新额度，或重启看板。
+把这句话发给能操作电脑的 AI：
+
+> 给我部署 https://github.com/zzy2670/codex-reset-forecast-dashboard ，并接入我的 Codex 额度。
+
+AI 按仓库的 [部署说明](AGENTS.md) 运行 `scripts/install.ps1`，自动下载安装并检查额度连接。未登录时会打开官方授权页；完成授权后继续检查，实际读到额度才算部署完成。
 
 <details>
 <summary>安装与运行说明</summary>
 
-- 看板识别 npm 安装的 CLI 或 PATH 中的 codex.exe。已安装 Codex 桌面版的用户也请按上面的步骤安装 CLI。个人额度来自 ChatGPT 登录后的额度窗口。
+- 安装包和便携版均内置官方 Codex 运行程序，无需另外安装 Node.js、npm 或 CLI。已有其他提供方配置时，看板会单独连接 ChatGPT 额度。
 - 发行包未签名，Windows 可能显示未知发布者提示。发行页附有 SHA256SUMS.txt，可用于核对下载文件。
 - 设置和缓存保存在 Windows 用户目录，安装版和便携版均使用此位置。升级会保留数据。
 - 开机启动默认开启，可以在设置中关闭。Windows 的通知开关与勿扰模式会影响通知显示。

@@ -14,7 +14,7 @@ function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){
  if(e.isSymbolicLink()){failures.push(`${relative}: symlink is not permitted`);continue;}
  if(e.isDirectory()){walk(p);continue;}
  if(/^(?:\.env(?:\.|$)|dashboard-state\.json|auth\.json|cookies|credentials)/i.test(e.name)||/\.(?:pfx|pem|key|log)$/i.test(e.name)){failures.push(`${relative}: private or runtime file`);continue;}
- if(!/\.(?:cjs|js|json|html|css|md|txt|ya?ml)$/.test(e.name)&&e.name!=='LICENSE'&&e.name!=='.gitignore')continue;
+ if(!/\.(?:cjs|js|json|html|css|md|txt|ya?ml|ps1)$/.test(e.name)&&e.name!=='LICENSE'&&e.name!=='.gitignore')continue;
  const source=fs.readFileSync(p,'utf8');scanned++;
  for(const [name,re] of rules){re.lastIndex=0;if(re.test(source))failures.push(`${relative}: ${name}`);}
 }}

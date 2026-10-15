@@ -3,7 +3,7 @@
  const automatic=new Set(['reset','regular','global','automatic','global_and_banked','both','combined']);
  function isFresh(s,now=Date.now()){
   const age=now-Date.parse(s?.updatedAt),readAge=now-Date.parse(s?.fetchedAt);
-  return s?.status==='ok'&&Number.isFinite(age)&&age>=-300000&&age<=s.maxAge&&Number.isFinite(readAge)&&readAge>=-300000&&readAge<=s.maxAge&&(!s.expiresAt||Date.parse(s.expiresAt)>now);
+  return ['ok','retrying'].includes(s?.status)&&Number.isFinite(age)&&age>=-300000&&age<=s.maxAge&&Number.isFinite(readAge)&&readAge>=-300000&&readAge<=s.maxAge&&(!s.expiresAt||Date.parse(s.expiresAt)>now);
  }
  function forecastState(f,now=Date.now()){
   if(!f)return 'none';

@@ -8,4 +8,10 @@ for(const name of entries.filter(x=>/\.(?:js|cjs|json|html|css|md)$/.test(x))){c
 }
 for(const name of ['app/main.cjs','app/ui/i18n.js','LICENSE','NOTICE.md'])assert.ok(entries.includes(name),`Missing ${name}`);
 for(const name of ['Codex Reset Dashboard.exe','LICENSE.electron.txt','LICENSES.chromium.html'])assert.ok(fs.existsSync(path.join(base,name)),`Missing ${name}`);
+const crypto=require('node:crypto'),expected=require('../third_party/codex/runtime.json');
+const runtime=path.join(base,'resources','codex');
+assert.deepEqual(fs.readdirSync(runtime).sort(),['LICENSE','NOTICE','codex.exe','runtime.json'].sort());
+assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(runtime,'codex.exe'))).digest('hex'),expected.sha256,'Official Codex checksum');
+assert.deepEqual(JSON.parse(fs.readFileSync(path.join(runtime,'runtime.json'),'utf8')),expected);
+for(const name of ['LICENSE','NOTICE'])assert.ok(fs.readFileSync(path.join(runtime,name)).equals(fs.readFileSync(path.join(__dirname,'..','third_party','codex',name))),`Codex ${name} differs`);
 console.log(`Packaged privacy/content check passed: ${entries.length} archive entries.`);

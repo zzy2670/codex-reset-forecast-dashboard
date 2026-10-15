@@ -1,0 +1,7 @@
+{
+  "version": "0.159.2",
+  "source": "https://github.com/openai/codex/tree/rust-v0.159.2",
+  "package": "@openai/codex@0.159.2",
+  "executable": "codex.exe",
+  "sha256": "52f75c649bebb8001102a1dd129c1ea6d02b0940321e6d7e82ee0526753bd58a"
+}
