@@ -1,6 +1,6 @@
 {
   "name": "codex-reset-forecast-dashboard",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "description": "Codex reset forecasts, local quota pacing and multi-source evidence.",
   "main": "app/main.cjs",

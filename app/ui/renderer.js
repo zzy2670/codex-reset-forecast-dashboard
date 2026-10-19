@@ -132,9 +132,9 @@ function renderHistory(now=Date.now()) {
  }).join(''):'<p class="history-empty">正在获取 2026/9/1 以来的完成记录…</p>';
 }
 function renderHypothetical(now=Date.now()) {
- const days=state.settings.hypotheticalDays||3,at=Date.parse(state.consensus?.at);
- const known=state.consensus?.state==='confirmed'&&Number.isFinite(at)&&at<=now;
- const progress=known?Math.min(1,(now-at)/(days*86400000)):null;
+ const days=state.settings.hypotheticalDays||3,pace=PaceTiming.hypotheticalPace(state.consensus,days,now,state.history);
+ const at=Date.parse(pace.anchor),known=pace.available;
+ const progress=known?pace.progress:null;
  $('hypothetical-days-label').textContent=days;
  $('hypothetical-fill').style.width=`${(progress??0)*100}%`;
  $('hypothetical-track').setAttribute('aria-valuenow',String(Math.round((progress??0)*100)));

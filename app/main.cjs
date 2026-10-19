@@ -85,7 +85,8 @@ function snapshot() {
   const quotaDisplay=quotaView(state.quota,state.settings,now);
   sources=projectAfterReset(sources,quotaDisplay,state.localReset,now);
   const consensus=calibratedReset(sources,now);
-  return { ...state, quotaConnection:smoke&&!deploymentCheck?{checking:false,authenticated:true,needsLogin:false}:connection, sources, consensus, history:resetHistory(sources,state.history||[],now),historyStart:new Date(historyStart()).toISOString(),hypothetical:hypotheticalPace(consensus,state.settings.hypotheticalDays,now), quotaDisplay, now: new Date(now).toISOString(), refreshing: running, version: app.getVersion(), notificationSupported: Notification.isSupported() };
+  const history=resetHistory(sources,state.history||[],now);
+  return { ...state, quotaConnection:smoke&&!deploymentCheck?{checking:false,authenticated:true,needsLogin:false}:connection, sources, consensus, history,historyStart:new Date(historyStart()).toISOString(),hypothetical:hypotheticalPace(consensus,state.settings.hypotheticalDays,now,history), quotaDisplay, now: new Date(now).toISOString(), refreshing: running, version: app.getVersion(), notificationSupported: Notification.isSupported() };
 }
 function publish() { if (win && !win.isDestroyed()) win.webContents.send('dashboard:state', snapshot()); }
 function showWindow() { if (!win || win.isDestroyed()) return; if (win.isMinimized()) win.restore(); win.show(); win.focus(); }

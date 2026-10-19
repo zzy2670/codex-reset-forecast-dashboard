@@ -1,13 +1,6 @@
 'use strict';
 const {safeUrl}=require('./core.cjs');
-const {historyStart}=require('./ui/pace-timing.js');
-const DAY=86400000;
-function hypotheticalPace(consensus,days=3,now=Date.now()){
- const at=Date.parse(consensus?.at),duration=days*DAY;
- if(consensus?.state!=='confirmed'||!Number.isFinite(at)||at>now||!Number.isFinite(days)||days<=0)return {available:false,days};
- const elapsed=now-at;
- return {available:true,days,anchor:new Date(at).toISOString(),end:new Date(at+duration).toISOString(),elapsedHours:elapsed/3600000,progress:Math.min(1,elapsed/duration),overdue:elapsed>=duration};
-}
+const {historyStart,hypotheticalPace}=require('./ui/pace-timing.js');
 function resetHistory(sources,previous=[],now=Date.now()){
  const cutoff=historyStart(),records=[];
  for(const old of previous)for(const source of old.sources||[])records.push({...old,source});

@@ -1,5 +1,7 @@
 ## Codex 重置预测看板
 
+- 修复信源缓存过期后“假设每 X 天重置”横条显示为空的问题。已核对的历史全局重置继续作为计算起点，保留自定义天数；到期显示 100%。
+
 - 内置官方 Codex 运行程序，自动检测本机授权；未登录时在看板完成 ChatGPT 登录，随后自动读取额度。
 - 新增 AI 部署入口，自动下载、校验、安装并检查额度，实际读到额度才报告部署完成。
 - 请求超时调整为 30 秒；连续 3 次临时失败才显示获取失败，前两次自动重试，缓存按原有效期使用。
@@ -23,6 +25,8 @@
 [图文介绍](https://zzy2670.github.io/codex-reset-forecast-dashboard/) · [安装说明](https://github.com/zzy2670/codex-reset-forecast-dashboard/blob/main/README.zh-CN.md)
 
 ## English
+
+- Fixed the assumed X-day reset bar going blank when source caches expire. Previously cross-checked global resets remain valid anchors, with custom durations preserved and progress capped at 100%.
 
 - Includes the official Codex runtime and detects existing local authorization. Sign in with ChatGPT from the dashboard to connect your quota.
 - Adds an AI deployment entry that downloads, verifies and installs the app, then checks that quota can actually be read.

@@ -13,6 +13,27 @@ test('hypothetical pace starts at verified global reset and stops at its assumed
  c.at=new Date(now-4*86400000).toISOString();assert.equal(hypotheticalPace(c,3,now).progress,1);assert.equal(hypotheticalPace(c,3,now).overdue,true);
  c.state='pending';assert.equal(hypotheticalPace(c,3,now).available,false);
 });
+
+const historyProof=(at=now-86400000)=>({at:new Date(at).toISOString(),type:'global',timeConflict:false,url:'https://x.com/thsottiaux/status/123456',sources:['didcodexreset','codex-resets-feed'].map((family,i)=>({id:String(i),family,at:new Date(at).toISOString(),url:'https://x.com/thsottiaux/status/123456'}))});
+test('assumed pace retains a cross-checked historical anchor when feeds expire or latest record is pending',()=>{
+ const row=historyProof();
+ for(const state of ['unavailable','pending','conflict'])assert.equal(hypotheticalPace({state,at:new Date(now-3600000).toISOString()},3,now,[row]).progress,1/3);
+ assert.equal(hypotheticalPace(null,4,now,[row]).progress,1/4);
+ assert.equal(hypotheticalPace(null,3,now+4*86400000,[row]).progress,1);
+ assert.equal(hypotheticalPace(null,3,now+4*86400000,[row]).overdue,true);
+ assert.equal(require('../app/ui/pace-timing.js').hypotheticalPace,hypotheticalPace);
+});
+test('historical pace requires matching post evidence from independent chains',()=>{
+ const row=historyProof();
+ for(const invalid of [{...row,timeConflict:true},{...row,type:'banked'},{...row,scope:{plans:['pro']}},historyProof(now+1000),{...row,sources:row.sources.map(s=>({...s,family:'codex-resets-feed'}))},{...row,familyCount:9,sources:[]},{...row,sources:row.sources.map(s=>({...s,family:'unverified-feed'}))},{...row,sources:row.sources.map((s,i)=>({...s,url:'https://x.com/thsottiaux/status/'+(123456+i)}))}])assert.equal(hypotheticalPace(null,3,now,[invalid]).available,false);
+});
+test('latest verified historical reset is selected and newer verified current reset replaces it',()=>{
+ const rows=[historyProof(now-2*86400000),historyProof()];
+ assert.equal(hypotheticalPace(null,3,now,rows).progress,1/3);
+ const c={state:'confirmed',at:new Date(now-3600000).toISOString()};
+ assert.equal(hypotheticalPace(c,3,now,rows).progress,1/72);
+ assert.equal(hypotheticalPace(c,0,now,rows).available,false);
+});
 test('history includes recent completed global, limited-plan and banked events, newest first',()=>{
  const did=normalize('did',fixture,new Date(now).toISOString());const rows=resetHistory([did],[],now);
  assert.equal(rows.length,10);assert.equal(rows[0].id,'2107676072871600470');assert.equal(rows.at(-1).type,'banked');

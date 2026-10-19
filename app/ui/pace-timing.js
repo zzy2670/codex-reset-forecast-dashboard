@@ -19,6 +19,24 @@
   if(!Number.isFinite(anchor)||!Number.isFinite(deadline)||deadline<=anchor)return null;
   return Math.max(0,Math.min(100,(now-anchor)/(deadline-anchor)*100));
  }
+ function hypotheticalPace(consensus,days=3,now=Date.now(),history=[]){
+  if(!Number.isFinite(days)||days<=0||!Number.isFinite(now))return {available:false,days};
+  const candidates=[];
+  const current=Date.parse(consensus?.at);
+  if(consensus?.state==='confirmed'&&Number.isFinite(current)&&current<=now)candidates.push({at:current,origin:'current'});
+  // A completed, cross-checked event remains a historical fact after its feeds expire.
+  for(const row of history||[]){
+   const at=Date.parse(row?.at),plans=row?.scope?.plans;
+   if(!automatic.has(row?.type)||row.timeConflict||!Number.isFinite(at)||at>now||plans?.length&&!plans.includes('all'))continue;
+   const post=completionPost(row)&&new URL(row.url).pathname.match(/\/status\/(\d+)/)[1];
+   const proof=(row.sources||[]).filter(s=>s.family&&s.family!=='unverified-feed'&&completionPost(s)&&post&&new URL(s.url).pathname.match(/\/status\/(\d+)/)[1]===post&&Number.isFinite(Date.parse(s.at))&&Math.abs(Date.parse(s.at)-at)<=120000);
+   if(new Set(proof.map(s=>s.family)).size>=2)candidates.push({at,origin:'history'});
+  }
+  const chosen=candidates.sort((a,b)=>b.at-a.at)[0];
+  if(!chosen)return {available:false,days};
+  const elapsed=now-chosen.at,duration=days*86400000;
+  return {available:true,days,anchor:new Date(chosen.at).toISOString(),end:new Date(chosen.at+duration).toISOString(),elapsedHours:elapsed/3600000,progress:Math.min(1,elapsed/duration),overdue:elapsed>=duration};
+ }
  function projectForecasts(source,now=Date.now()){
   const key=f=>`${f.id}:${f.start}:${f.end}:${f.type}:${[...(f.scope?.plans||[])].sort().join(',')}:${f.timingKind||'announcement'}`;
   const unique=items=>[...new Map(items.filter(f=>f&&f.state!=='none').map(f=>[key(f),f])).values()];
@@ -133,5 +151,5 @@
   return {active:true,earliest,latest,range:earliest!==latest,entries,sourceCount:new Set(entries.map(e=>e.sourceId)).size,
    mapped,axisStart,axisEnd,axisLabel,left,right};
  }
- return {warning,isFresh,forecastState,remainingSchedule,paceProgress,historyStart,projectForecasts,projectAfterReset,localCycleCompletion,latestNews};
+ return {warning,isFresh,forecastState,remainingSchedule,paceProgress,hypotheticalPace,historyStart,projectForecasts,projectAfterReset,localCycleCompletion,latestNews};
 });
