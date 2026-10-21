@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {warning,paceProgress,remainingSchedule}=require('../app/ui/pace-timing.js');
+const {warning,paceProgress,remainingSchedule,calendarPace,hypotheticalPace}=require('../app/ui/pace-timing.js');
 const now=Date.parse('2026-10-08T00:00:00+08:00'),day=86400000;
 const quota={resetsAt:new Date(now+6*day).toISOString(),durationMins:10080,planType:'pro'};
 const source=(id,start,end=start)=>({id,name:id,status:'ok',updatedAt:new Date(now).toISOString(),fetchedAt:new Date(now).toISOString(),maxAge:900000,forecast:{state:'scheduled',type:'global',start:new Date(start).toISOString(),end:new Date(end).toISOString()}});
@@ -48,4 +48,15 @@ test('reported October 10 window start disappears from next estimate without mut
 
 test('view trims a window locally at its start while the source schedule identity remains stable',()=>{
  const f={state:'scheduled',start:new Date(now+1000).toISOString(),end:new Date(now+5000).toISOString()};assert.equal(remainingSchedule(f,now),f);assert.equal(remainingSchedule(f,now+1000).start,null);assert.equal(remainingSchedule(f,now+5000),f);assert.equal(f.start,new Date(now+1000).toISOString());
+});
+test('calendar pace owns an exact target independent of the manual X-day assumption',()=>{
+ const anchor=new Date(now-day).toISOString(),at=new Date(now+day).toISOString(),target={anchor,at};
+ assert.deepEqual(calendarPace(target,now),{available:true,anchor,end:at,days:2,progress:.5,overdue:false});
+ assert.equal(calendarPace(target,now+day/2).progress,.75);assert.equal(calendarPace(target,now+day).progress,1);assert.equal(calendarPace(target,now+day).overdue,true);assert.equal(calendarPace(target,now+2*day).progress,1);
+ const consensus={state:'confirmed',at:anchor},before=hypotheticalPace(consensus,3,now);
+ const later=calendarPace({anchor,at:new Date(now+3*day).toISOString()},now);assert.equal(later.days,4);assert.equal(later.progress,.25);assert.deepEqual(hypotheticalPace(consensus,3,now),before);
+ assert.equal(hypotheticalPace(consensus,5,now).days,5);assert.equal(calendarPace(target,now).days,2);
+});
+test('calendar pace rejects missing, invalid, reversed and future anchors without inventing a target',()=>{
+ for(const target of [undefined,null,{}, {anchor:'bad',at:new Date(now+day).toISOString()},{anchor:new Date(now-day).toISOString(),at:'bad'},{anchor:new Date(now+1).toISOString(),at:new Date(now+day).toISOString()},{anchor:new Date(now-day).toISOString(),at:new Date(now-day).toISOString()},{anchor:new Date(now).toISOString(),at:new Date(now-day).toISOString()}])assert.deepEqual(calendarPace(target,now),{available:false});
 });

@@ -42,7 +42,7 @@ Routine mode shows your quota in green. A timed automatic-reset announcement for
 
 ![Usage bars, drag handle and assumed reset interval.](docs/assets/feature-pace.png)
 
-Compare actual usage with even usage across your personal cycle and an assumed X-day reset cycle. X starts at 3 days; click its label to change it. Drag a handle to reorder the bars.
+Four bars show actual usage, pacing for an assumed X-day reset cycle, pacing toward a calendar-selected time, and even usage across your personal cycle. The default is 3 days; click the label to change it. Set the calendar target separately, clear either assumption, and drag a handle to reorder the bars.
 
 ## The red reset pacing line
 
@@ -66,7 +66,7 @@ Each card shows the site’s next reset time, announcement and update time. Expa
 
 ## Reset history
 
-The calendar above the history list shows the past six weeks and the next week. Reset days are red, with each time shown to the minute. Select a future date, enter an hour and confirm to update the assumed reset period in the usage bars.
+The calendar groups the past six weeks and the next week by month. Reset days are red; today has a blue border and a blue date circle. All times use Beijing time. Select a future date, enter an hour and confirm to set the separate calendar pace bar.
 
 ![Latest reset and an expanded history record.](docs/assets/feature-history.png)
 

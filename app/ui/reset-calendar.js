@@ -32,7 +32,7 @@
  function historyEvents(history,range){
   const rows=(Array.isArray(history)?history:[]).filter(record=>{
    const at=timestamp(record?.at),day=Math.floor((at+OFFSET)/DAY);
-   return Number.isFinite(at)&&at<=range.at&&day>=range.start&&day<=range.today;
+   return !['observation','commentary','repair'].includes(record?.type)&&Number.isFinite(at)&&at<=range.at&&day>=range.start&&day<=range.today;
   });
   // IDs and original-post URLs are aliases. Merge both transitively so source
   // copies cannot create a second event even when they use different row IDs.
@@ -58,7 +58,20 @@
    const key=keyOf(day),date=new Date(day*DAY);
    cells.push({key,day:date.getUTCDate(),month:date.getUTCMonth()+1,inRange:true,future:day>range.today,today:day===range.today,events:byDay.get(key)||[]});
   }
-  return {start:keyOf(range.start),end:keyOf(range.end),today:keyOf(range.today),cells};
+  const months=[];
+  for(const cell of cells.filter(c=>c.inRange)){
+   const key=cell.key.slice(0,7);
+   let month=months.at(-1);
+   if(!month||month.key!==key){
+    const [year,number]=key.split('-').map(Number);
+    month={key,year,month:number,cells:[]};months.push(month);
+    const leading=(new Date(`${cell.key}T00:00:00.000Z`).getUTCDay()+6)%7;
+    for(let i=0;i<leading;i++)month.cells.push({key:null,day:null,month:null,inRange:false,future:false,today:false,events:[]});
+   }
+   month.cells.push(cell);
+  }
+  for(const month of months)while(month.cells.length%7)month.cells.push({key:null,day:null,month:null,inRange:false,future:false,today:false,events:[]});
+  return {start:keyOf(range.start),end:keyOf(range.end),today:keyOf(range.today),cells,months};
  }
  function targetForDay(key,hour,now=Date.now()){
   const range=bounds(now),day=dayNumber(key);

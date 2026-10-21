@@ -1,6 +1,14 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
+ '日历时间':'Calendar target','日历节奏':'Calendar pace','指定重置时间':'Choose a reset time',
+ '指定时间':'Selected time','未设置日历时间':'No calendar target','清除日期假设':'Clear calendar target',
+ '清除天数假设':'Clear assumed period','日期假设已清除':'Calendar target cleared',
+ '天数假设已清除':'Assumed period cleared','已更新日历节奏':'Calendar pace updated',
+ '站方观察':'Source observation','回顾':'Recap','限定套餐修复':'Plan-specific fix',
+ '观察记录时间':'Observation time','消息发布时间':'Post time','完成记录':'Completion record','观察记录':'Observation record',
+ '调整日历节奏位置':'Reorder calendar pace','日历指定节奏':'Calendar target pace',
+
  '确定':'Confirm','历史重置日历':'Reset calendar','过去6周 · 未来1周 · 北京时间':'Past 6 weeks · Next week · Beijing time',
  '周一':'Mon','周二':'Tue','周三':'Wed','周四':'Thu','周五':'Fri','周六':'Sat','周日':'Sun',
  '设定假设重置时间':'Set an assumed reset time','点击未来日期，再选择小时':'Choose a future date, then an hour',

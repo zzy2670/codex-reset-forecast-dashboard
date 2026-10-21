@@ -37,7 +37,7 @@ test('latest verified historical reset is selected and newer verified current re
 test('history includes recent completed global, limited-plan and banked events, newest first',()=>{
  const did=normalize('did',fixture,new Date(now).toISOString());const rows=resetHistory([did],[],now);
  assert.equal(rows.length,10);assert.equal(rows[0].id,'2107676072871600470');assert.equal(rows.at(-1).type,'banked');
- assert.ok(rows.some(r=>r.scope?.plans?.includes('pro')));assert.ok(rows.every(r=>Date.parse(r.at)>=historyStart(now)));
+ assert.ok(rows.some(r=>r.scope?.plans?.includes('pro500')));assert.ok(rows.every(r=>Date.parse(r.at)>=historyStart(now)));
  assert.equal(resetHistory([],rows,now).length,10);
  let repeated=rows;for(let i=0;i<10;i++)repeated=resetHistory([did],repeated,now);assert.equal(repeated.length,10);
  const banked=rows.find(r=>r.type==='banked');assert.equal(resetHistory([], [...rows,{...banked,id:`${banked.id}:banked:banked`}],now).length,10);

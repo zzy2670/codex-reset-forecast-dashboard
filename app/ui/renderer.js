@@ -126,35 +126,35 @@ function renderHistory(now=Date.now()) {
  $('history-range').textContent=`从 2026/9/1 起 · 最新在上 · 北京时间`;
  $('history-list').innerHTML=rows.length?rows.map(r=>{
    const plans=r.scope?.plans||[], limited=plans.length&&!plans.includes('all');
-   const type=r.type==='banked'?'重置卡':r.type==='global_and_banked'?'全局＋重置卡':limited?'限定套餐重置':'全局重置';
+   const type=r.type==='observation'?'站方观察':r.type==='commentary'?'回顾':r.type==='repair'?'限定套餐修复':r.type==='banked'?'重置卡':r.type==='global_and_banked'?'全局＋重置卡':limited?'限定套餐重置':'全局重置';
    const scope=limited?` · ${plans.map(p=>p.toUpperCase()).join('、')}`:'';
-   return `<article class="history-row"><div class="history-time"><time>${esc(dateFormat.format(date(r.at)))}<strong>${esc(clock(r.at))}</strong></time><span>${r.timeBasis==='effective'?'记录生效时间':'完成公告时间'}</span></div><div class="history-content"><div class="history-row-heading"><span class="pill ${r.type==='banked'?'warn':''}">${esc(type+scope)}</span><span class="history-evidence">${r.familyCount>=2?`${r.familyCount} 条采集链收录`:'单源记录'} · ${r.sources.length} 站${r.timeConflict?' · 记录时间存在分歧':''}</span></div><p class="history-quote"${r.text?' data-original':''}>${esc(r.text||'已收录完成记录，请查看来源原文。')}</p><details class="history-proof"><summary>查看各站记录</summary>${r.sources.map(s=>`<p><strong>${esc(s.name)}</strong> · 来源记录时间 ${esc(precise(s.at||r.at))}<br>采集链：${esc(s.family||'unverified')} ${s.url?`<button class="text-button" data-link="${esc(s.url)}">查看原帖 ↗</button>`:''}</p>`).join('')}</details></div>${r.url?`<button class="text-button" data-link="${esc(r.url)}">查看原帖 ↗</button>`:''}</article>`;
+   return `<article class="history-row"><div class="history-time"><time>${esc(dateFormat.format(date(r.at)))}<strong>${esc(clock(r.at))}</strong></time><span>${r.type==='observation'?'观察记录时间':['commentary','repair'].includes(r.type)?'消息发布时间':r.timeBasis==='effective'?'记录生效时间':'完成公告时间'}</span></div><div class="history-content"><div class="history-row-heading"><span class="pill ${r.type==='banked'?'warn':''}">${esc(type+scope)}</span><span class="history-evidence">${r.familyCount>=2?`${r.familyCount} 条采集链收录`:'单源记录'} · ${new Set(r.sources.map(s=>s.id)).size} 站${r.timeConflict?' · 记录时间存在分歧':''}</span></div><p class="history-quote"${r.text?' data-original':''}>${esc(r.text||'已收录完成记录，请查看来源原文。')}</p><details class="history-proof"><summary>查看各站记录</summary>${r.sources.map(s=>`<p><strong>${esc(s.name)}</strong> · ${s.phase==='commentary'?'回顾':s.phase==='repair'?'限定套餐修复':s.evidenceOnly?'观察记录':'完成记录'} · 来源记录时间 ${esc(precise(s.at||r.at))}<br>采集链：${esc(s.family||'unverified')} ${s.url?`<button class="text-button" data-link="${esc(s.url)}">查看原帖 ↗</button>`:''}</p>`).join('')}</details></div>${r.url?`<button class="text-button" data-link="${esc(r.url)}">查看原帖 ↗</button>`:''}</article>`;
  }).join(''):'<p class="history-empty">正在获取 2026/9/1 以来的完成记录…</p>';
 }
 let calendarDate=null,calendarSaving=false,lastCalendarMarkup='';
 const dayLabel=days=>String(days>=.01?Number(days.toFixed(3)):Number(days.toPrecision(2)));
 function renderCalendar(now=Date.now()){
- const model=ResetCalendar.calendar(state.history,now),pace=PaceTiming.hypotheticalPace(state.consensus,state.settings.hypotheticalDays||3,now,state.history);
+ const model=ResetCalendar.calendar(state.history,now),pace=PaceTiming.calendarPace(state.settings.calendarTarget,now);
  if(calendarDate&&(calendarDate<=model.today||calendarDate>model.end))calendarDate=null;
  const targetDay=pace.available?ResetCalendar.dateKey(pace.end):null;
  const showBanked=$('calendar-show-banked').checked,showLimited=$('calendar-show-limited').checked;
- const markup=model.cells.map(c=>{
+ const markup=model.months.map(month=>`<section class="calendar-month"><h3 class="calendar-month-heading" style="margin-left:calc(${month.cells.findIndex(c=>c.inRange)%7} * 100% / 7)">${state.settings.language==='en'?month.month:month.month+'月'}</h3><div class="calendar-month-grid">`+month.cells.map(c=>{
   if(!c.inRange)return '<div class="calendar-cell empty" aria-hidden="true"></div>';
   const events=c.events.filter(e=>(showBanked||e.type!=='banked')&&(showLimited||!e.scope?.plans?.length||e.scope.plans.includes('all')));
   const assumed=targetDay===c.key,hasReset=events.some(e=>e.type!=='banked');
   const labels=events.map(e=>`${e.time}${e.type==='banked'?' · 重置卡':e.scope?.plans?.length&&!e.scope.plans.includes('all')?' · '+e.scope.plans.join('/').toUpperCase():''}`);
   const text=labels.join('；')+(assumed?`${labels.length?'；':''}假设时间 ${full(pace.end)}`:'');
-  return `<button class="calendar-cell${c.future?' future':''}${c.today?' is-today':''}${hasReset?' has-reset':''}${calendarDate===c.key?' selected':''}${assumed?' assumed':''}" data-calendar-day="${c.key}" ${c.future?'':'disabled'} aria-label="${esc(c.key+' '+text)}" aria-pressed="${calendarDate===c.key}" title="${esc(c.key+' '+text)}"><span class="calendar-day">${c.day}<small>${c.day===1||c.key===model.start?c.month+'/':''}${c.today?'●':''}</small></span>${labels.map((label,i)=>`<span class="calendar-time${events[i].type==='banked'?' banked':''}">${esc(events[i].type==='banked'?'＋'+events[i].time:events[i].time)}</span>`).join('')}${assumed?`<span class="calendar-time assumed-time">◇${esc(full(pace.end).split(' ').at(-1))}</span>`:''}</button>`;
- }).join('');
+  return `<button class="calendar-cell${c.future?' future':''}${c.today?' is-today':''}${hasReset?' has-reset':''}${calendarDate===c.key?' selected':''}${assumed?' assumed':''}" data-calendar-day="${c.key}" ${c.future?'':'disabled'} aria-label="${esc(c.key+' '+text)}" aria-pressed="${calendarDate===c.key}" title="${esc(c.key+' '+text)}"><span class="calendar-day"><span class="calendar-day-number">${c.day}</span></span>${labels.map((label,i)=>`<span class="calendar-time${events[i].type==='banked'?' banked':''}">${esc(events[i].time)}</span>`).join('')}${assumed?`<span class="calendar-time assumed-time">${esc(clock(pace.end).slice(0,5))}</span>`:''}</button>`;
+ }).join('')+'</div></section>').join('');
  if(markup!==lastCalendarMarkup){$('reset-calendar').innerHTML=markup;lastCalendarMarkup=markup;}
  $('calendar-selected').value=calendarDate||'';
- $('calendar-current').textContent=pace.available?`当前假设 · ${full(pace.end)} · ${dayLabel(pace.days)} 天`:'';
+ $('calendar-current').textContent=pace.available?`指定时间 · ${full(pace.end)}`:'';
  let valid=false;
  if(!calendarDate)$('calendar-preview').textContent='请先选择未来日期';
  else try{
   const value=$('calendar-hour').value,hour=value.trim()===''?NaN:Number(value);
-  const result=ResetCalendar.daysForTarget(pace.anchor,calendarDate,hour,now);valid=true;
-  $('calendar-preview').textContent=`目标 ${full(result.targetAt)} · 假设 ${dayLabel(result.days)} 天`;
+  const result=ResetCalendar.daysForTarget(PaceTiming.hypotheticalPace(state.consensus,1,now,state.history).anchor,calendarDate,hour,now);valid=true;
+  $('calendar-preview').textContent=`目标 ${full(result.targetAt)} · 日历节奏`;
  }catch(error){$('calendar-preview').textContent=error.code==='NO_ANCHOR'?'等待已核对的全局重置，以设置假设时间':error.code==='INVALID_PERIOD'?'假设天数须大于0且不超过365':'请选择未来一周的日期及0—23点';}
  $('calendar-confirm').disabled=calendarSaving||!valid;
 }
@@ -163,18 +163,29 @@ for(const id of ['calendar-hour','calendar-show-banked','calendar-show-limited']
 $('calendar-confirm').addEventListener('click',async()=>{
  if(calendarSaving||$('calendar-confirm').disabled)return;
  calendarSaving=true;renderCalendar();
- const saved=await call(()=>window.dashboard.saveSettings({hypotheticalTarget:{day:calendarDate,hour:Number($('calendar-hour').value)}}));
- calendarSaving=false;if(saved){render(saved);$('calendar-result').textContent='已更新假设节奏';}renderCalendar();applyLocale();
+ const saved=await call(()=>window.dashboard.saveSettings({calendarTarget:{day:calendarDate,hour:Number($('calendar-hour').value)}}));
+ calendarSaving=false;if(saved){render(saved);$('calendar-result').textContent='已更新日历节奏';}renderCalendar();applyLocale();
 });
+
+$('calendar-clear').addEventListener('click',async()=>{const saved=await call(()=>window.dashboard.saveSettings({clearCalendarTarget:true}));if(saved){render(saved);$('calendar-result').textContent='日期假设已清除';applyLocale();}});
+$('clear-hypothetical').addEventListener('click',async()=>{const saved=await call(()=>window.dashboard.saveSettings({clearHypothetical:true}));if(saved)render(saved);});
+function renderCalendarPace(now=Date.now()){
+ const pace=PaceTiming.calendarPace(state.settings.calendarTarget,now),progress=pace.available?pace.progress:null;
+ $('calendar-fill').style.width=`${(progress??0)*100}%`;
+ $('calendar-track').setAttribute('aria-valuenow',String(Math.round((progress??0)*100)));
+ $('calendar-percent').textContent=progress===null?'—':`${Math.round(progress*100)}%`;
+ $('calendar-pace-note').textContent=pace.available?`指定时间 · ${full(pace.end)}`:'未设置日历时间';
+ $('calendar-clear').disabled=!pace.available;
+}
 function renderHypothetical(now=Date.now()) {
  const days=state.settings.hypotheticalDays||3,pace=PaceTiming.hypotheticalPace(state.consensus,days,now,state.history);
  const at=Date.parse(pace.anchor),known=pace.available;
- const progress=known?pace.progress:null;
+ const progress=known&&state.settings.hypotheticalEnabled!==false?pace.progress:null;
  $('hypothetical-days-label').textContent=dayLabel(days);
  $('hypothetical-fill').style.width=`${(progress??0)*100}%`;
  $('hypothetical-track').setAttribute('aria-valuenow',String(Math.round((progress??0)*100)));
  $('hypothetical-percent').textContent=progress===null?'—':`${Math.round(progress*100)}%`;
- $('hypothetical-note').textContent=known?progress>=1?'假设周期已到期 · 等待实际重置':`假设 ${dayLabel(days)} 天 · 从最近全局重置起算 · 参考到期 ${full(new Date(at+days*86400000).toISOString())}`:'等待已核对的全局重置，以显示假设节奏';
+ $('hypothetical-note').textContent=state.settings.hypotheticalEnabled===false?'天数假设已清除':known?progress>=1?'假设周期已到期 · 等待实际重置':`假设 ${dayLabel(days)} 天 · 从最近全局重置起算 · 参考到期 ${full(new Date(at+days*86400000).toISOString())}`:'等待已核对的全局重置，以显示假设节奏';
 }
 function renderForecastWarning(now=Date.now()) {
  const w=PaceTiming.warning(state.sources,state.quotaDisplay,state.consensus,state.settings.hypotheticalDays||3,now,state.localReset);
@@ -195,7 +206,7 @@ function tick() {
   $('local-date').innerHTML=`<span>${esc(new Intl.DateTimeFormat(DashboardI18n.locale(state?.settings.language),{timeZone:zone,month:'long',day:'numeric',weekday:'long'}).format(now))}</span><strong>${esc(timeFormat.format(now))}</strong>`;
   if (!state) return;
   const elapsed=$('reset-elapsed');if(elapsed&&state.consensus?.at){const hours=Math.max(0,(Date.now()-Date.parse(state.consensus.at))/3600000);elapsed.innerHTML=`<span>距今</span><strong><span>${hours.toFixed(2)}<small>小时</small></span><span class="elapsed-days"><small>=</small>${(hours/24).toFixed(2)}<small>天</small></span></strong>`;}
-  renderQuota(false);renderHypothetical();renderCalendar(); renderForecastWarning(now.getTime());
+  renderQuota(false);renderHypothetical();renderCalendarPace();renderCalendar(); renderForecastWarning(now.getTime());
   const newsDeadlines=(state.sources||[]).map(s=>{const news=PaceTiming.latestNews(s,now.getTime());return Date.parse(news?.end||news?.start)<=now.getTime();}).join(',');
   const key=(state.sources||[]).map(s=>`${s.id}:${isFresh(s)}:${[s.forecast,...(s.additionalForecasts||[])].map(f=>PaceTiming.forecastState(f)+':'+!!PaceTiming.remainingSchedule(f).clippedStart).join(',')}`).join('|')+newsDeadlines+PaceTiming.historyStart(now.getTime());
   if(key!==temporalKey){temporalKey=key;$('sources-grid').innerHTML=(state.sources||[]).map(cardMarkup).join('');renderHistory(now.getTime());

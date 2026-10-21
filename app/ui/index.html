@@ -40,12 +40,14 @@
         <div class="quota-bars">
           <div class="quota-row" data-bar="actual"><button class="bar-drag-handle" aria-label="调整实际消耗位置" title="按住拖动；也可用↑↓键调整">⠿</button><span>实际消耗</span><div class="track" role="progressbar" aria-label="实际消耗" id="actual-track"><i class="actual-fill" id="actual-fill"></i></div><strong id="actual-percent">—</strong></div>
           <div class="quota-row" data-bar="hypothetical"><button class="bar-drag-handle" aria-label="调整假设节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><button id="hypothetical-settings" class="pace-label" title="设置假设重置周期">假设 <span id="hypothetical-days-label">3</span> 天</button><div class="track" role="progressbar" aria-label="假设重置节奏" id="hypothetical-track"><i class="hypothetical-fill" id="hypothetical-fill"></i></div><strong id="hypothetical-percent">—</strong></div>
+          <div class="quota-row" data-bar="calendar"><button class="bar-drag-handle" aria-label="调整日历节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><span>日历时间</span><div class="track" role="progressbar" aria-label="日历指定节奏" id="calendar-track"><i class="calendar-fill" id="calendar-fill"></i></div><strong id="calendar-percent">—</strong></div>
           <div class="quota-row" data-bar="theory"><button class="bar-drag-handle" aria-label="调整均匀节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><span>均匀节奏</span><div class="track" role="progressbar" aria-label="均匀节奏" id="theory-track"><i class="theory-fill" id="theory-fill"></i></div><strong id="theory-percent">—</strong></div>
           <div id="forecast-markers" class="forecast-markers" aria-hidden="true" hidden></div>
           <div class="bar-guides" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
         </div>
         <p id="forecast-warning" class="forecast-warning" role="status" hidden></p>
         <p class="pace-note" id="hypothetical-note">假设节奏以最近已核对的全局重置为起点</p>
+        <p class="pace-note" id="calendar-pace-note">未设置日历时间</p>
         <p class="bar-sort-hint">拖动左侧把手可调整横条顺序</p><span id="bar-sort-status" class="sr-only" role="status" aria-live="polite"></span>
         <div class="panel-bottom"><span id="quota-reset">个人周期独立于全局重置预告</span><button class="text-button" id="quota-open">刷新额度</button></div>
       </section>
@@ -61,12 +63,12 @@
       <div class="calendar-layout">
         <div class="calendar-board"><div class="calendar-weekdays" aria-hidden="true"><span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span></div><div id="reset-calendar" class="reset-calendar" role="group" aria-label="历史重置日历"></div></div>
         <aside class="calendar-options">
-          <h3>设定假设重置时间</h3><p class="calendar-hint">点击未来日期，再选择小时</p>
+          <h3>指定重置时间</h3><p class="calendar-hint">点击未来日期，再选择小时</p>
           <label class="field">已选日期<input id="calendar-selected" readonly placeholder="请先选择未来日期"></label>
           <label class="field">小时（北京时间）<input id="calendar-hour" type="number" min="0" max="23" step="1" value="15"></label>
-          <p id="calendar-preview" class="calendar-preview"></p><button id="calendar-confirm" class="primary-button" disabled>确定</button><p id="calendar-result" class="calendar-result" role="status"></p>
+          <p id="calendar-preview" class="calendar-preview"></p><div class="calendar-actions"><button id="calendar-confirm" class="primary-button" disabled>确定</button><button id="calendar-clear" class="secondary-button">清除日期假设</button></div><p id="calendar-result" class="calendar-result" role="status"></p>
           <div class="calendar-filters"><label><input id="calendar-show-limited" type="checkbox" checked>限定套餐重置</label><label><input id="calendar-show-banked" type="checkbox">重置卡记录</label></div>
-          <div class="calendar-legend"><span><i class="legend-reset"></i>已记录重置</span><span><i class="legend-assumed"></i>假设时间</span></div><p id="calendar-current" class="calendar-current"></p>
+          <div class="calendar-legend"><span class="legend-reset-text">已记录重置</span><span class="legend-assumed-text">指定时间</span></div><p id="calendar-current" class="calendar-current"></p>
         </aside>
       </div>
     </section>
@@ -87,7 +89,7 @@
       <label class="setting-row"><span>深色外观</span><input id="setting-dark" type="checkbox" role="switch"></label>
     </div>
     <div class="settings-section"><h3>本机 Codex 额度</h3><label class="field" id="quota-limit-field" hidden>额度类别<select id="quota-limit-select"></select></label><button class="secondary-button" id="settings-refresh-quota">刷新本机额度</button><p class="help-text">自动读取本机 Codex 当前账户的剩余比例与重置时间。</p></div>
-    <div class="settings-section"><h3>节奏与文字</h3><label class="field">假设每 X 天重置<input id="setting-hypothetical-days" type="number" min="0.000001" max="365" step="any" value="3"></label><p class="help-text">默认 3 天。以最近已核对的全局重置为起点，到期停在 100%，等待实际重置。</p><label class="field">正文字号 <span id="body-font-value">13 px</span><input id="setting-body-font" type="range" min="11" max="22" step="1" value="13"></label><p class="help-text">正文和更小的文字同步调整，保留字号层次；大号时间、额度和预告数字保持原尺寸。</p></div>
+    <div class="settings-section"><h3>节奏与文字</h3><label class="field">假设每 X 天重置<input id="setting-hypothetical-days" type="number" min="0.000001" max="365" step="any" value="3"></label><button id="clear-hypothetical" class="text-button">清除天数假设</button><p class="help-text">默认 3 天。以最近已核对的全局重置为起点，到期停在 100%，等待实际重置。</p><label class="field">正文字号 <span id="body-font-value">13 px</span><input id="setting-body-font" type="range" min="11" max="22" step="1" value="13"></label><p class="help-text">正文和更小的文字同步调整，保留字号层次；大号时间、额度和预告数字保持原尺寸。</p></div>
     <div class="settings-footnote">看板每 30 秒检查。Did Codex Reset 受接口限流，约 3.5 分钟更新。实际新消息还取决于各站的采集频率。</div>
     <div id="settings-error" class="form-error" role="alert"></div>
   </dialog>

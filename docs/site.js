@@ -26,7 +26,7 @@ const translations={
       ],
       [
         "Quota usage",
-        "Compare actual usage with even usage across your personal cycle and an assumed X-day reset cycle. X starts at 3 days; click its label to change it. Drag a handle to reorder the bars."
+        "Four bars show actual usage, pacing for an assumed X-day reset cycle, pacing toward a calendar-selected time, and even usage across your personal cycle. The default is 3 days; click the label to change it. Set the calendar target separately, clear either assumption, and drag a handle to reorder the bars."
       ],
       [
         "The red reset pacing line",
@@ -86,7 +86,7 @@ const translations={
       ],
       [
         "额度消耗进度",
-        "三条横条分别是实际消耗、个人周期的均匀节奏，以及假设每 X 天重置一次的节奏。X 默认 3 天，点击横条上的标签就能修改；拖动左侧把手可以调整顺序。"
+        "四条横条分别显示实际消耗、假设每 X 天重置的节奏、日历指定时间的节奏，以及个人周期的均匀节奏。X 默认 3 天，点击标签修改；日历时间独立设置，两个假设可分别清除。拖动左侧把手可以调整顺序。"
       ],
       [
         "红色重置节奏线",
@@ -146,7 +146,7 @@ const translations={
       ],
       [
         "利用枠の消費ペース",
-        "実際の使用量、個人サイクルでの均等ペース、X日ごとのリセットを仮定したペースを比較できます。Xは初期値3日。ラベルで日数を変更し、ハンドルでバーを並べ替えます。"
+        "4本のバーで実際の使用量、X日ごとのリセットを仮定したペース、カレンダーで指定した時刻までのペース、個人サイクルの均等ペースを比較できます。Xは初期値3日。日数とカレンダーの仮定は個別に設定・解除でき、ハンドルで並べ替えられます。"
       ],
       [
         "赤いリセットペースライン",
@@ -206,7 +206,7 @@ const translations={
       ],
       [
         "Consumo de cuota",
-        "Compara el consumo real con un ritmo uniforme durante tu ciclo personal y un ciclo de reinicio supuesto de X días. X empieza en 3 días; pulsa la etiqueta para cambiarlo. Arrastra los controles para ordenar las barras."
+        "Cuatro barras muestran el consumo real, el ritmo de un reinicio supuesto cada X días, el ritmo hasta la fecha elegida en el calendario y el uso uniforme durante tu ciclo personal. X empieza en 3 días. Configura y borra cada supuesto por separado; arrastra los controles para ordenar las barras."
       ],
       [
         "La línea roja de ritmo hasta el reinicio",
@@ -266,7 +266,7 @@ const translations={
       ],
       [
         "Consommation du quota",
-        "Comparez la consommation réelle au rythme régulier de votre cycle personnel et à un cycle supposé de X jours. X vaut 3 jours par défaut ; cliquez sur son libellé pour le changer. Faites glisser les poignées pour réordonner les barres."
+        "Quatre barres affichent la consommation réelle, le rythme d’un cycle supposé de X jours, le rythme jusqu’à la date choisie dans le calendrier et le rythme régulier du cycle personnel. X vaut 3 jours par défaut. Réglez et effacez chaque hypothèse séparément ; faites glisser les poignées pour réordonner les barres."
       ],
       [
         "La ligne rouge de rythme jusqu’à la réinitialisation",
@@ -326,7 +326,7 @@ const translations={
       ],
       [
         "Kontingentverbrauch",
-        "Vergleiche den tatsächlichen Verbrauch mit einer gleichmäßigen Nutzung im persönlichen Zyklus und einem angenommenen Reset alle X Tage. X startet bei 3 Tagen; klicke auf die Beschriftung, um es zu ändern. Ziehe die Griffe, um die Balken zu sortieren."
+        "Vier Balken zeigen den tatsächlichen Verbrauch, das Tempo bei einem angenommenen Reset alle X Tage, das Tempo bis zum gewählten Kalendertermin und die gleichmäßige Nutzung im persönlichen Zyklus. X startet bei 3 Tagen. Beide Annahmen lassen sich getrennt einstellen und löschen; mit den Griffen sortierst du die Balken."
       ],
       [
         "Die rote Tempolinie bis zum Reset",
@@ -386,7 +386,7 @@ const translations={
       ],
       [
         "사용량 비교",
-        "실제 사용량을 개인 주기의 균등 사용 속도 및 X일마다 초기화한다고 가정한 속도와 비교합니다. X는 기본 3일이며 라벨을 눌러 바꿀 수 있습니다. 핸들을 끌어 막대 순서를 바꿉니다."
+        "네 막대로 실제 사용량, X일마다 초기화한다고 가정한 속도, 달력에서 지정한 시각까지의 속도, 개인 주기의 균등 사용 속도를 비교합니다. X는 기본 3일입니다. 두 가정은 각각 설정하거나 지울 수 있고, 핸들을 끌어 막대 순서를 바꿀 수 있습니다."
       ],
       [
         "빨간 초기화 페이스라인",

@@ -37,3 +37,5 @@ For a custom installation, pass `-InstallDir` with its absolute directory. Perso
 ## Developing and releasing changes
 
 For source changes, run the project's unit, privacy, interface, language and onboarding checks. Build the Windows release, verify the packaged runtime and deployment report, then publish through the release workflow. Use isolated profiles for tests. Preserve installed user data and avoid sending native test notifications.
+
+Maintainer changes are installed locally after verification. Queue reviewed updates for publication at 00:00 Beijing time, at most once per day and only when updates exist. Do not push main, tags or releases immediately after edits. This schedule applies to publishing new versions; installing an already published release remains immediate.

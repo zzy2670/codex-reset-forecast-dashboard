@@ -21,7 +21,7 @@ test('cached expired projection and local aging are immediate, idempotent and ne
  const future={...source,forecast:{...source.forecast,end:new Date(now+1000).toISOString()}};assert.equal(projectForecasts(future,now).forecast.state,'scheduled');assert.equal(projectForecasts(future,now+1001).forecast.state,'none');
 });
 test('cached completion relationship removes future deadline from card and urgency',()=>{
- const s={id:'did',status:'ok',updatedAt:stamp,fetchedAt:stamp,maxAge:900000,forecast:{id:'linked',state:'scheduled',type:'global',end:'2026-10-09T07:00:00Z'},historyEvents:[{relatedRecordIds:['linked']}],additionalForecasts:[]};
+ const s={id:'did',status:'ok',updatedAt:stamp,fetchedAt:stamp,maxAge:900000,forecast:{id:'linked',state:'scheduled',type:'global',end:'2026-10-09T07:00:00Z'},historyEvents:[{type:'global',relatedRecordIds:['linked']}],additionalForecasts:[]};
  assert.equal(projectForecasts(s,now).forecast.state,'none');assert.equal(warning([s],null,null,3,now).active,false);
 });
 test('same post and time retain separate plans and inferred versus explicit evidence',()=>{
@@ -31,4 +31,11 @@ test('same post and time retain separate plans and inferred versus explicit evid
 });
 test('missing Did reset type cannot become an automatic global forecast',()=>{
  for(const resetType of [null,undefined]){const r=raw();r.data.items.unshift({...old,id:'999999',source:{url:'https://x.com/thsottiaux/status/999999'},resetType,scheduleWindow:{endAt:'2026-10-09T07:00:00Z'}});const s=normalize('did',r,stamp);assert.equal(s.forecast.state,'none');assert.equal(s.additionalForecasts[0].type,'unknown');assert.equal(warning([s],null,null,3,now).active,false);}
+});
+
+test('observation, recap and repair links do not fulfill a pending automatic reset',()=>{
+ for(const type of ['observation','commentary','repair']){
+  const source={id:'did',forecast:{id:'linked',state:'scheduled',type:'global',end:'2026-10-09T07:00:00Z'},historyEvents:[{type,phase:type,relatedRecordIds:['linked']}],additionalForecasts:[]};
+  assert.equal(projectForecasts(source,now).forecast.state,'scheduled');
+ }
 });

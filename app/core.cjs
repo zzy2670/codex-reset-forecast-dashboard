@@ -1,5 +1,6 @@
 'use strict';
 const {isFresh,forecastState,projectForecasts}=require('./ui/pace-timing.js');
+const {projectSourceHistory}=require('./history-events.cjs');
 
 const SOURCES = [
   { id: 'codex', name: 'Codex Reset', url: 'https://codex-reset.com/zh/', api: 'https://codex-reset.com/api/forecast', family: 'codex-reset', familyLabel: '独立采集 · Codex Reset', interval: 30000, maxAge: 900000, color: '#3478f6', symbol: 'C' },
@@ -18,9 +19,17 @@ const postId = u => safeUrl(u)?.match(/(?:x\.com|twitter\.com)\/[^/]+\/status\/(
 const isAutomatic = type => ['reset', 'regular', 'global', 'automatic', 'global_and_banked', 'both', 'combined'].includes(type);
 const kindName = type => isAutomatic(type) ? '全局重置' : type === 'banked' ? '重置卡' : '范围待核实';
 
-function event({ id, at, url, text, type = 'global', scope = null, timeBasis = 'announcement' }) {
+function recordMetadata(record){
+ const result={};
+ if(['observation','commentary','repair','completion'].includes(record?.phase))result.phase=record.phase;
+ if(typeof record?.evidenceOnly==='boolean')result.evidenceOnly=record.evidenceOnly;
+ if(record?.completionRecordId!==undefined)result.completionRecordId=String(record.completionRecordId);
+ if(Array.isArray(record?.relatedRecordIds))result.relatedRecordIds=record.relatedRecordIds.map(String);
+ return result;
+}
+function event({ id, at, url, text, type = 'global', scope = null, timeBasis = 'announcement',...metadata }) {
   if (!iso(at)) return null;
-  return { id: String(postId(url) || id || at), at: iso(at), url: safeUrl(url), text: clean(text), type, kindLabel: kindName(type), scope, timeBasis };
+  return { id: String(postId(url) || id || at), at: iso(at), url: safeUrl(url), text: clean(text), type, kindLabel: kindName(type), scope, timeBasis,...recordMetadata(metadata) };
 }
 function forecast(data, now) {
   if (!data) return { state: 'none', start: null, end: null, url: null, text: '', type: null, id: null };
@@ -51,7 +60,7 @@ function normalize(id, raw, fetchedAt = new Date().toISOString()) {
     const a = raw.latest_alert;
     const source = raw.evidence?.find(e => e.code === 'last_reset');
     const lastUrl = a?.kind === 'reset' && a?.state === 'confirmed' ? a.url : source?.href;
-    last = event({ id: postId(lastUrl), at: raw.last_reset_at, url: lastUrl, text: a?.state === 'confirmed' && a?.kind === 'reset' ? a.summary : '站方收录的最近全局重置', type: 'global' });
+    last = event({ ...recordMetadata(a?.kind==='reset'?a:source),id: postId(lastUrl), at: raw.last_reset_at, url: lastUrl, text: a?.state === 'confirmed' && a?.kind === 'reset' ? a.summary : '站方收录的最近全局重置', type: 'global' });
     const s = raw.official_signal || raw.teased_window || (a && a.kind === 'watch' && !a.corrected && a.state === 'active' ? a : null);
     if (s && typeof s === 'object' && !(iso(s.at || s.source_at) && Date.parse(raw.last_reset_at) >= Date.parse(s.at || s.source_at))) upcoming = { ...scheduleFields(s), id: s.tweet_id || s.id || raw.alert_event_id, text: s.localized_summary || s.text || s.summary || s.quote, url: s.url || s.source_url, issuedAt: s.at || s.source_at, type: s.reset_type || 'global',scope:s.scope, confidence: s.score, timingKind:!raw.official_signal && raw.teased_window ? 'hint' : 'announcement',basis: !raw.official_signal && raw.teased_window ? '站方从暗示推断的观察窗口，非明确承诺' : 'Codex Reset 公告窗口；概率为站方评分' };
     if (raw.tease_signal?.post) signals.push({ text: clean(raw.tease_signal.post.localized_quote || raw.tease_signal.post.quote), url: safeUrl(raw.tease_signal.post.url), at: iso(raw.tease_signal.post.at) });
@@ -64,12 +73,12 @@ function normalize(id, raw, fetchedAt = new Date().toISOString()) {
     if (!raw?.ok || !Array.isArray(raw?.data?.items)) throw new Error('站方数据格式已变化');
     updatedAt = iso(raw.meta?.lastSuccessfulCheckAt || raw.meta?.generatedAt);
     const items = raw.data.items;
-    historyEvents = items.filter(i => i.kind === 'reset_completed').map(i => {const e=event({id:i.id,at:i.effectiveAt || i.announcedAt || i.completedAt,url:i.source?.url,text:i.text,type:i.resetType || 'unknown',scope:i.scope,timeBasis:i.effectiveAt ? 'effective' : 'announcement'});return e?{...e,recordKind:i.kind,relatedRecordIds:i.relatedRecordIds||[]}:null;}).filter(Boolean);
+    historyEvents = items.filter(i => i.kind === 'reset_completed').map(i => {const e=event({...recordMetadata(i),id:i.id,at:i.effectiveAt || i.announcedAt || i.completedAt,url:i.source?.url,text:i.text,type:i.resetType || 'unknown',scope:i.scope,timeBasis:i.effectiveAt ? 'effective' : 'announcement'});return e?{...e,recordKind:i.kind,relatedRecordIds:i.relatedRecordIds||[]}:null;}).filter(Boolean);
     const completed = items.filter(i => i.kind === 'reset_completed' && isAutomatic(i.resetType) && (!i.scope?.plans?.length || i.scope.plans.includes('all')));
     completed.sort((a,b) => Date.parse(b.effectiveAt || b.announcedAt) - Date.parse(a.effectiveAt || a.announcedAt));
     const c = completed[0];
-    if (c) last = event({ id: c.id, at: c.effectiveAt || c.announcedAt, url: c.source?.url, text: c.text, type: c.resetType, scope: c.scope, timeBasis: c.effectiveAt ? 'effective' : 'announcement' });
-    const linkedCompleted = new Set(items.filter(i=>i.kind==='reset_completed').flatMap(i=>i.relatedRecordIds||[]).map(String));
+    if (c) last = event({ ...recordMetadata(c),id: c.id, at: c.effectiveAt || c.announcedAt, url: c.source?.url, text: c.text, type: c.resetType, scope: c.scope, timeBasis: c.effectiveAt ? 'effective' : 'announcement' });
+    const linkedCompleted = new Set(projectSourceHistory({historyEvents}).historyEvents.filter(i=>isAutomatic(i.type)).flatMap(i=>i.relatedRecordIds||[]).map(String));
     const retired=i=>['fulfilled','cancelled','revoked'].includes(i.scheduleState)||i.completionRecordId||iso(i.completedAt)||linkedCompleted.has(String(i.id))||linkedCompleted.has(String(i.source?.postId));
     const dispositionsRaw=items.filter(i=>i.kind==='reset_scheduled'&&retired(i));
     dispositions=dispositionsRaw.map(i=>({...forecast({id:i.id,start:i.scheduleWindow?.startAt,end:i.scheduleWindow?.endAt||i.effectiveAt,text:i.text,url:i.source?.url,type:i.resetType || 'unknown',scope:i.scope,issuedAt:i.announcedAt,basis:i.scheduleBasis==='explicit'?'站方解析公告时间':'站方根据上下文推断'},now),outcome:['cancelled','revoked'].includes(i.scheduleState)?i.scheduleState:'fulfilled'}));
@@ -87,7 +96,7 @@ function normalize(id, raw, fetchedAt = new Date().toISOString()) {
     updatedAt = iso(raw.asOf); expiresAt = iso(raw.expiresAt);
     stale = raw.degraded === true || raw.checks?.history?.ok === false;
     const l = raw.history?.last;
-    if (l) last = event({ at: l.date, url: l.source, type: l.type, scope:l.scope, text: l.description || l.title });
+    if (l) last = event({ ...recordMetadata(l),at: l.date, url: l.source, type: l.type, scope:l.scope, text: l.description || l.title });
     const s = raw.social;
     if (s && typeof s === 'object') {
       const signal = { ...scheduleFields(s), id: s.id || s.postId, text: s.text || s.quote || s.summary, url: s.url || s.source?.url || (typeof s.source === 'string' ? s.source : null), issuedAt: s.announced_at || s.publishedAt, type: s.reset_type || 'global',scope:s.scope,timingKind:s.timingKind==='next_week'?'inferred':'announcement', basis: s.timingKind === 'next_week' ? '站方按太平洋日历推断的下周窗口，非原帖明确时刻' : 'NextReset 对公开信号的解释，非已验证的预测准确率' };
@@ -102,7 +111,7 @@ function normalize(id, raw, fetchedAt = new Date().toISOString()) {
     if (!raw?.data || !('scheduled_reset' in raw.data)) throw new Error('站方数据格式已变化');
     updatedAt = iso(raw.last_successful_update || raw.fetched_at); expiresAt = iso(raw.fresh_until); stale = raw.stale === true;
     const l = raw.data.latest_reset;
-    if (l && isAutomatic(l.reset_type)) last = event({ id: l.id, at: l.announced_at, text: l.translation?.text || l.text, url: l.source?.url, type: l.reset_type, scope:l.scope });
+    if (l && isAutomatic(l.reset_type)) last = event({ ...recordMetadata(l),id: l.id, at: l.announced_at, text: l.translation?.text || l.text, url: l.source?.url, type: l.reset_type, scope:l.scope });
     const s = raw.data.scheduled_reset;
     const assessment = raw.time_assessment;
     if (s && !assessment?.timeline_relation?.retires_current_schedule) upcoming = { id: s.id, start: assessment?.window_start, end: assessment?.window_end || s.scheduled_for, text: s.translation?.text || s.text, url: s.source?.url, type: s.reset_type,scope:s.scope, issuedAt: s.announced_at, basis: assessment?.reason || '上游预告，时间精度以原帖为准' };
@@ -112,7 +121,7 @@ function normalize(id, raw, fetchedAt = new Date().toISOString()) {
     if (!raw?.data?.next_reset_estimate) throw new Error('站方数据格式已变化');
     updatedAt = iso(raw.data.freshness?.fetched_at || raw.meta?.generated_at); stale = raw.data.freshness?.state !== 'fresh';
     const l = raw.data.latest_reset;
-    if (l && isAutomatic(l.reset_type)) last = event({ id: l.id, at: l.announced_at, url: l.source?.url, text: l.text, type: l.reset_type, scope:l.scope });
+    if (l && isAutomatic(l.reset_type)) last = event({ ...recordMetadata(l),id: l.id, at: l.announced_at, url: l.source?.url, text: l.text, type: l.reset_type, scope:l.scope });
     const e = raw.data.next_reset_estimate;
     const s = raw.data.active_watch;
     if (s || e.expected_by) upcoming = { id: s?.id, ...scheduleFields(s), end: e.expected_by || scheduleFields(s).end, text: s?.text || e.note, url: s?.source?.url, type: s?.reset_type || 'global',scope:s?.scope,timingKind:s?'announcement':'model', basis: '只有明确公开时间才展示 ETA' };
@@ -128,13 +137,14 @@ function normalize(id, raw, fetchedAt = new Date().toISOString()) {
   const primary=active.find(f=>isAutomatic(f.type)&&f.state==='scheduled')||active.find(f=>isAutomatic(f.type));
   additionalForecasts=active.filter(f=>f!==primary);
   const sourceStale = stale || now - Date.parse(updatedAt) > spec.maxAge || (expiresAt && now > Date.parse(expiresAt));
-  return projectForecasts({ ...spec, status: sourceStale ? 'stale' : 'ok', fetchedAt: iso(fetchedAt), updatedAt, expiresAt, error: null, lastReset: last, forecast: primary||forecast(null,now), probabilities, notes: notes.filter(Boolean), signals, model, historyEvents, additionalForecasts, archivedForecasts, dispositions, nextCheckAt: new Date(now + spec.interval).toISOString() },now);
+  return projectForecasts(projectSourceHistory({ ...spec, status: sourceStale ? 'stale' : 'ok', fetchedAt: iso(fetchedAt), updatedAt, expiresAt, error: null, lastReset: last, forecast: primary||forecast(null,now), probabilities, notes: notes.filter(Boolean), signals, model, historyEvents, additionalForecasts, archivedForecasts, dispositions, nextCheckAt: new Date(now + spec.interval).toISOString() }),now);
 }
 
 function freshness(source, now = Date.now()) {
   return isFresh(source,now);
 }
 function calibratedReset(sources, now = Date.now()) {
+  sources=sources.map(projectSourceHistory);
   const candidates = sources.filter(s => freshness(s, now) && s.lastReset && isAutomatic(s.lastReset.type) && (!s.lastReset.scope?.plans?.length||s.lastReset.scope.plans.includes('all')) && Date.parse(s.lastReset.at) <= now + 60000);
   if (!candidates.length) return { state: 'unavailable', at: null, sources: [], familyCount: 0, message: '等待可靠的完成记录' };
   const sorted = [...candidates].sort((a,b) => Date.parse(b.lastReset.at) - Date.parse(a.lastReset.at));
@@ -152,7 +162,8 @@ function calibratedReset(sources, now = Date.now()) {
 function forecastKey(f) { return f && f.state !== 'none' ? `${f.id}|${f.start || ''}|${f.end || ''}|${f.type || ''}|${[...(f.scope?.plans||[])].sort().join(',')}|${f.timingKind||'announcement'}` : null; }
 function changes(previous, next, now = Date.now()) {
   if (!next || !freshness(next, now)) return [];
-  previous=previous||{forecast:{state:'none'}};
+  next=projectSourceHistory(next);
+  previous=projectSourceHistory(previous||{forecast:{state:'none'}});
   const all=s=>[s.forecast,...(s.additionalForecasts||[])].filter(f=>forecastKey(f));
   const events=[],old=all(previous),latest=all(next),before=new Set(old.map(forecastKey)),after=new Set(latest.map(forecastKey)),sent=new Set();
   for(const f of latest){

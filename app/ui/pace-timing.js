@@ -29,7 +29,7 @@
    const at=Date.parse(row?.at),plans=row?.scope?.plans;
    if(!automatic.has(row?.type)||row.timeConflict||!Number.isFinite(at)||at>now||plans?.length&&!plans.includes('all'))continue;
    const post=completionPost(row)&&new URL(row.url).pathname.match(/\/status\/(\d+)/)[1];
-   const proof=(row.sources||[]).filter(s=>s.family&&s.family!=='unverified-feed'&&completionPost(s)&&post&&new URL(s.url).pathname.match(/\/status\/(\d+)/)[1]===post&&Number.isFinite(Date.parse(s.at))&&Math.abs(Date.parse(s.at)-at)<=120000);
+   const proof=(row.sources||[]).filter(s=>!s.evidenceOnly&&s.family&&s.family!=='unverified-feed'&&completionPost(s)&&post&&new URL(s.url).pathname.match(/\/status\/(\d+)/)[1]===post&&Number.isFinite(Date.parse(s.at))&&Math.abs(Date.parse(s.at)-at)<=120000);
    if(new Set(proof.map(s=>s.family)).size>=2)candidates.push({at,origin:'history'});
   }
   const chosen=candidates.sort((a,b)=>b.at-a.at)[0];
@@ -37,10 +37,15 @@
   const elapsed=now-chosen.at,duration=days*86400000;
   return {available:true,days,anchor:new Date(chosen.at).toISOString(),end:new Date(chosen.at+duration).toISOString(),elapsedHours:elapsed/3600000,progress:Math.min(1,elapsed/duration),overdue:elapsed>=duration};
  }
+ function calendarPace(target,now=Date.now()){
+  const anchor=Date.parse(target?.anchor),end=Date.parse(target?.at);
+  if(!Number.isFinite(now)||!Number.isFinite(anchor)||!Number.isFinite(end)||anchor>now||end<=anchor)return {available:false};
+  return {available:true,anchor:new Date(anchor).toISOString(),end:new Date(end).toISOString(),days:(end-anchor)/86400000,progress:paceProgress(anchor,end,now)/100,overdue:now>=end};
+ }
  function projectForecasts(source,now=Date.now()){
   const key=f=>`${f.id}:${f.start}:${f.end}:${f.type}:${[...(f.scope?.plans||[])].sort().join(',')}:${f.timingKind||'announcement'}`;
   const unique=items=>[...new Map(items.filter(f=>f&&f.state!=='none').map(f=>[key(f),f])).values()];
-  const linked=new Set((source.historyEvents||[]).flatMap(e=>e.relatedRecordIds||[]).map(String));
+  const linked=new Set((source.historyEvents||[]).filter(e=>!e.evidenceOnly&&(automatic.has(e.type)||e.type==='banked')&&!['observation','commentary','repair','forecast'].includes(e.phase)).flatMap(e=>e.relatedRecordIds||[]).map(String));
   const disposed=new Map((source.dispositions||[]).map(f=>[String(f.id),f.outcome]));
   const active=[],retired=[];
   for(const f of unique([source.forecast,...(source.additionalForecasts||[])])){
@@ -151,5 +156,5 @@
   return {active:true,earliest,latest,range:earliest!==latest,entries,sourceCount:new Set(entries.map(e=>e.sourceId)).size,
    mapped,axisStart,axisEnd,axisLabel,left,right};
  }
- return {warning,isFresh,forecastState,remainingSchedule,paceProgress,hypotheticalPace,historyStart,projectForecasts,projectAfterReset,localCycleCompletion,latestNews};
+ return {warning,isFresh,forecastState,remainingSchedule,paceProgress,hypotheticalPace,calendarPace,historyStart,projectForecasts,projectAfterReset,localCycleCompletion,latestNews};
 });

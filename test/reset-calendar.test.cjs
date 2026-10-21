@@ -28,6 +28,55 @@ test('each weekday produces exactly 56 cells and 50 distinct real dates',()=>{
  }
 });
 
+test('month groups keep their own Monday-first grids while preserving all flat dates and events',()=>{
+ const history=[row('201','2026-09-30T01:00:00Z'),row('202','2026-10-01T03:00:00Z')];
+ const model=Calendar.calendar(history,now);
+ assert.deepEqual(model.months.map(m=>[m.key,m.year,m.month]),[['2026-09',2026,9],['2026-10',2026,10]]);
+ const [september,october]=model.months;
+ assert.equal(september.cells.length,28);assert.equal(october.cells.length,35);
+ assert.deepEqual(september.cells.slice(0,3).map(c=>c.key),[null,null,'2026-09-09']);
+ assert.deepEqual(september.cells.slice(-5).map(c=>c.key),['2026-09-30',null,null,null,null]);
+ assert.deepEqual(october.cells.slice(0,4).map(c=>c.key),[null,null,null,'2026-10-01']);
+ assert.deepEqual(october.cells.slice(-5).map(c=>c.key),['2026-10-28',null,null,null,null]);
+ const grouped=model.months.flatMap(m=>m.cells.filter(c=>c.inRange));
+ assert.deepEqual(grouped,model.cells.filter(c=>c.inRange));
+ assert.equal(grouped.flatMap(c=>c.events).length,2);
+ assert.equal(grouped.filter(c=>c.today).length,1);assert.equal(grouped.filter(c=>c.future).length,7);
+});
+
+test('month grouping handles three-month windows, leap days and year-specific month keys',()=>{
+ for(const current of ['2027-01-01T12:00:00+08:00','2028-03-25T12:00:00+08:00','2026-03-01T12:00:00+08:00']){
+  const model=Calendar.calendar([],current),grouped=model.months.flatMap(m=>m.cells.filter(c=>c.inRange));
+  assert.equal(grouped.length,50);assert.equal(new Set(grouped.map(c=>c.key)).size,50);
+  assert.deepEqual(grouped,model.cells.filter(c=>c.inRange));
+  for(const month of model.months){
+   assert.equal(month.cells.length%7,0);
+   assert.ok(month.cells.filter(c=>c.inRange).every(c=>c.key.startsWith(month.key+'-')&&c.month===month.month));
+   for(const [i,cell] of month.cells.entries())if(cell.inRange)assert.equal((new Date(cell.key+'T00:00:00Z').getUTCDay()+6)%7,i%7);
+   for(const cell of month.cells.filter(c=>!c.inRange))assert.deepEqual(cell,{key:null,day:null,month:null,inRange:false,future:false,today:false,events:[]});
+  }
+ }
+ const year=Calendar.calendar([],'2027-01-01T12:00:00+08:00');
+ assert.deepEqual(year.months.map(m=>m.key),['2026-11','2026-12','2027-01']);
+ assert.deepEqual(year.months.map(m=>m.year),[2026,2026,2027]);
+ const leap=Calendar.calendar([],'2028-03-25T12:00:00+08:00');
+ assert(leap.months.find(m=>m.key==='2028-02').cells.some(c=>c.key==='2028-02-29'));
+});
+
+test('month grids align every weekday without widening the actual rolling window',()=>{
+ for(let offset=0;offset<35;offset++){
+  const model=Calendar.calendar([],now+offset*86400000),grouped=model.months.flatMap(m=>m.cells.filter(c=>c.inRange));
+  assert.deepEqual(grouped.map(c=>c.key),model.cells.filter(c=>c.inRange).map(c=>c.key));
+  assert.equal(grouped[0].key,model.start);assert.equal(grouped.at(-1).key,model.end);
+  for(const month of model.months){
+   assert.equal(month.cells.length%7,0);
+   const first=month.cells.findIndex(c=>c.inRange),last=month.cells.findLastIndex(c=>c.inRange);
+   assert(first>=0&&first<=6);assert(month.cells.length-last-1<=6);
+   for(const [i,cell] of month.cells.entries())if(cell.inRange)assert.equal((new Date(cell.key+'T00:00:00Z').getUTCDay()+6)%7,i%7);
+  }
+ }
+});
+
 test('month/year boundaries and midnight advance the actual calendar window correctly',()=>{
  const before=Calendar.calendar([],'2026-12-31T15:59:59.999Z'),after=Calendar.calendar([],'2026-12-31T16:00:00Z');
  assert.equal(before.today,'2026-12-31');assert.equal(before.end,'2027-01-07');
@@ -110,4 +159,11 @@ test('browser UMD exposes the same pure API without requiring the Node runtime',
  assert.equal(context.ResetCalendar.calendar([],now).cells.length,56);
  assert.equal(context.ResetCalendar.targetForDay('2026-10-22',15,now),'2026-10-22T07:00:00.000Z');
  assert.equal(context.ResetCalendar.daysForTarget('2026-10-20T07:00:00Z','2026-10-22',15,now).days,2);
+});
+
+test('observations, recaps and plan repairs are not counted as completed calendar resets',()=>{
+ const at='2026-10-18T05:12:21+08:00';
+ const model=Calendar.calendar(['observation','commentary','repair','global'].map((type,i)=>row(String(i+900),at,{type})),now);
+ const events=model.months.flatMap(m=>m.cells).flatMap(c=>c.events);
+ assert.equal(events.length,1);assert.equal(events[0].type,'global');
 });
