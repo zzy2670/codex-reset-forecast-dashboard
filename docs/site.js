@@ -18,7 +18,7 @@ const translations={
     "features": [
       [
         "The dashboard",
-        "Remaining quota and the latest verified reset at the top, five source cards below, then reset history. All dates and times use Beijing time (UTC+8)."
+        "Remaining quota and the latest verified reset at the top, five source cards below, then reset history. Dates and times default to Beijing time (UTC+8). Choose another time zone in Settings."
       ],
       [
         "Routine and accelerated modes",
@@ -78,7 +78,7 @@ const translations={
     "features": [
       [
         "看板全貌",
-        "顶部是剩余额度和最近一次已核对的重置，中间是五个信源，底部是历史记录。日期和时间统一显示为北京时间。"
+        "顶部是剩余额度和最近一次已核对的重置，中间是五个信源，底部是历史记录。日期和时间默认显示为北京时间，可在设置中切换时区。"
       ],
       [
         "常规模式与加速模式",
@@ -86,7 +86,7 @@ const translations={
       ],
       [
         "额度消耗进度",
-        "四条横条分别显示实际消耗、假设每 X 天重置的节奏、日历指定时间的节奏，以及个人周期的均匀节奏。X 默认 3 天，点击标签修改；日历时间独立设置，两个假设可分别清除。拖动左侧把手可以调整顺序。"
+        "四条横条分别显示实际消耗、假设每 X 天重置的节奏、日历指定时间的节奏，以及个人周期的均匀节奏。X 默认 3 天，点击标签修改；日历预测独立设置，两个假设可分别清除。拖动左侧把手可以调整顺序。"
       ],
       [
         "红色重置节奏线",
@@ -138,7 +138,7 @@ const translations={
     "features": [
       [
         "ダッシュボード全体",
-        "上部に残り利用枠と照合済みの直近リセット、その下に5つの情報源と履歴を表示します。日時は北京時間（UTC+8）です。"
+        "上部に残り利用枠と照合済みの直近リセット、その下に5つの情報源と履歴を表示します。日時の初期設定は北京時間（UTC+8）です。設定からタイムゾーンを変更できます。"
       ],
       [
         "通常モードと加速モード",
@@ -198,7 +198,7 @@ const translations={
     "features": [
       [
         "El panel completo",
-        "Arriba aparecen la cuota restante y el último reinicio contrastado; debajo, las cinco fuentes y el historial. Todas las fechas usan la hora de Pekín (UTC+8)."
+        "Arriba aparecen la cuota restante y el último reinicio contrastado; debajo, las cinco fuentes y el historial. Las fechas y horas usan por defecto la hora de Pekín (UTC+8). Puedes cambiar la zona horaria en Ajustes."
       ],
       [
         "Modo habitual y modo acelerado",
@@ -258,7 +258,7 @@ const translations={
     "features": [
       [
         "Le tableau de bord",
-        "Le quota restant et la dernière réinitialisation recoupée sont en haut, suivis des cinq sources et de l’historique. Les dates sont à l’heure de Pékin (UTC+8)."
+        "Le quota restant et la dernière réinitialisation recoupée sont en haut, suivis des cinq sources et de l’historique. Les dates et heures utilisent par défaut l’heure de Pékin (UTC+8). Le fuseau horaire peut être changé dans les paramètres."
       ],
       [
         "Mode normal et mode accéléré",
@@ -318,7 +318,7 @@ const translations={
     "features": [
       [
         "Das Dashboard",
-        "Oben stehen das Restkontingent und der letzte abgeglichene Reset. Darunter folgen fünf Quellen und der Verlauf. Alle Zeiten werden in Pekinger Zeit (UTC+8) angezeigt."
+        "Oben stehen das Restkontingent und der letzte abgeglichene Reset. Darunter folgen fünf Quellen und der Verlauf. Standardmäßig werden Datum und Uhrzeit in Pekinger Zeit (UTC+8) angezeigt. Die Zeitzone lässt sich in den Einstellungen ändern."
       ],
       [
         "Normaler und beschleunigter Modus",
@@ -378,7 +378,7 @@ const translations={
     "features": [
       [
         "전체 대시보드",
-        "위에는 잔여 사용량과 대조한 최근 초기화가, 아래에는 다섯 정보 출처와 기록이 표시됩니다. 시간은 베이징 시간(UTC+8)으로 표시합니다."
+        "위에는 잔여 사용량과 대조한 최근 초기화가, 아래에는 다섯 정보 출처와 기록이 표시됩니다. 날짜와 시간은 기본적으로 베이징 시간(UTC+8)으로 표시하며, 설정에서 시간대를 바꿀 수 있습니다."
       ],
       [
         "일반 모드와 가속 모드",

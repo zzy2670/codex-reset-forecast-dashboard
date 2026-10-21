@@ -40,14 +40,14 @@
         <div class="quota-bars">
           <div class="quota-row" data-bar="actual"><button class="bar-drag-handle" aria-label="调整实际消耗位置" title="按住拖动；也可用↑↓键调整">⠿</button><span>实际消耗</span><div class="track" role="progressbar" aria-label="实际消耗" id="actual-track"><i class="actual-fill" id="actual-fill"></i></div><strong id="actual-percent">—</strong></div>
           <div class="quota-row" data-bar="hypothetical"><button class="bar-drag-handle" aria-label="调整假设节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><button id="hypothetical-settings" class="pace-label" title="设置假设重置周期">假设 <span id="hypothetical-days-label">3</span> 天</button><div class="track" role="progressbar" aria-label="假设重置节奏" id="hypothetical-track"><i class="hypothetical-fill" id="hypothetical-fill"></i></div><strong id="hypothetical-percent">—</strong></div>
-          <div class="quota-row" data-bar="calendar"><button class="bar-drag-handle" aria-label="调整日历节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><span>日历时间</span><div class="track" role="progressbar" aria-label="日历指定节奏" id="calendar-track"><i class="calendar-fill" id="calendar-fill"></i></div><strong id="calendar-percent">—</strong></div>
-          <div class="quota-row" data-bar="theory"><button class="bar-drag-handle" aria-label="调整均匀节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><span>均匀节奏</span><div class="track" role="progressbar" aria-label="均匀节奏" id="theory-track"><i class="theory-fill" id="theory-fill"></i></div><strong id="theory-percent">—</strong></div>
+          <div class="quota-row" data-bar="calendar"><button class="bar-drag-handle" aria-label="调整日历节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><span id="calendar-target-label">日历预测</span><div class="track" role="progressbar" aria-label="日历指定节奏" id="calendar-track"><i class="calendar-fill" id="calendar-fill"></i></div><strong id="calendar-percent">—</strong></div>
+          <div class="quota-row" data-bar="theory"><button class="bar-drag-handle" aria-label="调整均匀节奏位置" title="按住拖动；也可用↑↓键调整">⠿</button><span>7天均匀节奏</span><div class="track" role="progressbar" aria-label="均匀节奏" id="theory-track"><i class="theory-fill" id="theory-fill"></i></div><strong id="theory-percent">—</strong></div>
           <div id="forecast-markers" class="forecast-markers" aria-hidden="true" hidden></div>
           <div class="bar-guides" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
         </div>
         <p id="forecast-warning" class="forecast-warning" role="status" hidden></p>
         <p class="pace-note" id="hypothetical-note">假设节奏以最近已核对的全局重置为起点</p>
-        <p class="pace-note" id="calendar-pace-note">未设置日历时间</p>
+        <p class="pace-note" id="calendar-pace-note">未设置日历预测</p>
         <p class="bar-sort-hint">拖动左侧把手可调整横条顺序</p><span id="bar-sort-status" class="sr-only" role="status" aria-live="polite"></span>
         <div class="panel-bottom"><span id="quota-reset">个人周期独立于全局重置预告</span><button class="text-button" id="quota-open">刷新额度</button></div>
       </section>
@@ -57,15 +57,15 @@
       <div class="forecasts-heading"><div><h2 id="forecasts-heading">下一次重置</h2><span id="forecast-subtitle">五个信源 · 北京时间</span></div></div>
       <div id="sources-grid" class="sources-grid" aria-live="polite"></div>
     </section>
-    <footer><div><span id="poll-dot" class="status-dot"></span><span id="poll-status">每 30 秒检查</span><span class="footer-separator"></span><span>北京时间 UTC+8</span></div><button id="pause" class="text-button">暂停监控</button></footer>
+    <footer><div><span id="poll-dot" class="status-dot"></span><span id="poll-status">每 30 秒检查</span><span class="footer-separator"></span><span id="display-zone">北京时间 UTC+8</span></div><button id="pause" class="text-button">暂停监控</button></footer>
     <section class="calendar-section" aria-labelledby="calendar-heading">
-      <div class="history-heading"><h2 id="calendar-heading">历史重置日历</h2><span>过去6周 · 未来1周 · 北京时间</span></div>
+      <div class="history-heading"><h2 id="calendar-heading">历史重置日历</h2><span id="calendar-range">过去6周 · 未来1周 · 北京时间</span></div>
       <div class="calendar-layout">
         <div class="calendar-board"><div class="calendar-weekdays" aria-hidden="true"><span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span></div><div id="reset-calendar" class="reset-calendar" role="group" aria-label="历史重置日历"></div></div>
         <aside class="calendar-options">
           <h3>指定重置时间</h3><p class="calendar-hint">点击未来日期，再选择小时</p>
           <label class="field">已选日期<input id="calendar-selected" readonly placeholder="请先选择未来日期"></label>
-          <label class="field">小时（北京时间）<input id="calendar-hour" type="number" min="0" max="23" step="1" value="15"></label>
+          <label class="field"><span id="calendar-hour-label">小时（北京时间）</span><input id="calendar-hour" type="number" min="0" max="23" step="1" value="15"></label>
           <p id="calendar-preview" class="calendar-preview"></p><div class="calendar-actions"><button id="calendar-confirm" class="primary-button" disabled>确定</button><button id="calendar-clear" class="secondary-button">清除日期假设</button></div><p id="calendar-result" class="calendar-result" role="status"></p>
           <div class="calendar-filters"><label><input id="calendar-show-limited" type="checkbox" checked>限定套餐重置</label><label><input id="calendar-show-banked" type="checkbox">重置卡记录</label></div>
           <div class="calendar-legend"><span class="legend-reset-text">已记录重置</span><span class="legend-assumed-text">指定时间</span></div><p id="calendar-current" class="calendar-current"></p>
@@ -82,6 +82,7 @@
       <label class="setting-row"><span>提示音</span><input id="setting-sound" type="checkbox" role="switch"></label>
       <button class="secondary-button" id="test-notification">发送测试通知</button><p id="notification-status" class="help-text">系统勿扰模式可能将通知收进通知中心。</p>
     </div>
+    <div class="settings-section"><h3>时区</h3><label class="field"><select id="setting-timezone" aria-label="时区"></select></label><p class="help-text">默认北京时间</p></div>
     <div class="settings-section"><h3>Language / 语言</h3><label class="field"><select id="setting-language" aria-label="Language / 语言"><option value="zh-CN">简体中文</option><option value="en">English</option></select></label></div>
     <div class="settings-section"><h3>后台运行</h3>
       <label class="setting-row"><span>关闭窗口后留在托盘<small>右键托盘图标可以完全退出</small></span><input id="setting-tray" type="checkbox" role="switch"></label>
@@ -105,6 +106,7 @@
   <div id="toast" class="toast" role="status" hidden></div>
   <script src="i18n.js"></script>
   <script src="pace-timing.js"></script>
+  <script src="time-zone.js"></script>
   <script src="reset-calendar.js"></script>
   <script src="bar-order.js"></script>
   <script src="renderer.js"></script>

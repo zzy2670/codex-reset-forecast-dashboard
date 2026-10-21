@@ -1,24 +1,25 @@
-(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.ResetCalendar=api;})(globalThis,()=>{
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./time-zone.js'));else root.ResetCalendar=factory(root.DashboardTimeZone);})(globalThis,TimeZone=>{
  'use strict';
- const DAY=86400000,OFFSET=8*3600000;
+ const DAY=86400000;
  function timestamp(value){
   if(typeof value==='string'&&!/^\d{4}-\d{2}-\d{2}$/.test(value)&&!/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value))return NaN;
   const at=typeof value==='number'?value:value instanceof Date?value.getTime():typeof value==='string'?Date.parse(value):NaN;
   return Number.isFinite(at)&&Number.isFinite(new Date(at).getTime())?at:NaN;
  }
  const keyOf=day=>new Date(day*DAY).toISOString().slice(0,10);
- function dateKey(value){
+ function dateKey(value,zone=TimeZone.DEFAULT){
   const at=timestamp(value);if(!Number.isFinite(at))throw new Error('Invalid date');
-  return keyOf(Math.floor((at+OFFSET)/DAY));
+  return TimeZone.dateKey(at,zone);
  }
  function dayNumber(key){
   if(typeof key!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(key))return NaN;
   const at=Date.parse(`${key}T00:00:00.000Z`);
   return Number.isFinite(at)&&keyOf(at/DAY)===key?at/DAY:NaN;
  }
- function bounds(now){
+ function bounds(now,zone){
   const at=timestamp(now);if(!Number.isFinite(at))throw new Error('Invalid date');
-  const today=Math.floor((at+OFFSET)/DAY);return {at,today,start:today-42,end:today+7};
+  zone=TimeZone.normalize(zone);
+  const today=dayNumber(dateKey(at,zone));return {at,today,start:today-42,end:today+7,zone};
  }
  function postKey(value){
   try{
@@ -31,7 +32,7 @@
  }
  function historyEvents(history,range){
   const rows=(Array.isArray(history)?history:[]).filter(record=>{
-   const at=timestamp(record?.at),day=Math.floor((at+OFFSET)/DAY);
+   const at=timestamp(record?.at),day=Number.isFinite(at)?dayNumber(dateKey(at,range.zone)):NaN;
    return !['observation','commentary','repair'].includes(record?.type)&&Number.isFinite(at)&&at<=range.at&&day>=range.start&&day<=range.today;
   });
   // IDs and original-post URLs are aliases. Merge both transitively so source
@@ -44,13 +45,13 @@
   });
   const selected=new Map();rows.forEach((row,i)=>{const root=find(i);if(!selected.has(root))selected.set(root,row);});
   return [...selected.values()].map(row=>{
-   const at=timestamp(row.at),clock=new Date(at+OFFSET).toISOString().slice(11,16);
+   const at=timestamp(row.at),clock=TimeZone.time(at,range.zone);
    return {...row,id:String(row.id??postKey(row.url)??`${row.type||'reset'}:${at}`),time:clock,scope:row.scope??null};
   }).sort((a,b)=>timestamp(a.at)-timestamp(b.at)||a.id.localeCompare(b.id));
  }
- function calendar(history,now=Date.now()){
-  const range=bounds(now),byDay=new Map();
-  for(const event of historyEvents(history,range)){const key=dateKey(event.at);if(!byDay.has(key))byDay.set(key,[]);byDay.get(key).push(event);}
+ function calendar(history,now=Date.now(),zone=TimeZone.DEFAULT){
+  const range=bounds(now,zone),byDay=new Map();
+  for(const event of historyEvents(history,range)){const key=dateKey(event.at,range.zone);if(!byDay.has(key))byDay.set(key,[]);byDay.get(key).push(event);}
   const leading=(new Date(range.start*DAY).getUTCDay()+6)%7,cells=[];
   for(let i=0;i<56;i++){
    const day=range.start+i-leading;
@@ -73,17 +74,17 @@
   for(const month of months)while(month.cells.length%7)month.cells.push({key:null,day:null,month:null,inRange:false,future:false,today:false,events:[]});
   return {start:keyOf(range.start),end:keyOf(range.end),today:keyOf(range.today),cells,months};
  }
- function targetForDay(key,hour,now=Date.now()){
-  const range=bounds(now),day=dayNumber(key);
-  if(!Number.isFinite(day)||day<=range.today||day>range.end)throw new Error('Invalid day');
-  if(!Number.isInteger(hour)||hour<0||hour>23)throw new Error('Invalid hour');
-  return new Date(day*DAY-OFFSET+hour*3600000).toISOString();
+ function targetForDay(key,hour,now=Date.now(),zone=TimeZone.DEFAULT){
+  const range=bounds(now,zone),day=dayNumber(key);
+  if(!Number.isFinite(day)||day<=range.today||day>range.end){const error=new Error('Invalid day');error.code='INVALID_TARGET';throw error;}
+  if(!Number.isInteger(hour)||hour<0||hour>23){const error=new Error('Invalid hour');error.code='INVALID_TARGET';throw error;}
+  return TimeZone.atLocal(key,hour,range.zone);
  }
- function daysForTarget(anchor,day,hour,now=Date.now()){
+ function daysForTarget(anchor,day,hour,now=Date.now(),zone=TimeZone.DEFAULT){
   const at=timestamp(anchor),current=timestamp(now);
   if(!Number.isFinite(at)||!Number.isFinite(current)||at>current){const error=new Error('No reset anchor');error.code='NO_ANCHOR';throw error;}
   let targetAt;
-  try{targetAt=targetForDay(day,hour,now);}catch{const error=new Error('Invalid target');error.code='INVALID_TARGET';throw error;}
+  try{targetAt=targetForDay(day,hour,now,zone);}catch(cause){const error=new Error('Invalid target');error.code='INVALID_TARGET';if(cause?.reason)error.reason=cause.reason;throw error;}
   const days=(Date.parse(targetAt)-at)/DAY;
   if(!Number.isFinite(days)||days<=0||days>365){const error=new Error('Invalid period');error.code='INVALID_PERIOD';throw error;}
   return {days,targetAt};

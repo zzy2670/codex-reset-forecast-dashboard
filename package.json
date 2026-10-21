@@ -19,7 +19,8 @@
     "prebuild:dir": "node scripts/prepare-runtime.cjs",
     "test:onboarding": "node scripts/verify-onboarding.cjs",
     "test:deployment": "node scripts/verify-deployment.cjs",
-    "test:calendar": "node scripts/verify-calendar.cjs"
+    "test:calendar": "node scripts/verify-calendar.cjs",
+    "test:timezone": "node scripts/verify-timezone.cjs"
   },
   "devDependencies": {
     "@openai/codex": "0.159.2",

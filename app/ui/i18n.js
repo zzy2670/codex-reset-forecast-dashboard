@@ -1,8 +1,13 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
- '日历时间':'Calendar target','日历节奏':'Calendar pace','指定重置时间':'Choose a reset time',
- '指定时间':'Selected time','未设置日历时间':'No calendar target','清除日期假设':'Clear calendar target',
+ '通知已关闭':'Notifications off','时区':'Time zone','默认北京时间':'Default: Beijing time','时区无效':'Invalid time zone',
+ '此时区没有这个整点，请选择其他小时':'This hour does not exist in this time zone. Choose another hour.',
+ '过去6周 · 未来1周 · ':'Past 6 weeks · Next week · ','小时（':'Hour (',
+
+ '7天均匀节奏':'Even 7-day pace',
+ '日历预测':'Calendar forecast','日历节奏':'Calendar pace','指定重置时间':'Choose a reset time',
+ '指定时间':'Selected time','未设置日历预测':'No calendar forecast','清除日期假设':'Clear calendar target',
  '清除天数假设':'Clear assumed period','日期假设已清除':'Calendar target cleared',
  '天数假设已清除':'Assumed period cleared','已更新日历节奏':'Calendar pace updated',
  '站方观察':'Source observation','回顾':'Recap','限定套餐修复':'Plan-specific fix',

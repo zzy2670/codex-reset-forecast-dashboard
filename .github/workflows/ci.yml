@@ -22,6 +22,7 @@ jobs:
       - run: npm run test:language
       - run: npm run test:reset
       - run: npm run test:onboarding
+      - run: npm run test:timezone
       - run: npm run test:calendar
       - run: npm run build
       - run: node scripts/verify-package.cjs
@@ -39,6 +40,11 @@ jobs:
         run: |
           $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
           npm run test:onboarding
+      - name: Verify installed timezone
+        shell: pwsh
+        run: |
+          $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
+          npm run test:timezone
       - name: Verify installed calendar and target settings
         shell: pwsh
         run: |

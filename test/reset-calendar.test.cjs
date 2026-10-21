@@ -154,7 +154,7 @@ test('all three APIs are identical under different host timezones',()=>{
 });
 
 test('browser UMD exposes the same pure API without requiring the Node runtime',()=>{
- const context=vm.createContext({Date,URL});vm.runInContext(fs.readFileSync(require.resolve('../app/ui/reset-calendar.js'),'utf8'),context);
+ const context=vm.createContext({Date,URL,Intl});vm.runInContext(fs.readFileSync(require.resolve('../app/ui/time-zone.js'),'utf8'),context);vm.runInContext(fs.readFileSync(require.resolve('../app/ui/reset-calendar.js'),'utf8'),context);
  assert.equal(context.ResetCalendar.dateKey('2026-10-20T16:00:00Z'),'2026-10-21');
  assert.equal(context.ResetCalendar.calendar([],now).cells.length,56);
  assert.equal(context.ResetCalendar.targetForDay('2026-10-22',15,now),'2026-10-22T07:00:00.000Z');
@@ -166,4 +166,47 @@ test('observations, recaps and plan repairs are not counted as completed calenda
  const model=Calendar.calendar(['observation','commentary','repair','global'].map((type,i)=>row(String(i+900),at,{type})),now);
  const events=model.months.flatMap(m=>m.cells).flatMap(c=>c.events);
  assert.equal(events.length,1);assert.equal(events[0].type,'global');
+});
+
+test('selected timezone controls today, the rolling window and history clocks together',()=>{
+ const current='2026-10-21T01:00:00Z',history=[row('950','2026-10-20T23:02:00Z')];
+ const bj=Calendar.calendar(history,current),ny=Calendar.calendar(history,current,'America/New_York');
+ assert.equal(bj.today,'2026-10-21');assert.equal(ny.today,'2026-10-20');assert.equal(ny.start,'2026-09-08');assert.equal(ny.end,'2026-10-27');
+ assert.equal(bj.cells.find(c=>c.key==='2026-10-21').events[0].time,'07:02');
+ assert.equal(ny.cells.find(c=>c.key==='2026-10-20').events[0].time,'19:02');
+ assert.equal(Calendar.dateKey(current,'America/New_York'),'2026-10-20');
+ assert.deepEqual(Calendar.calendar(history,current,'invalid'),bj);
+});
+
+test('civil calendar ranges retain 50 dates and seven future days across both DST changes',()=>{
+ for(const current of ['2026-03-08T07:01:00Z','2026-11-01T06:01:00Z']){
+  const model=Calendar.calendar([],current,'America/New_York'),dates=model.cells.filter(c=>c.inRange);
+  assert.equal(model.cells.length,56);assert.equal(dates.length,50);assert.equal(new Set(dates.map(c=>c.key)).size,50);assert.equal(dates.filter(c=>c.future).length,7);
+  assert.deepEqual(model.months.flatMap(m=>m.cells.filter(c=>c.inRange)),dates);
+ }
+});
+
+test('target dates preserve selected local hours and reject DST gaps within the seven-day window',()=>{
+ const current='2026-03-07T17:00:00Z',zone='America/New_York';
+ assert.equal(Calendar.targetForDay('2026-03-08',3,current,zone),'2026-03-08T07:00:00.000Z');
+ assert.equal(Calendar.targetForDay('2026-03-14',0,current,zone),'2026-03-14T04:00:00.000Z');
+ assert.throws(()=>Calendar.targetForDay('2026-03-08',2,current,zone),{code:'INVALID_TARGET',reason:'NONEXISTENT_HOUR'});
+ assert.throws(()=>Calendar.daysForTarget('2026-03-07T05:00:00Z','2026-03-08',2,current,zone),{code:'INVALID_TARGET',reason:'NONEXISTENT_HOUR'});
+ assert.throws(()=>Calendar.targetForDay('2026-03-15',0,current,zone),{code:'INVALID_TARGET'});
+ assert.equal(Calendar.targetForDay('2026-11-01',1,'2026-10-31T16:00:00Z',zone),'2026-11-01T05:00:00.000Z');
+});
+
+test('periods use real elapsed hours across 23 and 25 hour local days',()=>{
+ const zone='America/New_York';
+ const spring=Calendar.daysForTarget('2026-03-07T05:00:00Z','2026-03-09',0,'2026-03-07T17:00:00Z',zone);
+ assert.equal(spring.targetAt,'2026-03-09T04:00:00.000Z');assert.equal(spring.days,47/24);
+ const autumn=Calendar.daysForTarget('2026-10-31T04:00:00Z','2026-11-02',0,'2026-10-31T16:00:00Z',zone);
+ assert.equal(autumn.targetAt,'2026-11-02T05:00:00.000Z');assert.equal(autumn.days,49/24);
+});
+
+test('separate resets in repeated local DST hours remain separate history events',()=>{
+ const history=[row('951','2026-11-01T05:30:00Z'),row('952','2026-11-01T06:30:00Z')];
+ const model=Calendar.calendar(history,'2026-11-01T12:00:00Z','America/New_York');
+ const events=model.cells.find(c=>c.key==='2026-11-01').events;
+ assert.deepEqual(events.map(e=>[e.id,e.time]),[['951','01:30'],['952','01:30']]);
 });

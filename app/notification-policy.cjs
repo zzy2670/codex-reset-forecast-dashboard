@@ -6,8 +6,13 @@ const QUIET_MS=6*3600000;
 const notificationId=key=>crypto.createHash('sha256').update(key).digest('hex').slice(0,16);
 const isQuiet=(until,now=Date.now())=>Number.isFinite(Date.parse(until))&&Date.parse(until)>now;
 const allowedTypes=new Set(['reset','regular','global','automatic','global_and_banked','both','combined']);
-const fmt=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
-const stamp=t=>fmt.format(new Date(t));
+function displayClock(timeZone){
+ let zone=typeof timeZone==='string'?timeZone:'Asia/Shanghai',formatter;
+ const options={month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false};
+ try{formatter=new Intl.DateTimeFormat('zh-CN',{...options,timeZone:zone});}
+ catch{zone='Asia/Shanghai';formatter=new Intl.DateTimeFormat('zh-CN',{...options,timeZone:zone});}
+ return {stamp:t=>formatter.format(new Date(t)),label:zone==='Asia/Shanghai'?'北京时间':zone};
+}
 function interval(e,now=Date.now(),planType=null){
  if(e.kind==='quota_reset'){
   const at=Date.parse(e.at);
@@ -22,7 +27,7 @@ function interval(e,now=Date.now(),planType=null){
  if(plans?.length&&!plans.includes('all')&&(!planType||!plans.includes(String(planType).toLowerCase())))return null;
  return {start,end,type:'automatic',phase:e.kind==='cancelled'?'cancelled':e.kind==='confirmed'?'confirmed':'forecast'};
 }
-function mergeMessage(groups,event,now=Date.now(),planType=null){
+function mergeMessage(groups,event,now=Date.now(),planType=null,timeZone='Asia/Shanghai'){
  const time=interval(event,now,planType);if(!time)return null;
  const scope=(event.scope?.plans||[]).map(p=>String(p).toLowerCase()).sort();
  // Compare the original bounds, not repeatedly widened ranges, to prevent drift.
@@ -41,9 +46,10 @@ function mergeMessage(groups,event,now=Date.now(),planType=null){
  if(event.sourceId&&!group.sources.includes(event.sourceId))group.sources.push(event.sourceId);
  if(!group.evidence.some(p=>p.key===event.key&&p.sourceId===event.sourceId))group.evidence.push({key:event.key,sourceId:event.sourceId,url:event.url||null,start:event.start||null,end:event.end||null,title:event.title,scope});
  group.evidence=group.evidence.slice(-30);group.updatedAt=new Date(now).toISOString();
- const when=time.start===time.end?stamp(time.end):`${stamp(time.start)} 至 ${stamp(time.end)}`;
+ const clock=displayClock(timeZone);
+ const when=time.start===time.end?clock.stamp(time.end):`${clock.stamp(time.start)} 至 ${clock.stamp(time.end)}`;
  const scopes=[...new Set(group.evidence.map(p=>!p.scope?.length||p.scope.includes('all')?'全体':p.scope.join('、').toUpperCase()))];
- const body=time.type==='local'?`${event.body}\n本机确认时间：${when}（北京时间）`:`${event.body}\n${event.kind==='cancelled'?'原排期':'重置时间'}：${when}（北京时间）\n适用范围：${scopes.join('；')}${group.sources.length>1?`\n已合并 ${group.sources.length} 个信源的同类消息`:''}`;
+ const body=time.type==='local'?`${event.body}\n本机确认时间：${when}（${clock.label}）`:`${event.body}\n${event.kind==='cancelled'?'原排期':'重置时间'}：${when}（${clock.label}）\n适用范围：${scopes.join('；')}${group.sources.length>1?`\n已合并 ${group.sources.length} 个信源的同类消息`:''}`;
  return {first,group,event:{...event,notificationGroup:group.id,body,sources:[...group.sources],evidence:[...group.evidence]}};
 }
 const xml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));

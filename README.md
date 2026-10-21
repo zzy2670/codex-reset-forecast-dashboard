@@ -66,7 +66,7 @@ Each card shows the site’s next reset time, announcement and update time. Expa
 
 ## Reset history
 
-The calendar groups the past six weeks and the next week by month. Reset days are red; today has a blue border and a blue date circle. All times use Beijing time. Select a future date, enter an hour and confirm to set the separate calendar pace bar.
+The calendar groups the past six weeks and the next week by month. Reset days are red; today has a blue border and a blue date circle. Dates and times default to Beijing time (UTC+8). Choose another time zone in Settings. Select a future date, enter an hour and confirm to set the separate calendar pace bar.
 
 ![Latest reset and an expanded history record.](docs/assets/feature-history.png)
 

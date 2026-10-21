@@ -1,15 +1,15 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const zone = 'Asia/Shanghai';
-const dateFormat = new Intl.DateTimeFormat('zh-CN',{timeZone:zone,month:'numeric',day:'numeric'});
-const timeFormat = new Intl.DateTimeFormat('zh-CN',{timeZone:zone,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-const fullFormat = new Intl.DateTimeFormat('zh-CN',{timeZone:zone,month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+let zone = 'Asia/Shanghai';
+let dateFormat = new Intl.DateTimeFormat('zh-CN',{timeZone:zone,month:'numeric',day:'numeric'});
+let timeFormat = new Intl.DateTimeFormat('zh-CN',{timeZone:zone,hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
 const period = mins => mins % 1440 === 0 ? `${mins/1440} 天` : mins % 60 === 0 ? `${mins/60} 小时` : `${mins} 分钟`;
 const date = x => x && Number.isFinite(Date.parse(x)) ? new Date(x) : null;
 const clock = x => date(x) ? timeFormat.format(date(x)) : '—';
-const full = x => date(x) ? new Intl.DateTimeFormat(DashboardI18n.locale(state?.settings.language),{timeZone:zone,month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(date(x)) : '时间未注明';
-const precise = x => date(x) ? new Intl.DateTimeFormat(DashboardI18n.locale(state?.settings.language),{timeZone:zone,month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(date(x)) : '时间未注明';
+const full = x => date(x) ? new Intl.DateTimeFormat(DashboardI18n.locale(state?.settings.language),{timeZone:zone,month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(date(x)) : '时间未注明';
+const precise = x => date(x) ? new Intl.DateTimeFormat(DashboardI18n.locale(state?.settings.language),{timeZone:zone,month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(date(x)) : '时间未注明';
+const zoneName=()=>zone==='Asia/Shanghai'?'北京时间':zone;
 const applyLocale=()=>DashboardI18n.apply(document,state?.settings.language||'zh-CN');
 let state, toastTimer, detailsExpanded=false, temporalKey='',barDrag=null,barSaving=false,lastConnectionMarkup='';
 function toast(message) { $('toast').textContent=message; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true,3600);applyLocale(); }
@@ -58,7 +58,13 @@ function cardMarkup(s) {
   </article>`;
 }
 function render(next) {
-  state=next; document.body.classList.toggle('dark',state.settings.theme==='dark');
+  state=next;
+  const nextZone=DashboardTimeZone.normalize(state.settings.timeZone);
+  if(zone!==nextZone){zone=nextZone;dateFormat=new Intl.DateTimeFormat('zh-CN',{timeZone:zone,month:'numeric',day:'numeric'});timeFormat=new Intl.DateTimeFormat('zh-CN',{timeZone:zone,hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});calendarDate=null;temporalKey='';lastCalendarMarkup='';}
+  $('display-zone').textContent=zone==='Asia/Shanghai'?'北京时间 UTC+8':zone;
+  $('calendar-range').textContent=`过去6周 · 未来1周 · ${zoneName()}`;
+  $('calendar-hour-label').textContent=`小时（${zoneName()}）`;
+  document.body.classList.toggle('dark',state.settings.theme==='dark');
   document.body.style.setProperty('--body-font-size',`${state.settings.bodyFontSize||13}px`);
   if(!barDrag&&!barSaving)applyBarOrder(state.settings.barOrder);
   const sources=state.sources || [], c=state.consensus || {};
@@ -86,6 +92,7 @@ function render(next) {
   if (unread.length) $('change-banner').innerHTML=`<strong>${esc(unread[0].title)}</strong>${esc(unread[0].body)}<span>查看 ›</span>`;
   $('pause').textContent=state.paused?'继续监控':'暂停监控';
   $('poll-dot').style.background=state.paused?'#bb9863':ok?'#50a996':'#bb9863';
+  populateTimeZones();$('setting-timezone').value=zone;
   if (!$('settings-dialog').open) syncSettings();
   tick();
 }
@@ -123,7 +130,7 @@ function renderQuotaDetails() {
 }
 function renderHistory(now=Date.now()) {
  const cutoff=PaceTiming.historyStart(now),rows=(state.history||[]).filter(r=>Date.parse(r.at)>=cutoff&&Date.parse(r.at)<=now).sort((a,b)=>Date.parse(b.at)-Date.parse(a.at));
- $('history-range').textContent=`从 2026/9/1 起 · 最新在上 · 北京时间`;
+ $('history-range').textContent=`从 2026/9/1 起 · 最新在上 · ${zoneName()}`;
  $('history-list').innerHTML=rows.length?rows.map(r=>{
    const plans=r.scope?.plans||[], limited=plans.length&&!plans.includes('all');
    const type=r.type==='observation'?'站方观察':r.type==='commentary'?'回顾':r.type==='repair'?'限定套餐修复':r.type==='banked'?'重置卡':r.type==='global_and_banked'?'全局＋重置卡':limited?'限定套餐重置':'全局重置';
@@ -134,9 +141,9 @@ function renderHistory(now=Date.now()) {
 let calendarDate=null,calendarSaving=false,lastCalendarMarkup='';
 const dayLabel=days=>String(days>=.01?Number(days.toFixed(3)):Number(days.toPrecision(2)));
 function renderCalendar(now=Date.now()){
- const model=ResetCalendar.calendar(state.history,now),pace=PaceTiming.calendarPace(state.settings.calendarTarget,now);
+ const model=ResetCalendar.calendar(state.history,now,zone),pace=PaceTiming.calendarPace(state.settings.calendarTarget,now);
  if(calendarDate&&(calendarDate<=model.today||calendarDate>model.end))calendarDate=null;
- const targetDay=pace.available?ResetCalendar.dateKey(pace.end):null;
+ const targetDay=pace.available?ResetCalendar.dateKey(pace.end,zone):null;
  const showBanked=$('calendar-show-banked').checked,showLimited=$('calendar-show-limited').checked;
  const markup=model.months.map(month=>`<section class="calendar-month"><h3 class="calendar-month-heading" style="margin-left:calc(${month.cells.findIndex(c=>c.inRange)%7} * 100% / 7)">${state.settings.language==='en'?month.month:month.month+'月'}</h3><div class="calendar-month-grid">`+month.cells.map(c=>{
   if(!c.inRange)return '<div class="calendar-cell empty" aria-hidden="true"></div>';
@@ -153,9 +160,9 @@ function renderCalendar(now=Date.now()){
  if(!calendarDate)$('calendar-preview').textContent='请先选择未来日期';
  else try{
   const value=$('calendar-hour').value,hour=value.trim()===''?NaN:Number(value);
-  const result=ResetCalendar.daysForTarget(PaceTiming.hypotheticalPace(state.consensus,1,now,state.history).anchor,calendarDate,hour,now);valid=true;
+  const result=ResetCalendar.daysForTarget(PaceTiming.hypotheticalPace(state.consensus,1,now,state.history).anchor,calendarDate,hour,now,zone);valid=true;
   $('calendar-preview').textContent=`目标 ${full(result.targetAt)} · 日历节奏`;
- }catch(error){$('calendar-preview').textContent=error.code==='NO_ANCHOR'?'等待已核对的全局重置，以设置假设时间':error.code==='INVALID_PERIOD'?'假设天数须大于0且不超过365':'请选择未来一周的日期及0—23点';}
+ }catch(error){$('calendar-preview').textContent=error.reason==='NONEXISTENT_HOUR'?'此时区没有这个整点，请选择其他小时':error.code==='NO_ANCHOR'?'等待已核对的全局重置，以设置假设时间':error.code==='INVALID_PERIOD'?'假设天数须大于0且不超过365':'请选择未来一周的日期及0—23点';}
  $('calendar-confirm').disabled=calendarSaving||!valid;
 }
 $('reset-calendar').addEventListener('click',event=>{const day=event.target.closest('[data-calendar-day]');if(!day||day.disabled)return;calendarDate=day.dataset.calendarDay;$('calendar-result').textContent='';renderCalendar();applyLocale();});
@@ -171,10 +178,11 @@ $('calendar-clear').addEventListener('click',async()=>{const saved=await call(()
 $('clear-hypothetical').addEventListener('click',async()=>{const saved=await call(()=>window.dashboard.saveSettings({clearHypothetical:true}));if(saved)render(saved);});
 function renderCalendarPace(now=Date.now()){
  const pace=PaceTiming.calendarPace(state.settings.calendarTarget,now),progress=pace.available?pace.progress:null;
+ $('calendar-target-label').textContent=pace.available?`日历预测 ${dateFormat.format(date(pace.end))}`:'日历预测';
  $('calendar-fill').style.width=`${(progress??0)*100}%`;
  $('calendar-track').setAttribute('aria-valuenow',String(Math.round((progress??0)*100)));
  $('calendar-percent').textContent=progress===null?'—':`${Math.round(progress*100)}%`;
- $('calendar-pace-note').textContent=pace.available?`指定时间 · ${full(pace.end)}`:'未设置日历时间';
+ $('calendar-pace-note').textContent=pace.available?`指定时间 · ${full(pace.end)}`:'未设置日历预测';
  $('calendar-clear').disabled=!pace.available;
 }
 function renderHypothetical(now=Date.now()) {
@@ -215,12 +223,18 @@ function tick() {
   }
   let countdown=state.nextPollAt?Math.max(0,Math.ceil((Date.parse(state.nextPollAt)-Date.now())/1000)):30;
   $('poll-status').textContent=state.paused?'监控已暂停':state.refreshing?'正在获取信源信息…':`每 30 秒检查 · ${countdown || 30} 秒后再次检查`;
-  $('notification-status').textContent=Date.parse(state.resetQuietUntil)>Date.now()?`重置系统通知已静默至 ${full(state.resetQuietUntil)}（北京时间）`:state.notificationStatus || '系统勿扰模式可能将通知收进通知中心。';
+  $('notification-status').textContent=Date.parse(state.resetQuietUntil)>Date.now()?`重置系统通知已静默至 ${full(state.resetQuietUntil)}（${zoneName()}）`:state.notificationStatus || '系统勿扰模式可能将通知收进通知中心。';
   applyLocale();
+}
+function populateTimeZones(){
+ const select=$('setting-timezone'),language=state.settings.language||'zh-CN';if(select.dataset.language===language)return;
+ const zones=[...new Set(['Asia/Shanghai','UTC',...Intl.supportedValuesOf('timeZone')])];
+ select.innerHTML=zones.map(z=>{const name=new Intl.DateTimeFormat(DashboardI18n.locale(language),{timeZone:z,timeZoneName:'long'}).formatToParts(new Date()).find(p=>p.type==='timeZoneName')?.value||z;return `<option value="${esc(z)}">${esc(z+' · '+name)}</option>`;}).join('');select.dataset.language=language;
 }
 function syncSettings() {
   if (!state) return;
   $('setting-language').value=state.settings.language||'zh-CN';
+  populateTimeZones();$('setting-timezone').value=zone;
   $('setting-notify').checked=state.settings.notify; $('setting-sound').checked=state.settings.sound;
   $('setting-tray').checked=state.settings.closeToTray; $('setting-autostart').checked=state.settings.autoStart; $('setting-dark').checked=state.settings.theme==='dark';
   $('setting-hypothetical-days').value=state.settings.hypotheticalDays||3;
@@ -307,6 +321,7 @@ $('original-post').addEventListener('click',()=>state.consensus?.url && call(()=
 for (const [id,key] of [['setting-notify','notify'],['setting-sound','sound'],['setting-tray','closeToTray'],['setting-autostart','autoStart']]) $(id).addEventListener('change',async()=>{
   try { await window.dashboard.saveSettings({[key]:$(id).checked}); $('settings-error').textContent=''; } catch(error) { $('settings-error').textContent=error.message.replace(/^Error invoking remote method '[^']+': Error: /,''); $(id).checked=state.settings[key]; }
 });
+$('setting-timezone').addEventListener('change',()=>call(()=>window.dashboard.saveSettings({timeZone:$('setting-timezone').value})));
 $('setting-dark').addEventListener('change',()=>call(()=>window.dashboard.saveSettings({theme:$('setting-dark').checked?'dark':'light'})));
 $('quota-limit-select').addEventListener('change',()=>call(()=>window.dashboard.saveSettings({quotaLimitId:$('quota-limit-select').value})));
 $('test-notification').addEventListener('click',async()=>{await call(()=>window.dashboard.testNotification());toast('已发送常驻测试通知，可手动关闭');});

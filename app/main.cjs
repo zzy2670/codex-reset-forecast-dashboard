@@ -7,6 +7,7 @@ const { SOURCES, normalize, calibratedReset, changes, freshness, safeUrl } = req
 const { LocalCodexQuota, quotaView,quotaChanges } = require('./codex-quota.cjs');
 const {historyStart,hypotheticalPace,resetHistory}=require('./dashboard-model.cjs');
 const {projectSourceHistory}=require('./history-events.cjs');
+const TimeZone=require('./ui/time-zone.js');
 const ResetCalendar=require('./ui/reset-calendar.js');
 const {projectForecasts,projectAfterReset}=require('./ui/pace-timing.js');
 const BarOrder=require('./ui/bar-order.js');
@@ -32,7 +33,7 @@ if (smoke) {
 }
 const dataFile = path.join(app.getPath('userData'), 'dashboard-state.json');
 let win, tray, quitting = false, running = false, quotaRunning = false, quotaFlight=null, refreshTimer, quotaTimer;
-const defaults = { language:Intl.DateTimeFormat().resolvedOptions().locale.startsWith('zh')?'zh-CN':'en', notify: true, sound: false, closeToTray: true, autoStart: true, quotaLimitId: 'codex', quotaWindow: 'secondary', theme: 'dark', hypotheticalDays:3, bodyFontSize:13,barOrder:BarOrder.defaults };
+const defaults = { timeZone:'Asia/Shanghai', language:Intl.DateTimeFormat().resolvedOptions().locale.startsWith('zh')?'zh-CN':'en', notify: true, sound: false, closeToTray: true, autoStart: true, quotaLimitId: 'codex', quotaWindow: 'secondary', theme: 'dark', hypotheticalDays:3, bodyFontSize:13,barOrder:BarOrder.defaults };
 let state = { settings: { ...defaults }, sources: [], quota: null, quotaOptions: [], events: [], seen: [], paused: false, lastPollAt: null, nextPollAt: null, notificationStatus: null, baseline: false, confirmedId: null };
 try {
   const saved = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
@@ -40,6 +41,7 @@ try {
 } catch { /* First launch or incomplete state: obtain new observations. */ }
 state.settings.barOrder=BarOrder.normalize(state.settings.barOrder);
 state.sources=state.sources.map(projectSourceHistory);
+state.settings.timeZone=TimeZone.normalize(state.settings.timeZone);
 // Backfill captured public completion records through the normal history merger.
 // This never creates forecast signals, events or notifications.
 state.history=resetHistory([], [...require('./history-seed.json'),...(state.history||[])]);
@@ -59,7 +61,7 @@ if(!Array.isArray(state.notificationGroups)){
       const [,start,end,resetType,plans,timingKind]=e.key.split('|');
       candidate={...e,start:start||null,end:end||null,resetType,timingKind,scope:{plans:plans?plans.split(','):[]}};
     }
-    const grouped=mergeMessage(state.notificationGroups,candidate,Date.now(),quotaView(state.quota,state.settings)?.planType);
+    const grouped=mergeMessage(state.notificationGroups,candidate,Date.now(),quotaView(state.quota,state.settings)?.planType,state.settings.timeZone);
     if(grouped){e.notificationGroup=grouped.group.id;grouped.group.delivered=state.settings.notify===true;}
   }
 }
@@ -103,7 +105,7 @@ function addEvent(e, notify = true) {
   state.seen.push(e.key);
   if(e.kind==='quota_reset'&&e.bucketId&&e.windowKey&&e.resetsAt)state.localReset={key:e.key,bucketId:e.bucketId,windowKey:e.windowKey,resetsAt:e.resetsAt,observedAt:e.at,kind:'quota-reset'};
   state.notificationGroups=state.notificationGroups||[];
-  const grouped=mergeMessage(state.notificationGroups,e,Date.now(),quotaView(state.quota,state.settings)?.planType);
+  const grouped=mergeMessage(state.notificationGroups,e,Date.now(),quotaView(state.quota,state.settings)?.planType,state.settings.timeZone);
   state.notificationGroups=state.notificationGroups.slice(-200);
   const existing=grouped&&state.events.findIndex(p=>p.notificationGroup===grouped.group.id);
   if(grouped&&existing>=0)state.events[existing]={...grouped.event,read:state.events[existing].read};
@@ -310,13 +312,14 @@ function registerIpc() {
     if (!patch || typeof patch !== 'object') throw new Error('设置无效');
     const next = { ...state.settings };
     for (const key of ['notify','sound','closeToTray','autoStart']) if (typeof patch[key] === 'boolean') next[key] = patch[key];
+    if('timeZone' in patch){if(!TimeZone.valid(patch.timeZone))throw new Error('时区无效');next.timeZone=TimeZone.normalize(patch.timeZone);}
     if('hypotheticalDays' in patch){if(!Number.isFinite(patch.hypotheticalDays)||patch.hypotheticalDays<=0||patch.hypotheticalDays>365)throw new Error('假设天数须大于0且不超过365');next.hypotheticalDays=patch.hypotheticalDays;next.hypotheticalEnabled=true;}
     if(patch.clearHypothetical===true)next.hypotheticalEnabled=false;
     if(patch.clearCalendarTarget===true)delete next.calendarTarget;
     if('calendarTarget' in patch){
       const now=Date.now(),view=snapshot();
-      try{const anchor=hypotheticalPace(view.consensus,1,now,view.history).anchor;const target=ResetCalendar.daysForTarget(anchor,patch.calendarTarget?.day,patch.calendarTarget?.hour,now);next.calendarTarget={at:target.targetAt,anchor};}
-      catch(error){throw new Error(error.code==='NO_ANCHOR'?'等待已核对的全局重置，以设置假设时间':error.code==='INVALID_PERIOD'?'假设天数须大于0且不超过365':'请选择未来一周的日期及0—23点');}
+      try{const anchor=hypotheticalPace(view.consensus,1,now,view.history).anchor;const target=ResetCalendar.daysForTarget(anchor,patch.calendarTarget?.day,patch.calendarTarget?.hour,now,next.timeZone);next.calendarTarget={at:target.targetAt,anchor};}
+      catch(error){throw new Error(error.reason==='NONEXISTENT_HOUR'?'此时区没有这个整点，请选择其他小时':error.code==='NO_ANCHOR'?'等待已核对的全局重置，以设置假设时间':error.code==='INVALID_PERIOD'?'假设天数须大于0且不超过365':'请选择未来一周的日期及0—23点');}
     }
     if('bodyFontSize' in patch){if(!Number.isInteger(patch.bodyFontSize)||patch.bodyFontSize<11||patch.bodyFontSize>22)throw new Error('正文大小须为 11—22 px');next.bodyFontSize=patch.bodyFontSize;}
     if('barOrder' in patch){if(!BarOrder.valid(patch.barOrder))throw new Error('横条顺序无效');next.barOrder=[...patch.barOrder];}
