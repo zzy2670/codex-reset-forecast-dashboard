@@ -6,6 +6,7 @@ const { SOURCES, normalize, calibratedReset, changes, freshness, safeUrl } = req
 
 const { LocalCodexQuota, quotaView,quotaChanges } = require('./codex-quota.cjs');
 const {historyStart,hypotheticalPace,resetHistory}=require('./dashboard-model.cjs');
+const ResetCalendar=require('./ui/reset-calendar.js');
 const {projectForecasts,projectAfterReset}=require('./ui/pace-timing.js');
 const BarOrder=require('./ui/bar-order.js');
 const {REQUEST_TIMEOUT_MS,buildFailure}=require('./source-retry.cjs');
@@ -307,7 +308,12 @@ function registerIpc() {
     if (!patch || typeof patch !== 'object') throw new Error('设置无效');
     const next = { ...state.settings };
     for (const key of ['notify','sound','closeToTray','autoStart']) if (typeof patch[key] === 'boolean') next[key] = patch[key];
-    if('hypotheticalDays' in patch){if(!Number.isFinite(patch.hypotheticalDays)||patch.hypotheticalDays<0.25||patch.hypotheticalDays>365)throw new Error('假设天数须为 0.25—365');next.hypotheticalDays=patch.hypotheticalDays;}
+    if('hypotheticalDays' in patch){if(!Number.isFinite(patch.hypotheticalDays)||patch.hypotheticalDays<=0||patch.hypotheticalDays>365)throw new Error('假设天数须大于0且不超过365');next.hypotheticalDays=patch.hypotheticalDays;}
+    if('hypotheticalTarget' in patch){
+      const now=Date.now(),view=snapshot();
+      try{next.hypotheticalDays=ResetCalendar.daysForTarget(view.hypothetical.anchor,patch.hypotheticalTarget?.day,patch.hypotheticalTarget?.hour,now).days;}
+      catch(error){throw new Error(error.code==='NO_ANCHOR'?'等待已核对的全局重置，以设置假设时间':error.code==='INVALID_PERIOD'?'假设天数须大于0且不超过365':'请选择未来一周的日期及0—23点');}
+    }
     if('bodyFontSize' in patch){if(!Number.isInteger(patch.bodyFontSize)||patch.bodyFontSize<11||patch.bodyFontSize>22)throw new Error('正文大小须为 11—22 px');next.bodyFontSize=patch.bodyFontSize;}
     if('barOrder' in patch){if(!BarOrder.valid(patch.barOrder))throw new Error('横条顺序无效');next.barOrder=[...patch.barOrder];}
     if (['light','dark'].includes(patch.theme)) next.theme = patch.theme;

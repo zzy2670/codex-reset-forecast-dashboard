@@ -7,6 +7,7 @@
   <title>codex重置预测看板</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="dashboard-v12.css">
+  <link rel="stylesheet" href="reset-calendar.css">
 </head>
 <body class="dark">
   <header class="titlebar">
@@ -55,6 +56,20 @@
       <div id="sources-grid" class="sources-grid" aria-live="polite"></div>
     </section>
     <footer><div><span id="poll-dot" class="status-dot"></span><span id="poll-status">每 30 秒检查</span><span class="footer-separator"></span><span>北京时间 UTC+8</span></div><button id="pause" class="text-button">暂停监控</button></footer>
+    <section class="calendar-section" aria-labelledby="calendar-heading">
+      <div class="history-heading"><h2 id="calendar-heading">历史重置日历</h2><span>过去6周 · 未来1周 · 北京时间</span></div>
+      <div class="calendar-layout">
+        <div class="calendar-board"><div class="calendar-weekdays" aria-hidden="true"><span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span></div><div id="reset-calendar" class="reset-calendar" role="group" aria-label="历史重置日历"></div></div>
+        <aside class="calendar-options">
+          <h3>设定假设重置时间</h3><p class="calendar-hint">点击未来日期，再选择小时</p>
+          <label class="field">已选日期<input id="calendar-selected" readonly placeholder="请先选择未来日期"></label>
+          <label class="field">小时（北京时间）<input id="calendar-hour" type="number" min="0" max="23" step="1" value="15"></label>
+          <p id="calendar-preview" class="calendar-preview"></p><button id="calendar-confirm" class="primary-button" disabled>确定</button><p id="calendar-result" class="calendar-result" role="status"></p>
+          <div class="calendar-filters"><label><input id="calendar-show-limited" type="checkbox" checked>限定套餐重置</label><label><input id="calendar-show-banked" type="checkbox">重置卡记录</label></div>
+          <div class="calendar-legend"><span><i class="legend-reset"></i>已记录重置</span><span><i class="legend-assumed"></i>假设时间</span></div><p id="calendar-current" class="calendar-current"></p>
+        </aside>
+      </div>
+    </section>
     <section class="history-section" aria-labelledby="history-heading"><div class="history-heading"><h2 id="history-heading">历史重置</h2><span id="history-range"></span></div><div id="history-list" class="history-list"></div></section>
   </main>
 
@@ -72,7 +87,7 @@
       <label class="setting-row"><span>深色外观</span><input id="setting-dark" type="checkbox" role="switch"></label>
     </div>
     <div class="settings-section"><h3>本机 Codex 额度</h3><label class="field" id="quota-limit-field" hidden>额度类别<select id="quota-limit-select"></select></label><button class="secondary-button" id="settings-refresh-quota">刷新本机额度</button><p class="help-text">自动读取本机 Codex 当前账户的剩余比例与重置时间。</p></div>
-    <div class="settings-section"><h3>节奏与文字</h3><label class="field">假设每 X 天重置<input id="setting-hypothetical-days" type="number" min="0.25" max="365" step="0.25" value="3"></label><p class="help-text">默认 3 天。以最近已核对的全局重置为起点，到期停在 100%，等待实际重置。</p><label class="field">正文字号 <span id="body-font-value">13 px</span><input id="setting-body-font" type="range" min="11" max="22" step="1" value="13"></label><p class="help-text">正文和更小的文字同步调整，保留字号层次；大号时间、额度和预告数字保持原尺寸。</p></div>
+    <div class="settings-section"><h3>节奏与文字</h3><label class="field">假设每 X 天重置<input id="setting-hypothetical-days" type="number" min="0.000001" max="365" step="any" value="3"></label><p class="help-text">默认 3 天。以最近已核对的全局重置为起点，到期停在 100%，等待实际重置。</p><label class="field">正文字号 <span id="body-font-value">13 px</span><input id="setting-body-font" type="range" min="11" max="22" step="1" value="13"></label><p class="help-text">正文和更小的文字同步调整，保留字号层次；大号时间、额度和预告数字保持原尺寸。</p></div>
     <div class="settings-footnote">看板每 30 秒检查。Did Codex Reset 受接口限流，约 3.5 分钟更新。实际新消息还取决于各站的采集频率。</div>
     <div id="settings-error" class="form-error" role="alert"></div>
   </dialog>
@@ -88,6 +103,7 @@
   <div id="toast" class="toast" role="status" hidden></div>
   <script src="i18n.js"></script>
   <script src="pace-timing.js"></script>
+  <script src="reset-calendar.js"></script>
   <script src="bar-order.js"></script>
   <script src="renderer.js"></script>
 </body>

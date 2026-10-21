@@ -1,5 +1,8 @@
 ## Codex 重置预测看板
 
+- 新增历史重置日历，显示过去六周和未来一周；重置当天标红，格内列出北京时间的时、分。
+- 点击未来日期、输入小时并确认，即可更新上方的假设重置周期；支持限定套餐和重置卡筛选。
+
 - 修复信源缓存过期后“假设每 X 天重置”横条显示为空的问题。已核对的历史全局重置继续作为计算起点，保留自定义天数；到期显示 100%。
 
 - 内置官方 Codex 运行程序，自动检测本机授权；未登录时在看板完成 ChatGPT 登录，随后自动读取额度。
@@ -25,6 +28,9 @@
 [图文介绍](https://zzy2670.github.io/codex-reset-forecast-dashboard/) · [安装说明](https://github.com/zzy2670/codex-reset-forecast-dashboard/blob/main/README.zh-CN.md)
 
 ## English
+
+- Adds a compact reset calendar covering the past six weeks and the next week. Reset days have a red background and show each recorded time in Beijing time.
+- Select a future date and an hour, then confirm to update the assumed reset period above. Includes filters for plan-specific resets and reset credits.
 
 - Fixed the assumed X-day reset bar going blank when source caches expire. Previously cross-checked global resets remain valid anchors, with custom durations preserved and progress capped at 100%.
 

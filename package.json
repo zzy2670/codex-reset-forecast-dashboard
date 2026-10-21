@@ -1,6 +1,6 @@
 {
   "name": "codex-reset-forecast-dashboard",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "private": true,
   "description": "Codex reset forecasts, local quota pacing and multi-source evidence.",
   "main": "app/main.cjs",
@@ -18,7 +18,8 @@
     "prebuild": "node scripts/prepare-runtime.cjs",
     "prebuild:dir": "node scripts/prepare-runtime.cjs",
     "test:onboarding": "node scripts/verify-onboarding.cjs",
-    "test:deployment": "node scripts/verify-deployment.cjs"
+    "test:deployment": "node scripts/verify-deployment.cjs",
+    "test:calendar": "node scripts/verify-calendar.cjs"
   },
   "devDependencies": {
     "@openai/codex": "0.159.2",

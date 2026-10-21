@@ -66,6 +66,8 @@ Each card shows the site’s next reset time, announcement and update time. Expa
 
 ## Reset history
 
+The calendar above the history list shows the past six weeks and the next week. Reset days are red, with each time shown to the minute. Select a future date, enter an hour and confirm to update the assumed reset period in the usage bars.
+
 ![Latest reset and an expanded history record.](docs/assets/feature-history.png)
 
 Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard.

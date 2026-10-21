@@ -1,6 +1,15 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
+ '确定':'Confirm','历史重置日历':'Reset calendar','过去6周 · 未来1周 · 北京时间':'Past 6 weeks · Next week · Beijing time',
+ '周一':'Mon','周二':'Tue','周三':'Wed','周四':'Thu','周五':'Fri','周六':'Sat','周日':'Sun',
+ '设定假设重置时间':'Set an assumed reset time','点击未来日期，再选择小时':'Choose a future date, then an hour',
+ '已选日期':'Selected date','请先选择未来日期':'Select a future date','小时（北京时间）':'Hour (Beijing time)',
+ '重置卡记录':'Reset credit records','已记录重置':'Recorded reset','假设时间':'Assumed time','今天':'Today',
+ '当前假设 ·':'Current assumption ·','目标 ':'Target ','已更新假设节奏':'Assumed pace updated',
+ '等待已核对的全局重置，以设置假设时间':'Awaiting a verified global reset to set the assumed time',
+ '请选择未来一周的日期及0—23点':'Choose a date in the next week and an hour from 0 to 23',
+ '假设天数须大于0且不超过365':'Assumed days must be greater than 0 and no more than 365',
  '重试中':'Retrying','站方数据格式已变化，请打开原站核查。':'The source format changed. Open its website to check.','站方请求未成功，请打开原站核查。':'The source request failed. Open its website to check.',
  "连接 Codex 额度":"Connect Codex quota",
  "登录 ChatGPT 并接入额度":"Sign in with ChatGPT",
