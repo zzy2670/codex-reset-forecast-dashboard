@@ -58,10 +58,12 @@ function cardMarkup(s) {
   </article>`;
 }
 function render(next) {
+  const calendarChanged=next.settings.calendarTarget?.at!==state?.settings.calendarTarget?.at||next.settings.timeZone!==state?.settings.timeZone;
   if(next.calendarResetClearedBy&&next.calendarResetClearedBy!==state?.calendarResetClearedBy&&!next.settings.calendarTarget){calendarDate=null;$('calendar-hour').value='';$('calendar-result').textContent='';}
   state=next;
   const nextZone=DashboardTimeZone.normalize(state.settings.timeZone);
   if(zone!==nextZone){zone=nextZone;dateFormat=new Intl.DateTimeFormat('zh-CN',{timeZone:zone,month:'numeric',day:'numeric'});timeFormat=new Intl.DateTimeFormat('zh-CN',{timeZone:zone,hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});calendarDate=null;temporalKey='';lastCalendarMarkup='';}
+  if(calendarChanged&&Number.isFinite(Date.parse(state.settings.calendarTarget?.at))){calendarDate=DashboardTimeZone.dateKey(state.settings.calendarTarget.at,zone);$('calendar-hour').value=String(Number(DashboardTimeZone.time(state.settings.calendarTarget.at,zone).split(':')[0]));}
   $('display-zone').textContent=zone==='Asia/Shanghai'?'北京时间 UTC+8':zone;
   $('calendar-range').textContent=`过去6周 · 未来1周 · ${zoneName()}`;
   $('calendar-hour-label').textContent=`小时（${zoneName()}）`;

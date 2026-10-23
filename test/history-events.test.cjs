@@ -99,3 +99,48 @@ test('existing evidence survives merging and repeated reads without evidence gro
  const first=copyJson(result);for(let i=0;i<4;i++)result=reconcileHistory(result);assert.deepEqual(result,first);
 });
 function copyJson(value){return JSON.parse(JSON.stringify(value));}
+
+function cachedManualFixture(){
+ const observedId='2113162277688070445',observedAt='2026-10-22T17:10:01.000Z',at='2026-10-22T17:09:00.000Z';
+ const observed=row(observedId,observedAt,{text:"Reset observed by operator; awaiting Tibo's confirmation.",type:'observation',phase:'observation',originalType:'global',originalKindLabel:'global',sources:[source('codex',observedAt,{phase:'observation',evidenceOnly:true,url:`https://x.com/thsottiaux/status/${observedId}`})]});
+ delete observed.kindLabel;
+ const completed=row(`did:manual:${observedId}`,at,{url:null,text:'Actually completed; awaiting public announcement',timeBasis:'effective',relatedRecordIds:[observedId],sources:[source('did',at,{url:null})],observations:[copyJson(observed)],evidence:[{kind:'manual-effective-record',at},copyJson(observed)]});
+ const duplicate={...copyJson(completed),id:`codex:${completed.id}`,sources:copyJson(observed.sources)};
+ return {observed,completed,duplicate};
+}
+
+test('a cached source prefix cannot duplicate the same manual event or its confirmation votes',()=>{
+ const {observed,completed,duplicate}=cachedManualFixture(),input=[observed,completed,duplicate],before=JSON.stringify(input);
+ const output=reconcileHistory(input);assert.equal(output.length,1);assert.equal(output[0].id,completed.id);assert.equal(output[0].at,completed.at);assert.equal(output[0].type,'global');
+ assert.equal(output[0].familyCount,1);assert.equal(output[0].timeConflict,false);assert.equal(output[0].sources.length,2);
+ assert.equal(output[0].sources.find(s=>s.id==='codex').evidenceOnly,true);assert.equal(output[0].sources.find(s=>s.id==='codex').phase,'observation');
+ assert.equal(output[0].observations.length,1);assert.equal(output[0].observations[0].id,observed.id);assert.equal(output[0].observations[0].text,observed.text);assert.equal(output[0].observations[0].at,observed.at);
+ assert.ok(output[0].evidence.some(e=>e.id===duplicate.id));assert.ok(output[0].evidence.some(e=>e.kind==='manual-effective-record'));assert.equal(JSON.stringify(input),before);
+ assert.deepEqual(reconcileHistory(copyJson(output)),output);
+});
+
+test('manual cache copies reconcile regardless of input order and survive real polling and disk restarts',()=>{
+ const {observed,completed,duplicate}=cachedManualFixture();
+ for(const input of [[duplicate,observed,completed],[completed,duplicate,observed]]){
+  let output=reconcileHistory(input);
+  for(let index=0;index<10;index++){
+   const current=copyJson(observed);current.sources[0].observedAt=new Date(Date.parse('2026-10-23T00:00:00Z')+index*30000).toISOString();
+   output=reconcileHistory([...copyJson(output),current]);
+   assert.equal(output.length,1);assert.equal(output[0].id,completed.id);assert.equal(output[0].familyCount,1);assert.equal(output[0].observations.length,1);
+  }
+  assert.deepEqual(reconcileHistory(copyJson(output)),output);
+ }
+});
+
+test('a manual cache copy with only observation sources never invents a completion without its owner',()=>{
+ const {duplicate}=cachedManualFixture(),result=reconcileHistory([duplicate]);
+ assert.equal(result.length,1);assert.equal(result[0].id,duplicate.id);assert.equal(result[0].type,'observation');assert.equal(result[0].familyCount,0);
+});
+
+test('manual prefix repair does not combine unrelated same-minute records or different reset categories',()=>{
+ const {completed,duplicate}=cachedManualFixture();
+ for(const other of [{...copyJson(completed),id:'did:manual:2113162277688070446'},{...copyJson(completed),id:'external:did:manual:2113162277688070445'},{...copyJson(completed),id:'codex:did:manual:2113162277688070445',type:'banked',sources:[source('codex',completed.at)]}]){
+  const output=reconcileHistory([completed,other]);assert.equal(output.length,2);
+ }
+ const second=row('2113162277688070446',completed.at);assert.equal(reconcileHistory([completed,duplicate,second]).length,2);
+});

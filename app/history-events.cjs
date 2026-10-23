@@ -17,6 +17,7 @@ function phase(row){
  if(identity(row)==='2097183639356489952'||row.type==='commentary'||row.phase==='commentary')return 'commentary';
  if(identity(row)==='2106239435461579088'||row.type==='repair'||row.phase==='repair')return 'repair';
  if(row.evidenceOnly===true)return 'observation';
+ if(row.sources?.length&&row.sources.every(source=>source.evidenceOnly||['observation','commentary','repair'].includes(source.phase)))return 'observation';
  return 'completion';
 }
 function classified(row){
@@ -49,7 +50,7 @@ const collectionFields=new Set(['observedAt','fetchedAt']);
 function evidenceVersion(value,key){
  if(Array.isArray(value)){
   const result=value.map(item=>evidenceVersion(item));
-  return key==='sources'?result.sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))):result;
+  return key==='sources'?[...new Map(result.map(item=>[JSON.stringify(item),item])).values()].sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))):result;
  }
  if(value&&typeof value==='object')return Object.fromEntries(Object.keys(value).sort().filter(name=>!collectionFields.has(name)&&!['familyCount','timeConflict'].includes(name)).map(name=>[name,evidenceVersion(value[name],name)]));
  return value;
@@ -97,8 +98,32 @@ function metrics(row){
  const times=completed.map(s=>Date.parse(s.at||row.at)).filter(Number.isFinite);
  return {...row,familyCount:families.size,timeConflict:times.length>1&&Math.max(...times)!==Math.min(...times)};
 }
+function manualIdentity(row){
+ if(row.url)return null;
+ const segments=String(row.id??'').split(':'),manual=segments.indexOf('manual');
+ if(manual<1||manual===segments.length-1||!segments.slice(0,manual).every(id=>Object.hasOwn(knownFamilies,id)))return null;
+ return segments.slice(manual-1).join(':');
+}
+function mergeCachedCopies(records){
+ const groups=new Map(),absorbed=new Set();
+ for(const row of records){const key=manualIdentity(row);if(key){if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);}}
+ for(const [key,rows] of groups){
+  if(rows.length<2)continue;
+  const canonical=rows.find(row=>row.id===key&&completion(row))||rows.find(completion)||rows.find(row=>row.id===key)||rows[0];
+  for(const duplicate of rows){
+   if(duplicate===canonical||!compatible(duplicate,canonical))continue;
+   const before=evidenceOf(canonical);
+   canonical.sources=uniqueSources([...(canonical.sources||[]),...(duplicate.sources||[])]);
+   if(canonical.observations||duplicate.observations)canonical.observations=uniqueEvidence([...(canonical.observations||[]),...(duplicate.observations||[])]);
+   canonical.evidence=uniqueEvidence([...before,...evidenceOf(duplicate),snapshot(duplicate)]);
+   if(canonical.relatedRecordIds||duplicate.relatedRecordIds)canonical.relatedRecordIds=[...new Set([...(canonical.relatedRecordIds||[]),...(duplicate.relatedRecordIds||[])])];
+   absorbed.add(duplicate);
+  }
+ }
+ return records.filter(row=>!absorbed.has(row));
+}
 function reconcileHistory(rows){
- const records=(Array.isArray(rows)?rows:[]).filter(row=>row&&typeof row==='object').map(classified);
+ const records=mergeCachedCopies((Array.isArray(rows)?rows:[]).filter(row=>row&&typeof row==='object').map(classified));
  const completed=records.filter(completion),absorbed=new Set();
  for(const observed of records.filter(row=>phase(row)==='observation')){
   const canonical=targetFor(observed,completed);if(!canonical)continue;
