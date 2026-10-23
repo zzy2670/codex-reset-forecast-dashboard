@@ -321,7 +321,7 @@ function registerIpc() {
     if(patch.clearCalendarTarget===true)delete next.calendarTarget;
     if('calendarTarget' in patch){
       const now=Date.now(),view=snapshot();
-      try{const anchor=hypotheticalPace(view.consensus,1,now,view.history).anchor;const target=ResetCalendar.daysForTarget(anchor,patch.calendarTarget?.day,patch.calendarTarget?.hour,now,next.timeZone);next.calendarTarget={at:target.targetAt,anchor,createdAt:new Date(now).toISOString()};}
+      try{const anchor=hypotheticalPace(view.consensus,1,now,view.history,{quota:view.quotaDisplay,localReset:view.localReset}).anchor;const target=ResetCalendar.daysForTarget(anchor,patch.calendarTarget?.day,patch.calendarTarget?.hour,now,next.timeZone);next.calendarTarget={at:target.targetAt,anchor,createdAt:new Date(now).toISOString()};}
       catch(error){throw new Error(error.reason==='NONEXISTENT_HOUR'?'此时区没有这个整点，请选择其他小时':error.code==='NO_ANCHOR'?'等待已核对的全局重置，以设置假设时间':error.code==='INVALID_PERIOD'?'假设天数须大于0且不超过365':'请选择未来一周的日期及0—23点');}
     }
     if('bodyFontSize' in patch){if(!Number.isInteger(patch.bodyFontSize)||patch.bodyFontSize<11||patch.bodyFontSize>22)throw new Error('正文大小须为 11—22 px');next.bodyFontSize=patch.bodyFontSize;}

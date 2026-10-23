@@ -95,3 +95,58 @@ test('browser UMD uses persisted local proof without Node or account access',()=
  const actual=context.PaceTiming.hypotheticalPace(global,3,now,[],JSON.parse(JSON.stringify(proof())));
  assert.equal(actual.origin,'local');assert.equal(actual.anchor,'2026-10-22T17:09:48.000Z');
 });
+
+test('reported October 28 calendar deadline measures progress from the real local refill while keeping the exact selected deadline',()=>{
+ const current=localAt+9*3600000,target={anchor:global.at,at:'2026-10-28T07:00:00.000Z',createdAt:'2026-10-23T02:25:29.726Z'},options=proof();
+ const before=JSON.stringify({target,options}),old=Pace.calendarPace(target,current),actual=Pace.calendarPace(target,current,options);
+ assert.equal(actual.available,true);assert.equal(actual.anchor,'2026-10-22T17:09:48.000Z');assert.equal(actual.end,target.at);
+ assert.equal(actual.progress,(current-localAt)/(Date.parse(target.at)-localAt));
+ assert.ok(actual.progress>.067&&actual.progress<.068);assert.ok(old.progress>.35&&old.progress<.36);
+ assert.equal(actual.days,(Date.parse(target.at)-localAt)/day);assert.equal(actual.overdue,false);
+ assert.equal(JSON.stringify({target,options}),before);
+});
+
+test('calendar pacing retains the local receipt through aging, temporary errors and a disk round trip',()=>{
+ const target={anchor:global.at,at:'2026-10-28T07:00:00.000Z'};
+ for(const state of ['ok','error']){
+  const options=proof();options.quota.state=state;options.quota.stale=true;options.quota.fetchedAt='2026-10-22T17:50:59.306Z';delete options.quota.usedPercent;
+  const actual=Pace.calendarPace(target,now,JSON.parse(JSON.stringify(options)));
+  assert.equal(Date.parse(actual.anchor),localAt);assert.equal(actual.end,target.at);assert.equal(actual.progress,(now-localAt)/(Date.parse(target.at)-localAt));
+ }
+});
+
+test('calendar pacing falls back to its stored anchor when no matching actual local refill is proved',()=>{
+ const target={anchor:global.at,at:'2026-10-28T07:00:00.000Z'},expected=Pace.calendarPace(target,now);
+ const observed=proof();observed.localReset.kind='observed-cycle';
+ const mismatched=proof();mismatched.localReset.windowKey='secondary';
+ for(const options of [undefined,null,{},observed,mismatched,{quota:proof().quota},proof(now+60000)]){
+  const actual=Pace.calendarPace(target,now,options);assert.equal(actual.anchor,global.at);assert.equal(actual.end,target.at);assert.equal(actual.progress,expected.progress);
+ }
+});
+
+test('changing the exact calendar deadline immediately changes progress without moving the actual local anchor',()=>{
+ const options=proof(),target={anchor:global.at,at:'2026-10-28T07:00:00.000Z'},later={...target,at:'2026-10-28T09:00:00.000Z'};
+ const a=Pace.calendarPace(target,now,options),b=Pace.calendarPace(later,now,options);
+ assert.equal(a.anchor,b.anchor);assert.equal(Date.parse(a.anchor),localAt);assert.equal(Date.parse(b.end)-Date.parse(a.end),2*3600000);
+ assert.ok(b.progress<a.progress);assert.equal(b.progress,(now-localAt)/(Date.parse(later.at)-localAt));
+ assert.equal(a.end,target.at);assert.equal(b.end,later.at);
+});
+
+test('a valid local receipt supplies the calendar anchor even when the saved historical anchor is unavailable',()=>{
+ const target={at:'2026-10-28T07:00:00.000Z'},actual=Pace.calendarPace(target,now,proof());
+ assert.equal(actual.available,true);assert.equal(Date.parse(actual.anchor),localAt);assert.equal(actual.end,target.at);
+ assert.equal(Pace.calendarPace(target,now).available,false);
+});
+
+test('calendar progress reaches the selected absolute deadline exactly and stays complete without rolling forward',()=>{
+ const target={anchor:global.at,at:'2026-10-28T07:00:00.000Z'},deadline=Date.parse(target.at),options=proof();
+ const before=Pace.calendarPace(target,deadline-1,options);assert.ok(before.progress<1);assert.equal(before.overdue,false);
+ for(const current of [deadline,deadline+day]){
+  const actual=Pace.calendarPace(target,current,options);assert.equal(actual.progress,1);assert.equal(actual.overdue,true);assert.equal(Date.parse(actual.anchor),localAt);assert.equal(actual.end,target.at);
+ }
+});
+
+test('a later local refill preserves an expired calendar deadline at 100 percent until it is cleared',()=>{
+ const target={anchor:global.at,at:'2026-10-28T07:00:00.000Z'},deadline=Date.parse(target.at),current=deadline+2*day,options=proof(deadline+day);
+ const actual=Pace.calendarPace(target,current,options);assert.equal(actual.available,true);assert.equal(actual.progress,1);assert.equal(actual.overdue,true);assert.equal(actual.end,target.at);assert.equal(actual.anchor,target.anchor);assert.equal(actual.origin,'saved');
+});

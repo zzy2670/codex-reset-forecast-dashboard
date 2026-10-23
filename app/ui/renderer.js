@@ -144,7 +144,7 @@ function renderHistory(now=Date.now()) {
 let calendarDate=null,calendarSaving=false,lastCalendarMarkup='';
 const dayLabel=days=>String(days>=.01?Number(days.toFixed(3)):Number(days.toPrecision(2)));
 function renderCalendar(now=Date.now()){
- const model=ResetCalendar.calendar(state.history,now,zone),pace=PaceTiming.calendarPace(state.settings.calendarTarget,now);
+ const model=ResetCalendar.calendar(state.history,now,zone),pace=PaceTiming.calendarPace(state.settings.calendarTarget,now,{quota:state.quotaDisplay,localReset:state.localReset});
  if(calendarDate&&(calendarDate<=model.today||calendarDate>model.end))calendarDate=null;
  const targetDay=pace.available?ResetCalendar.dateKey(pace.end,zone):null;
  const showBanked=$('calendar-show-banked').checked,showLimited=$('calendar-show-limited').checked;
@@ -163,7 +163,7 @@ function renderCalendar(now=Date.now()){
  if(!calendarDate)$('calendar-preview').textContent='请先选择未来日期';
  else try{
   const value=$('calendar-hour').value,hour=value.trim()===''?NaN:Number(value);
-  const result=ResetCalendar.daysForTarget(PaceTiming.hypotheticalPace(state.consensus,1,now,state.history).anchor,calendarDate,hour,now,zone);valid=true;
+  const result=ResetCalendar.daysForTarget(PaceTiming.hypotheticalPace(state.consensus,1,now,state.history,{quota:state.quotaDisplay,localReset:state.localReset}).anchor,calendarDate,hour,now,zone);valid=true;
   $('calendar-preview').textContent=`目标 ${full(result.targetAt)} · 日历节奏`;
  }catch(error){$('calendar-preview').textContent=error.reason==='NONEXISTENT_HOUR'?'此时区没有这个整点，请选择其他小时':error.code==='NO_ANCHOR'?'等待已核对的全局重置，以设置假设时间':error.code==='INVALID_PERIOD'?'假设天数须大于0且不超过365':'请选择未来一周的日期及0—23点';}
  $('calendar-confirm').disabled=calendarSaving||!valid;
@@ -180,12 +180,12 @@ $('calendar-confirm').addEventListener('click',async()=>{
 $('calendar-clear').addEventListener('click',async()=>{const saved=await call(()=>window.dashboard.saveSettings({clearCalendarTarget:true}));if(saved){render(saved);$('calendar-result').textContent='日期假设已清除';applyLocale();}});
 $('clear-hypothetical').addEventListener('click',async()=>{const saved=await call(()=>window.dashboard.saveSettings({clearHypothetical:true}));if(saved)render(saved);});
 function renderCalendarPace(now=Date.now()){
- const pace=PaceTiming.calendarPace(state.settings.calendarTarget,now),progress=pace.available?pace.progress:null;
+ const pace=PaceTiming.calendarPace(state.settings.calendarTarget,now,{quota:state.quotaDisplay,localReset:state.localReset}),progress=pace.available?pace.progress:null;
  $('calendar-target-label').textContent=pace.available?`日历预测 ${dateFormat.format(date(pace.end))}`:'日历预测';
  $('calendar-fill').style.width=`${(progress??0)*100}%`;
  $('calendar-track').setAttribute('aria-valuenow',String(Math.round((progress??0)*100)));
  $('calendar-percent').textContent=progress===null?'—':`${Math.round(progress*100)}%`;
- $('calendar-pace-note').textContent=pace.available?`指定时间 · ${full(pace.end)}`:'未设置日历预测';
+ $('calendar-pace-note').textContent=pace.available?`${pace.origin==='local'?'从本机最近补充起算 · ':''}指定时间 · ${full(pace.end)}`:'未设置日历预测';
  $('calendar-clear').disabled=!pace.available;
 }
 function renderHypothetical(now=Date.now()) {

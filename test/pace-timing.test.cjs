@@ -51,7 +51,7 @@ test('view trims a window locally at its start while the source schedule identit
 });
 test('calendar pace owns an exact target independent of the manual X-day assumption',()=>{
  const anchor=new Date(now-day).toISOString(),at=new Date(now+day).toISOString(),target={anchor,at};
- assert.deepEqual(calendarPace(target,now),{available:true,anchor,end:at,days:2,progress:.5,overdue:false});
+ assert.deepEqual(calendarPace(target,now),{available:true,origin:'saved',anchor,end:at,days:2,progress:.5,overdue:false});
  assert.equal(calendarPace(target,now+day/2).progress,.75);assert.equal(calendarPace(target,now+day).progress,1);assert.equal(calendarPace(target,now+day).overdue,true);assert.equal(calendarPace(target,now+2*day).progress,1);
  const consensus={state:'confirmed',at:anchor},before=hypotheticalPace(consensus,3,now);
  const later=calendarPace({anchor,at:new Date(now+3*day).toISOString()},now);assert.equal(later.days,4);assert.equal(later.progress,.25);assert.deepEqual(hypotheticalPace(consensus,3,now),before);

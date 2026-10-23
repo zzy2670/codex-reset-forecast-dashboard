@@ -45,10 +45,10 @@
   const elapsed=now-chosen.at,duration=days*86400000;
   return {available:true,days,origin:chosen.origin,anchor:new Date(chosen.at).toISOString(),end:new Date(chosen.at+duration).toISOString(),elapsedHours:elapsed/3600000,progress:Math.min(1,elapsed/duration),overdue:elapsed>=duration};
  }
- function calendarPace(target,now=Date.now()){
-  const anchor=Date.parse(target?.anchor),end=Date.parse(target?.at);
+ function calendarPace(target,now=Date.now(),options={}){
+  const local=actualLocalResetAnchor(options?.quota,options?.localReset,now),end=Date.parse(target?.at),useLocal=local&&local.at<end,anchor=useLocal?local.at:Date.parse(target?.anchor);
   if(!Number.isFinite(now)||!Number.isFinite(anchor)||!Number.isFinite(end)||anchor>now||end<=anchor)return {available:false};
-  return {available:true,anchor:new Date(anchor).toISOString(),end:new Date(end).toISOString(),days:(end-anchor)/86400000,progress:paceProgress(anchor,end,now)/100,overdue:now>=end};
+  return {available:true,origin:useLocal?'local':'saved',anchor:new Date(anchor).toISOString(),end:new Date(end).toISOString(),days:(end-anchor)/86400000,progress:paceProgress(anchor,end,now)/100,overdue:now>=end};
  }
  function projectForecasts(source,now=Date.now()){
   const key=f=>`${f.id}:${f.start}:${f.end}:${f.type}:${[...(f.scope?.plans||[])].sort().join(',')}:${f.timingKind||'announcement'}`;
