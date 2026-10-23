@@ -186,14 +186,14 @@ function renderCalendarPace(now=Date.now()){
  $('calendar-clear').disabled=!pace.available;
 }
 function renderHypothetical(now=Date.now()) {
- const days=state.settings.hypotheticalDays||3,pace=PaceTiming.hypotheticalPace(state.consensus,days,now,state.history);
+ const days=state.settings.hypotheticalDays||3,pace=PaceTiming.hypotheticalPace(state.consensus,days,now,state.history,{quota:state.quotaDisplay,localReset:state.localReset});
  const at=Date.parse(pace.anchor),known=pace.available;
  const progress=known&&state.settings.hypotheticalEnabled!==false?pace.progress:null;
  $('hypothetical-days-label').textContent=dayLabel(days);
  $('hypothetical-fill').style.width=`${(progress??0)*100}%`;
  $('hypothetical-track').setAttribute('aria-valuenow',String(Math.round((progress??0)*100)));
  $('hypothetical-percent').textContent=progress===null?'—':`${Math.round(progress*100)}%`;
- $('hypothetical-note').textContent=state.settings.hypotheticalEnabled===false?'天数假设已清除':known?progress>=1?'假设周期已到期 · 等待实际重置':`假设 ${dayLabel(days)} 天 · 从最近全局重置起算 · 参考到期 ${full(new Date(at+days*86400000).toISOString())}`:'等待已核对的全局重置，以显示假设节奏';
+ $('hypothetical-note').textContent=state.settings.hypotheticalEnabled===false?'天数假设已清除':known?progress>=1?'假设周期已到期 · 等待实际重置':`假设 ${dayLabel(days)} 天 · ${pace.origin==='local'?'从本机最近补充起算':'从最近全局重置起算'} · 参考到期 ${full(new Date(at+days*86400000).toISOString())}`:'等待已核对的全局重置，以显示假设节奏';
 }
 function renderForecastWarning(now=Date.now()) {
  const w=PaceTiming.warning(state.sources,state.quotaDisplay,state.consensus,state.settings.hypotheticalDays||3,now,state.localReset);

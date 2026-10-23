@@ -19,7 +19,15 @@
   if(!Number.isFinite(anchor)||!Number.isFinite(deadline)||deadline<=anchor)return null;
   return Math.max(0,Math.min(100,(now-anchor)/(deadline-anchor)*100));
  }
- function hypotheticalPace(consensus,days=3,now=Date.now(),history=[]){
+ function actualLocalResetAnchor(quota,localReset,now){
+  if(quota?.source!=='local-codex'||localReset?.kind!=='quota-reset'||!quota.bucketId||!['primary','secondary'].includes(quota.key))return null;
+  if(localReset.bucketId!==quota.bucketId||localReset.windowKey!==quota.key||localReset.resetsAt!==quota.resetsAt)return null;
+  const end=Date.parse(quota.resetsAt),duration=quota.durationMins*60000,observed=Date.parse(localReset.observedAt),at=end-duration;
+  if(!Number.isFinite(quota.durationMins)||!Number.isFinite(duration)||duration<=0||!Number.isFinite(at)||at>now||!Number.isFinite(observed)||observed<at||observed>=end||observed>now)return null;
+  // A persisted refill proves this cycle even if a later network read fails.
+  return {at,origin:'local'};
+ }
+ function hypotheticalPace(consensus,days=3,now=Date.now(),history=[],options={}){
   if(!Number.isFinite(days)||days<=0||!Number.isFinite(now))return {available:false,days};
   const candidates=[];
   const current=Date.parse(consensus?.at);
@@ -32,10 +40,10 @@
    const proof=(row.sources||[]).filter(s=>!s.evidenceOnly&&s.family&&s.family!=='unverified-feed'&&completionPost(s)&&post&&new URL(s.url).pathname.match(/\/status\/(\d+)/)[1]===post&&Number.isFinite(Date.parse(s.at))&&Math.abs(Date.parse(s.at)-at)<=120000);
    if(new Set(proof.map(s=>s.family)).size>=2)candidates.push({at,origin:'history'});
   }
-  const chosen=candidates.sort((a,b)=>b.at-a.at)[0];
+  const chosen=actualLocalResetAnchor(options?.quota,options?.localReset,now)||candidates.sort((a,b)=>b.at-a.at)[0];
   if(!chosen)return {available:false,days};
   const elapsed=now-chosen.at,duration=days*86400000;
-  return {available:true,days,anchor:new Date(chosen.at).toISOString(),end:new Date(chosen.at+duration).toISOString(),elapsedHours:elapsed/3600000,progress:Math.min(1,elapsed/duration),overdue:elapsed>=duration};
+  return {available:true,days,origin:chosen.origin,anchor:new Date(chosen.at).toISOString(),end:new Date(chosen.at+duration).toISOString(),elapsedHours:elapsed/3600000,progress:Math.min(1,elapsed/duration),overdue:elapsed>=duration};
  }
  function calendarPace(target,now=Date.now()){
   const anchor=Date.parse(target?.anchor),end=Date.parse(target?.at);

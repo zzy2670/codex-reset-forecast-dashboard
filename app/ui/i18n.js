@@ -1,6 +1,7 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
+ '从本机最近补充起算':'From the latest local quota refill',
  '通知已关闭':'Notifications off','时区':'Time zone','默认北京时间':'Default: Beijing time','时区无效':'Invalid time zone',
  '此时区没有这个整点，请选择其他小时':'This hour does not exist in this time zone. Choose another hour.',
  '过去6周 · 未来1周 · ':'Past 6 weeks · Next week · ','小时（':'Hour (',

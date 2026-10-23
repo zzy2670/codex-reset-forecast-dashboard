@@ -19,7 +19,7 @@ async function main(language){
   await page.evaluate(n=>{const D=Date;window.Date=class extends D{constructor(...a){super(...(a.length?a:[n]));}static now(){return n}}},demoNow);
   await page.addStyleTag({content:'*,*::before,*::after{animation:none!important;transition:none!important}'});
   async function viewport(width,height=1200){const b=await app.evaluate(({BrowserWindow},b)=>{const w=BrowserWindow.getAllWindows()[0];w.setContentSize(b.width,b.height);return w.getContentBounds()},{width,height});await page.waitForFunction(b=>Math.abs(innerWidth-b.width)<=1&&Math.abs(innerHeight-b.height)<=1,b);}
-  async function demo(options={}){const d=makeDemo(demoNow,{...options,language});d.settings.bodyFontSize=14;await page.evaluate(d=>{document.querySelectorAll('dialog[open]').forEach(e=>e.close());detailsExpanded=false;render(d);scrollTo(0,0)},d);await page.waitForTimeout(80);}
+  async function demo(options={}){const d=makeDemo(demoNow,{...options,language});d.settings.bodyFontSize=14;Object.assign(d.quotaDisplay,{source:'local-codex',state:'ok',bucketId:'codex',key:'secondary'});d.localReset={kind:'quota-reset',bucketId:'codex',windowKey:'secondary',resetsAt:d.quotaDisplay.resetsAt,observedAt:d.consensus.at};await page.evaluate(d=>{document.querySelectorAll('dialog[open]').forEach(e=>e.close());detailsExpanded=false;render(d);scrollTo(0,0)},d);await page.waitForTimeout(80);}
   // Measure annotations after the viewport and crop have reached their final layout.
   // Draw in the image composition, so dialog positioning cannot offset the marks.
   async function capture(selector,pad=18,marks=[]){

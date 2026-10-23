@@ -44,6 +44,8 @@ Routine mode shows your quota in green. A timed automatic-reset announcement for
 
 Four bars show actual usage, pacing for an assumed X-day reset cycle, pacing toward a calendar-selected time, and even usage across your personal cycle. The default is 3 days; click the label to change it. Set the calendar target separately, clear either assumption, and drag a handle to reorder the bars.
 
+The assumed X-day pace starts from your latest confirmed local quota refill. Custom durations, calendar targets and bar order remain independent.
+
 ## The red reset pacing line
 
 ![One reset time on the left; a time range on the right.](docs/assets/feature-forecast.png)
