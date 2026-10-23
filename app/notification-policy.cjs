@@ -54,15 +54,48 @@ function mergeMessage(groups,event,now=Date.now(),planType=null,timeZone='Asia/S
 }
 const xml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const shouldNotify=(group,enabled,quietUntil=null,now=Date.now())=>!!group&&enabled&&!group.delivered&&!group.pending&&!group.suppressedAt&&!isQuiet(quietUntil,now);
+function actualResetProof(value,now){
+ if(value?.kind!=='quota-reset'||!value.bucketId||!['primary','secondary'].includes(value.windowKey))return null;
+ const at=Date.parse(value.observedAt),end=Date.parse(value.resetsAt),key=`quota-reset:${value.bucketId}:${value.windowKey}:${value.resetsAt}`;
+ if(value.key!==key||!Number.isFinite(at)||!Number.isFinite(end)||at>now||at>=end)return null;
+ return {key,bucketId:value.bucketId,windowKey:value.windowKey,resetsAt:value.resetsAt,observedAt:value.observedAt,kind:'quota-reset',...(value.acknowledgedAt?{acknowledgedAt:value.acknowledgedAt}:{})};
+}
+function legacyResetEvent(event){
+ const match=typeof event.key==='string'&&event.key.match(/^quota-reset:(.+):(primary|secondary):(.+)$/);
+ if(!match)return null;
+ const [,bucketId,windowKey,resetsAt]=match;
+ const stamp=resetsAt.match(/^(\d{4}-\d{2}-\d{2})T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,3})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/);
+ if(!stamp||!Number.isFinite(Date.parse(resetsAt)))return null;
+ const day=Date.parse(`${stamp[1]}T00:00:00.000Z`);
+ if(!Number.isFinite(day)||new Date(day).toISOString().slice(0,10)!==stamp[1])return null;
+ const fields={bucketId,windowKey,resetsAt};
+ for(const [key,value] of Object.entries(fields))if(Object.hasOwn(event,key)&&event[key]!==value)return null;
+ return {...fields,...event,kind:'quota-reset',observedAt:event.at};
+}
+function recoverActualProofs(state,now){
+ const proofs=new Map();
+ const remember=value=>{
+  const proof=actualResetProof(value,now);if(!proof)return;
+  const old=proofs.get(proof.key);
+  proofs.set(proof.key,{...old,...proof,observedAt:old&&Date.parse(old.observedAt)<Date.parse(proof.observedAt)?old.observedAt:proof.observedAt,...(proof.acknowledgedAt||old?.acknowledgedAt?{acknowledgedAt:proof.acknowledgedAt||old.acknowledgedAt}:{})});
+ };
+ for(const [key,value] of Object.entries(state.localResetProofs||{}))if(value?.key===key)remember(value);
+ for(const event of state.events||[])if(event.kind==='quota_reset'&&event.sourceId===null)remember(legacyResetEvent(event));
+ remember(state.localReset);
+ if(proofs.size||state.localResetProofs)state.localResetProofs=Object.fromEntries([...proofs].sort((a,b)=>Date.parse(a[1].observedAt)-Date.parse(b[1].observedAt)).slice(-200));
+ return proofs;
+}
 function recoverLocalReset(state,quota,now=Date.now()){
+ const proofs=recoverActualProofs(state,now);
  if(!quota||!quota.bucketId||!quota.key||!quota.resetsAt)return;
  const key=`quota-reset:${quota.bucketId}:${quota.key}:${quota.resetsAt}`;
  const same=state.localReset?.key===key;
+ const actual=proofs.get(key);
+ if(actual){state.localReset={...(same?state.localReset:{}),...actual,...(same&&state.localReset.acknowledgedAt?{acknowledgedAt:state.localReset.acknowledgedAt}:state.localResetReceipts?.[key]?{acknowledgedAt:state.localResetReceipts[key]}:{})};return;}
  if(same&&state.localReset.kind)return;
- const event=state.events?.find(e=>e.kind==='quota_reset'&&e.key===key&&Number.isFinite(Date.parse(e.at))&&Date.parse(e.at)<=now&&e.sourceId===null);
  const cycle=!quota.stale&&quota.source==='local-codex'&&localCycleCompletion(quota,null,now);
- if(same){if(event||cycle)state.localReset.kind=event?'quota-reset':'observed-cycle';return;}
- if(event||cycle)state.localReset={key,bucketId:quota.bucketId,windowKey:quota.key,resetsAt:quota.resetsAt,observedAt:event?.at||quota.fetchedAt,kind:event?'quota-reset':'observed-cycle',...(state.localResetReceipts?.[key]?{acknowledgedAt:state.localResetReceipts[key]}:{})};
+ if(same){if(cycle)state.localReset.kind='observed-cycle';return;}
+ if(cycle)state.localReset={key,bucketId:quota.bucketId,windowKey:quota.key,resetsAt:quota.resetsAt,observedAt:quota.fetchedAt,kind:'observed-cycle',...(state.localResetReceipts?.[key]?{acknowledgedAt:state.localResetReceipts[key]}:{})};
 }
 function acknowledgeReset(state,tag,quota,now=Date.now()){
  const group=state.notificationGroups?.find(g=>notificationId(g.id)===tag);

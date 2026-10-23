@@ -27,6 +27,13 @@
   // A persisted refill proves this cycle even if a later network read fails.
   return {at,origin:'local'};
  }
+ function localPaceAnchor(quota,localReset,now){
+  const actual=actualLocalResetAnchor(quota,localReset,now);if(actual)return actual;
+  if(quota?.source!=='local-codex'||!quota.bucketId||!['primary','secondary'].includes(quota.key))return null;
+  const end=Date.parse(quota.resetsAt),duration=quota.durationMins*60000,fetched=Date.parse(quota.fetchedAt),at=end-duration;
+  if(!Number.isFinite(quota.durationMins)||!Number.isFinite(duration)||duration<=0||!Number.isFinite(at)||at>now||!Number.isFinite(fetched)||fetched<at||fetched>now+5000)return null;
+  return {at,origin:'cycle'};
+ }
  function hypotheticalPace(consensus,days=3,now=Date.now(),history=[],options={}){
   if(!Number.isFinite(days)||days<=0||!Number.isFinite(now))return {available:false,days};
   const candidates=[];
@@ -40,15 +47,15 @@
    const proof=(row.sources||[]).filter(s=>!s.evidenceOnly&&s.family&&s.family!=='unverified-feed'&&completionPost(s)&&post&&new URL(s.url).pathname.match(/\/status\/(\d+)/)[1]===post&&Number.isFinite(Date.parse(s.at))&&Math.abs(Date.parse(s.at)-at)<=120000);
    if(new Set(proof.map(s=>s.family)).size>=2)candidates.push({at,origin:'history'});
   }
-  const chosen=actualLocalResetAnchor(options?.quota,options?.localReset,now)||candidates.sort((a,b)=>b.at-a.at)[0];
+  const chosen=localPaceAnchor(options?.quota,options?.localReset,now)||candidates.sort((a,b)=>b.at-a.at)[0];
   if(!chosen)return {available:false,days};
   const elapsed=now-chosen.at,duration=days*86400000;
   return {available:true,days,origin:chosen.origin,anchor:new Date(chosen.at).toISOString(),end:new Date(chosen.at+duration).toISOString(),elapsedHours:elapsed/3600000,progress:Math.min(1,elapsed/duration),overdue:elapsed>=duration};
  }
  function calendarPace(target,now=Date.now(),options={}){
-  const local=actualLocalResetAnchor(options?.quota,options?.localReset,now),end=Date.parse(target?.at),useLocal=local&&local.at<end,anchor=useLocal?local.at:Date.parse(target?.anchor);
+  const local=localPaceAnchor(options?.quota,options?.localReset,now),end=Date.parse(target?.at),useLocal=local&&local.at<end,anchor=useLocal?local.at:Date.parse(target?.anchor);
   if(!Number.isFinite(now)||!Number.isFinite(anchor)||!Number.isFinite(end)||anchor>now||end<=anchor)return {available:false};
-  return {available:true,origin:useLocal?'local':'saved',anchor:new Date(anchor).toISOString(),end:new Date(end).toISOString(),days:(end-anchor)/86400000,progress:paceProgress(anchor,end,now)/100,overdue:now>=end};
+  return {available:true,origin:useLocal?local.origin:'saved',anchor:new Date(anchor).toISOString(),end:new Date(end).toISOString(),days:(end-anchor)/86400000,progress:paceProgress(anchor,end,now)/100,overdue:now>=end};
  }
  function projectForecasts(source,now=Date.now()){
   const key=f=>`${f.id}:${f.start}:${f.end}:${f.type}:${[...(f.scope?.plans||[])].sort().join(',')}:${f.timingKind||'announcement'}`;
@@ -156,9 +163,9 @@
   const globalAnchor=Date.parse(consensus?.at),personalEnd=Date.parse(quota?.resetsAt),duration=Number(quota?.durationMins)*60000;
   const globalKnown=consensus?.state==='confirmed'&&Number.isFinite(globalAnchor)&&globalAnchor<=now;
   const personalAnchor=Number.isFinite(personalEnd)&&duration>0&&personalEnd>now?personalEnd-duration:NaN;
-  const axisStart=globalKnown?globalAnchor:personalAnchor,axisEnd=latest;
+  const localAxis=localPaceAnchor(quota,localReset,now),axisStart=localAxis?.at??(globalKnown?globalAnchor:personalAnchor),axisEnd=latest;
   const mapped=Number.isFinite(axisStart)&&axisStart<=now&&earliest>axisStart;
-  const axisLabel=globalKnown?'上次全局重置':'个人额度周期起点';
+  const axisLabel=localAxis?(localAxis.origin==='local'?'本机最近补充':'本机额度周期起点'):globalKnown?'上次全局重置':'个人额度周期起点';
   // Earlier deadlines require faster consumption: their pace is the right edge.
   const left=mapped?paceProgress(axisStart,latest,now):null,right=mapped?paceProgress(axisStart,earliest,now):null;
   return {active:true,earliest,latest,range:earliest!==latest,entries,sourceCount:new Set(entries.map(e=>e.sourceId)).size,

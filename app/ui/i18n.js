@@ -2,6 +2,8 @@
  'use strict';
  const phrases={
  '从本机最近补充起算':'From the latest local quota refill',
+ '从本机额度周期起算':'From the local quota-cycle start','从本机额度周期起点起算':'from the local quota-cycle start','本机额度周期起点':'Local quota-cycle start','本机最近补充':'Latest local refill',
+ '红线从本机额度周期起点起算':'The red line starts at the local quota-cycle start','红线从本机最近补充起算':'The red line starts at the latest local quota refill',
  '通知已关闭':'Notifications off','时区':'Time zone','默认北京时间':'Default: Beijing time','时区无效':'Invalid time zone',
  '此时区没有这个整点，请选择其他小时':'This hour does not exist in this time zone. Choose another hour.',
  '过去6周 · 未来1周 · ':'Past 6 weeks · Next week · ','小时（':'Hour (',

@@ -1,16 +1,11 @@
 ## Codex 重置预测看板 2.3.1
 
-- “假设 X 天”改为从本机最近一次实际补充起算，修复补充后仍沿用旧全局起点的问题。自定义天数、日历指定时间和排序保持独立。
-
-- 每次官方全局重置确认完成后，日历预测的日期和时间会自动清空。
-
-- 修复历史日历中同一人工记录重复显示的问题。重新打开软件后会回填已保存的日历日期和小时，便于继续修改。
-
-- 日历预测与假设X天统一从本机最近实际补充起算，修复沿用旧全局起点导致进度偏大的问题，选定的目标时间保持不变。
+- “假设 X 天”、日历预测和红色重置节奏线统一使用本机起点。预告出现或撤回时，两条节奏横条继续按各自的目标计算。
+- 日历预测支持继续编辑已保存的日期和小时；官方全局重置确认完成后自动清空。
+- 修复历史日历重复显示同一重置记录的问题，保留各站来源与原始证据。
 
 ## English
 
-- The assumed X-day pace now starts from the latest confirmed local quota refill, fixing progress that kept using an older global reset. Custom durations, calendar targets and bar order remain independent.
-- The calendar forecast date and time clear automatically after each confirmed official global reset.
-- Fixed duplicate manual records in the reset calendar. Saved calendar dates and hours are restored when reopening the app for further editing.
-- Calendar forecasts and assumed X-day pacing now share the latest actual local refill as their starting point. This fixes inflated progress from an older global reset while keeping the selected deadline unchanged.
+- The assumed X-day pace, calendar forecast and red reset pacing line now share a local starting point. New or withdrawn forecasts leave both pacing bars on their chosen schedules.
+- Saved calendar dates and hours can be edited again. The target clears after a confirmed official global reset.
+- Fixed duplicate reset records in the calendar while preserving source records and original evidence.

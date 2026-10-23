@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {interval,mergeMessage,toastXml,shouldNotify,notificationId,isQuiet,acknowledgeReset,QUIET_MS}=require('../app/notification-policy.cjs');
+const {interval,mergeMessage,toastXml,shouldNotify,notificationId,isQuiet,acknowledgeReset,recoverLocalReset,QUIET_MS}=require('../app/notification-policy.cjs');
 const now=Date.parse('2026-10-08T00:00:00Z'),t=now+3600000,iso=ms=>new Date(ms).toISOString();
 const event=(id,at=t,end=at)=>({key:id,transition:{entity:'forecast:'+id},kind:'forecast',resetType:'global',timingKind:'announcement',title:'新重置预告',body:'信源给出排期',start:iso(at),end:iso(end),sourceId:id,url:'https://x.com/thsottiaux/status/123456'});
 test('only reset messages with valid applicable concrete times qualify for notification',()=>{
@@ -73,4 +73,82 @@ test('changing only the display zone keeps notification grouping, receipt identi
 });
 test('invalid display zones safely use the Beijing default',()=>{
  for(const zone of ['not/a-zone','',null,123])assert.match(mergeMessage([],event('a'),now,'pro',zone).event.body,/10\/8 09:00（北京时间）/);
+});
+
+function recoveryFixture(){
+ const start=now-3600000,resetsAt=iso(start+7*86400000),key=`quota-reset:codex:primary:${resetsAt}`;
+ const quota={source:'local-codex',state:'ok',bucketId:'codex',key:'primary',resetsAt,durationMins:10080,usedPercent:2,fetchedAt:iso(now),stale:false};
+ const actual={key,kind:'quota_reset',bucketId:'codex',windowKey:'primary',resetsAt,at:iso(start+10000),sourceId:null};
+ const observed={key,kind:'observed-cycle',bucketId:'codex',windowKey:'primary',resetsAt,observedAt:iso(now-60000),acknowledgedAt:iso(now-30000)};
+ return {quota,actual,observed};
+}
+
+test('same-key observed cycle upgrades from an existing actual event including its original observation time',()=>{
+ const {quota,actual,observed}=recoveryFixture(),quiet=iso(now+QUIET_MS),events=[actual],groups=[{id:'previous-notice',delivered:true}];
+ const state={localReset:observed,events,notificationGroups:groups,resetQuietUntil:quiet,localResetReceipts:{[observed.key]:observed.acknowledgedAt}};
+ recoverLocalReset(state,quota,now);
+ assert.equal(state.localReset.kind,'quota-reset');assert.equal(state.localReset.observedAt,actual.at);assert.equal(state.localReset.acknowledgedAt,observed.acknowledgedAt);
+ assert.equal(state.localResetProofs[actual.key].kind,'quota-reset');assert.equal(state.resetQuietUntil,quiet);assert.equal(state.events,events);assert.equal(state.notificationGroups,groups);
+ assert.equal(state.localResetReceipts[actual.key],observed.acknowledgedAt);
+});
+
+test('actual weekly proof survives switching windows, trimmed events and JSON restart',()=>{
+ const {quota,actual}=recoveryFixture(),state={events:[actual]};recoverLocalReset(state,quota,now);
+ const original=JSON.parse(JSON.stringify(state.localReset));
+ const short={...quota,key:'secondary',durationMins:300,resetsAt:iso(now+4*3600000)};
+ state.events=[];recoverLocalReset(state,short,now);assert.equal(state.localReset.kind,'observed-cycle');assert.equal(state.localReset.windowKey,'secondary');
+ const restored=JSON.parse(JSON.stringify(state));recoverLocalReset(restored,{...quota,state:'error',stale:true},now+60000);
+ assert.deepEqual(restored.localReset,original);assert.equal(restored.localReset.kind,'quota-reset');assert.equal(restored.events.length,0);
+});
+
+test('same-key actual proof never degrades and repeated recovery preserves receipts and quiet deadlines',()=>{
+ const {quota,actual}=recoveryFixture(),state={events:[actual]};recoverLocalReset(state,quota,now);
+ state.localReset.acknowledgedAt=iso(now-1000);state.resetQuietUntil=iso(now+QUIET_MS);state.localResetReceipts={[actual.key]:state.localReset.acknowledgedAt};
+ recoverLocalReset(state,quota,now);const saved=JSON.parse(JSON.stringify(state));
+ for(let index=0;index<10;index++)recoverLocalReset(state,{...quota,stale:index%2===0,state:index%2===0?'error':'ok'},now+index*30000);
+ assert.deepEqual(state,saved);const restored=JSON.parse(JSON.stringify(state));recoverLocalReset(restored,quota,now+600000);assert.deepEqual(restored,saved);
+});
+
+test('an acknowledgment or ordinary observed cycle never becomes actual refill proof without evidence',()=>{
+ const {quota,observed}=recoveryFixture(),state={events:[],localReset:observed,localResetReceipts:{[observed.key]:observed.acknowledgedAt},resetQuietUntil:iso(now+QUIET_MS)};
+ const saved=JSON.parse(JSON.stringify(state));recoverLocalReset(state,quota,now);assert.deepEqual(state,saved);assert.equal(state.localResetProofs,undefined);
+ const noProof={events:[],localResetReceipts:state.localResetReceipts};recoverLocalReset(noProof,quota,now);
+ assert.equal(noProof.localReset.kind,'observed-cycle');assert.equal(noProof.localReset.acknowledgedAt,observed.acknowledgedAt);assert.equal(noProof.localResetProofs,undefined);
+});
+
+test('proof recovery rejects wrong identity, future and nonlocal events while preserving the observed record',()=>{
+ const {quota,actual,observed}=recoveryFixture();
+ for(const patch of [{sourceId:'did'},{kind:'confirmed'},{bucketId:'other'},{windowKey:'secondary'},{at:iso(now+1)},{at:'invalid'},{at:quota.resetsAt},{resetsAt:'invalid'}]){
+  const state={events:[{...actual,...patch}],localReset:JSON.parse(JSON.stringify(observed))};recoverLocalReset(state,quota,now);
+  assert.equal(state.localReset.kind,'observed-cycle');assert.equal(state.localReset.observedAt,observed.observedAt);assert.equal(state.localResetProofs,undefined);
+ }
+});
+
+test('the proof registry keeps at most 200 actual resets and never caches ordinary cycles',()=>{
+ const {quota,actual}=recoveryFixture(),events=[];
+ for(let index=0;index<205;index++){
+  const resetsAt=iso(now+86400000+index*60000),key=`quota-reset:codex:primary:${resetsAt}`;
+  events.push({...actual,key,resetsAt,at:iso(now-(205-index)*60000)});
+ }
+ const state={events,localReset:{key:actual.key,bucketId:'codex',windowKey:'primary',resetsAt:quota.resetsAt,kind:'observed-cycle',observedAt:iso(now)}};
+ recoverLocalReset(state,null,now);assert.equal(Object.keys(state.localResetProofs).length,200);assert.ok(Object.values(state.localResetProofs).every(p=>p.kind==='quota-reset'));assert.equal(state.localResetProofs[actual.key],undefined);
+});
+
+test('legacy actual events recover missing identity fields from their complete key without changing receipt or quiet state',()=>{
+ const {quota,actual,observed}=recoveryFixture(),legacy={kind:'quota_reset',key:actual.key,at:actual.at,sourceId:null};
+ const state={localReset:observed,events:[legacy],localResetReceipts:{[actual.key]:observed.acknowledgedAt},resetQuietUntil:iso(now+QUIET_MS)},eventsBefore=JSON.stringify(state.events);
+ recoverLocalReset(state,quota,now);
+ assert.equal(state.localReset.kind,'quota-reset');assert.equal(state.localReset.observedAt,actual.at);
+ assert.equal(state.localReset.bucketId,actual.bucketId);assert.equal(state.localReset.windowKey,actual.windowKey);assert.equal(state.localReset.resetsAt,actual.resetsAt);
+ assert.equal(state.localReset.acknowledgedAt,observed.acknowledgedAt);assert.equal(state.localResetReceipts[actual.key],observed.acknowledgedAt);assert.equal(state.resetQuietUntil,iso(now+QUIET_MS));
+ assert.equal(state.localResetProofs[actual.key].observedAt,actual.at);assert.equal(JSON.stringify(state.events),eventsBefore);
+});
+
+test('legacy key recovery rejects malformed keys and every explicit identity conflict',()=>{
+ const {quota,actual,observed}=recoveryFixture(),legacy={kind:'quota_reset',key:actual.key,at:actual.at,sourceId:null};
+ const malformed=[{key:actual.key.replace('quota-reset:','reset:')},{key:'quota-reset::primary:'+actual.resetsAt},{key:'quota-reset:codex:other:'+actual.resetsAt},{key:'quota-reset:codex:primary:2026-02-30T00:00:00.000Z'},{key:'quota-reset:codex:primary:2026-10-15T24:00:00.000Z'},{key:'quota-reset:codex:primary:not-iso'},{bucketId:'other'},{windowKey:'secondary'},{resetsAt:iso(now+86400000)},{bucketId:null},{windowKey:undefined},{resetsAt:null}];
+ for(const patch of malformed){
+  const state={localReset:JSON.parse(JSON.stringify(observed)),events:[{...legacy,...patch}],resetQuietUntil:iso(now+QUIET_MS)};
+  recoverLocalReset(state,quota,now);assert.equal(state.localReset.kind,'observed-cycle');assert.equal(state.localReset.observedAt,observed.observedAt);assert.equal(state.localResetProofs,undefined);assert.equal(state.resetQuietUntil,iso(now+QUIET_MS));
+ }
 });

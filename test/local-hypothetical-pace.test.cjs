@@ -41,11 +41,11 @@ test('aging, paused cache and temporary errors retain a proved same-window refil
  }
 });
 
-test('ordinary observed five-hour and weekly cycles cannot claim an actual refill',()=>{
+test('ordinary observed cycles use their valid API cycle without claiming an actual refill',()=>{
  for(const duration of [300,10080])for(const localReset of [null,undefined,{kind:'observed-cycle'},{}]){
   const options=proof(localAt,duration);options.localReset=localReset;
-  const pace=Pace.hypotheticalPace(global,3,now,[],options);assert.equal(pace.origin,'current');assert.equal(pace.anchor,global.at);
-  assert.equal(Pace.hypotheticalPace(null,3,now,[],options).available,false);
+  const pace=Pace.hypotheticalPace(global,3,now,[],options);assert.equal(pace.origin,'cycle');assert.equal(Date.parse(pace.anchor),localAt);
+  assert.equal(Pace.hypotheticalPace(null,3,now,[],options).origin,'cycle');
  }
 });
 
@@ -55,7 +55,7 @@ test('five-hour, weekly and distinct bucket proofs apply only to their selected 
   const pace=Pace.hypotheticalPace(global,3,now,[],options);assert.equal(pace.origin,'local');
   assert.equal(Date.parse(pace.anchor),Date.parse(options.quota.resetsAt)-options.quota.durationMins*60000);
  }
- for(const [quota,localReset] of [[primary.quota,secondary.localReset],[secondary.quota,primary.localReset],[other.quota,primary.localReset]])assert.equal(Pace.hypotheticalPace(global,3,now,[],{quota,localReset}).origin,'current');
+ for(const [quota,localReset] of [[primary.quota,secondary.localReset],[secondary.quota,primary.localReset],[other.quota,primary.localReset]])assert.equal(Pace.hypotheticalPace(global,3,now,[],{quota,localReset}).origin,'cycle');
 });
 
 test('invalid, future and mismatched refill proof never overrides current or historical global fallback',()=>{
@@ -63,8 +63,7 @@ test('invalid, future and mismatched refill proof never overrides current or his
  const add=mutate=>{const options=proof();mutate(options);invalid.push(options);};
  for(const duration of [0,-1,NaN,Infinity,undefined,null,'10080'])add(o=>o.quota.durationMins=duration);
  for(const timestamp of ['bad',undefined,null])add(o=>o.quota.resetsAt=o.localReset.resetsAt=timestamp);
- for(const timestamp of ['bad',undefined,null,new Date(localAt-1).toISOString(),new Date(now+1).toISOString(),new Date(localAt+7*day).toISOString()])add(o=>o.localReset.observedAt=timestamp);
- add(o=>o.localReset.resetsAt=new Date(localAt+8*day).toISOString());
+ for(const timestamp of ['bad',undefined,null,new Date(localAt-1).toISOString(),new Date(now+5001).toISOString()])add(o=>{o.localReset.kind='observed-cycle';o.quota.fetchedAt=timestamp;});
  add(o=>o.quota.source='other');add(o=>delete o.quota.source);add(o=>o.quota.bucketId='');add(o=>o.quota.key='unknown');
  invalid.push(proof(now+60000));
  for(const options of invalid){
@@ -115,11 +114,9 @@ test('calendar pacing retains the local receipt through aging, temporary errors 
  }
 });
 
-test('calendar pacing falls back to its stored anchor when no matching actual local refill is proved',()=>{
+test('calendar pacing falls back only when neither actual proof nor a valid API cycle is available',()=>{
  const target={anchor:global.at,at:'2026-10-28T07:00:00.000Z'},expected=Pace.calendarPace(target,now);
- const observed=proof();observed.localReset.kind='observed-cycle';
- const mismatched=proof();mismatched.localReset.windowKey='secondary';
- for(const options of [undefined,null,{},observed,mismatched,{quota:proof().quota},proof(now+60000)]){
+ for(const options of [undefined,null,{},proof(now+60000)]){
   const actual=Pace.calendarPace(target,now,options);assert.equal(actual.anchor,global.at);assert.equal(actual.end,target.at);assert.equal(actual.progress,expected.progress);
  }
 });
@@ -149,4 +146,59 @@ test('calendar progress reaches the selected absolute deadline exactly and stays
 test('a later local refill preserves an expired calendar deadline at 100 percent until it is cleared',()=>{
  const target={anchor:global.at,at:'2026-10-28T07:00:00.000Z'},deadline=Date.parse(target.at),current=deadline+2*day,options=proof(deadline+day);
  const actual=Pace.calendarPace(target,current,options);assert.equal(actual.available,true);assert.equal(actual.progress,1);assert.equal(actual.overdue,true);assert.equal(actual.end,target.at);assert.equal(actual.anchor,target.anchor);assert.equal(actual.origin,'saved');
+});
+
+
+test('invalid actual receipts fall back to a valid cycle without being promoted to local reset evidence',()=>{
+ for(const mutate of [o=>o.localReset.kind='observed-cycle',o=>o.localReset.observedAt='bad',o=>o.localReset.observedAt=new Date(now+1).toISOString(),o=>o.localReset.windowKey='secondary',o=>o.localReset.bucketId='other',o=>o.localReset.resetsAt=new Date(Date.parse(o.localReset.resetsAt)+1000).toISOString()]){
+  const options=proof();mutate(options);const before=JSON.stringify(options);
+  for(const pace of [Pace.hypotheticalPace(global,3,now,[],options),Pace.calendarPace({anchor:global.at,at:new Date(now+day).toISOString()},now,options)]){
+   assert.equal(pace.origin,'cycle');assert.equal(Date.parse(pace.anchor),localAt);
+  }
+  assert.equal(JSON.stringify(options),before);
+ }
+});
+
+test('observed API cycle remains stable through fresh forecast arrival, withdrawal, repeated polls and JSON restart',()=>{
+ const options=proof();options.localReset.kind='observed-cycle';
+ const target={anchor:global.at,at:new Date(now+2*day).toISOString()},before=JSON.stringify(options);
+ const forecast={state:'scheduled',type:'global',start:new Date(now+day).toISOString(),end:new Date(now+day).toISOString(),timingKind:'announcement',scope:{plans:['all']}};
+ const original=Pace.hypotheticalPace(global,3,now,[],options),calendar=Pace.calendarPace(target,now,options);
+ for(const active of [false,true,true,false,true]){
+  const sources=[{id:'tibo',status:'ok',updatedAt:new Date(now).toISOString(),fetchedAt:new Date(now).toISOString(),maxAge:3600000,forecast:active?forecast:{state:'none'}}];
+  const restored=JSON.parse(JSON.stringify(options));
+  assert.deepEqual(Pace.hypotheticalPace(global,3,now,[],restored),original);
+  assert.deepEqual(Pace.calendarPace(target,now,restored),calendar);
+  const warning=Pace.warning(sources,restored.quota,global,3,now,restored.localReset);
+  assert.equal(warning.active,active);
+  if(active){assert.equal(warning.axisStart,localAt);assert.equal(warning.left,Pace.paceProgress(localAt,now+day,now));}
+ }
+ assert.equal(JSON.stringify(options),before);assert.equal(options.localReset.kind,'observed-cycle');
+});
+
+test('one-second API end jitter cannot fall back to the old global completion',()=>{
+ const options=proof();options.localReset.kind='observed-cycle';const target={anchor:global.at,at:new Date(now+2*day).toISOString()};
+ for(const seconds of [-1,0,1]){
+  const changed=JSON.parse(JSON.stringify(options));changed.quota.resetsAt=new Date(Date.parse(options.quota.resetsAt)+seconds*1000).toISOString();
+  for(const value of [Pace.hypotheticalPace(global,3,now,[],changed),Pace.calendarPace(target,now,changed)]){
+   assert.equal(value.origin,'cycle');assert.equal(Date.parse(value.anchor),localAt+seconds*1000);assert.ok(value.progress<.2);
+  }
+ }
+});
+
+test('a disappearing quota window falls back explicitly and the reappearing valid window restores the API-cycle axis',()=>{
+ const options=proof();options.localReset.kind='observed-cycle';const target={anchor:global.at,at:new Date(now+2*day).toISOString()};
+ assert.equal(Pace.hypotheticalPace(global,3,now,[],options).origin,'cycle');
+ assert.equal(Pace.hypotheticalPace(global,3,now,[],{...options,quota:{state:'error'}}).origin,'current');
+ assert.equal(Pace.calendarPace(target,now,{...options,quota:null}).origin,'saved');
+ const restored=JSON.parse(JSON.stringify(options));assert.equal(Pace.hypotheticalPace(global,3,now,[],restored).origin,'cycle');assert.equal(Pace.calendarPace(target,now,restored).origin,'cycle');
+});
+
+test('cached observed cycles survive failure and expiry without fabricating another cycle',()=>{
+ const options=proof();options.localReset.kind='observed-cycle';
+ for(const state of ['ok','error'])for(const current of [now,localAt+3*day,localAt+10*day]){
+  const cached=JSON.parse(JSON.stringify(options));cached.quota.state=state;cached.quota.stale=true;
+  const value=Pace.hypotheticalPace(global,3,current,[],cached);assert.equal(value.origin,'cycle');assert.equal(Date.parse(value.anchor),localAt);assert.equal(Date.parse(value.end),localAt+3*day);
+  assert.equal(value.progress,Math.min(1,(current-localAt)/(3*day)));
+ }
 });
