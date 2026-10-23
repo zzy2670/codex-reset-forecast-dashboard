@@ -9,6 +9,7 @@ const {historyStart,hypotheticalPace,resetHistory}=require('./dashboard-model.cj
 const {projectSourceHistory}=require('./history-events.cjs');
 const TimeZone=require('./ui/time-zone.js');
 const ResetCalendar=require('./ui/reset-calendar.js');
+const {initializeCalendarResets,applyOfficialCalendarReset}=require('./calendar-reset.cjs');
 const {projectForecasts,projectAfterReset}=require('./ui/pace-timing.js');
 const BarOrder=require('./ui/bar-order.js');
 const {REQUEST_TIMEOUT_MS,buildFailure}=require('./source-retry.cjs');
@@ -45,6 +46,7 @@ state.settings.timeZone=TimeZone.normalize(state.settings.timeZone);
 // Backfill captured public completion records through the normal history merger.
 // This never creates forecast signals, events or notifications.
 state.history=resetHistory([], [...require('./history-seed.json'),...(state.history||[])]);
+initializeCalendarResets(state);
 for(const group of state.notificationGroups||[])group.pending=false;
 if (!state.schemaVersion || state.schemaVersion < 2) {
   state.settings = { ...defaults, ...state.settings, theme: 'dark', quotaLimitId: 'codex', quotaWindow: 'secondary' };
@@ -213,6 +215,7 @@ async function refresh(manual=false) {
   }));
   const consensus = calibratedReset(state.sources);
   state.history=resetHistory(state.sources,state.history||[]);
+  applyOfficialCalendarReset(state,consensus);
   if (consensus.state === 'confirmed') {
     if (state.baseline && state.confirmedId && state.confirmedId !== consensus.id) addEvent({ key: `confirmed:${consensus.id}`, kind: 'confirmed', title: '新一次全局重置已获多源核对', body: `${consensus.message}。完成公告已更新，个人额度请看本机数据。`,start:consensus.at,end:consensus.at,resetType:'global', at: new Date().toISOString(), sourceId: null, url: consensus.url });
     state.confirmedId = consensus.id;
@@ -318,7 +321,7 @@ function registerIpc() {
     if(patch.clearCalendarTarget===true)delete next.calendarTarget;
     if('calendarTarget' in patch){
       const now=Date.now(),view=snapshot();
-      try{const anchor=hypotheticalPace(view.consensus,1,now,view.history).anchor;const target=ResetCalendar.daysForTarget(anchor,patch.calendarTarget?.day,patch.calendarTarget?.hour,now,next.timeZone);next.calendarTarget={at:target.targetAt,anchor};}
+      try{const anchor=hypotheticalPace(view.consensus,1,now,view.history).anchor;const target=ResetCalendar.daysForTarget(anchor,patch.calendarTarget?.day,patch.calendarTarget?.hour,now,next.timeZone);next.calendarTarget={at:target.targetAt,anchor,createdAt:new Date(now).toISOString()};}
       catch(error){throw new Error(error.reason==='NONEXISTENT_HOUR'?'此时区没有这个整点，请选择其他小时':error.code==='NO_ANCHOR'?'等待已核对的全局重置，以设置假设时间':error.code==='INVALID_PERIOD'?'假设天数须大于0且不超过365':'请选择未来一周的日期及0—23点');}
     }
     if('bodyFontSize' in patch){if(!Number.isInteger(patch.bodyFontSize)||patch.bodyFontSize<11||patch.bodyFontSize>22)throw new Error('正文大小须为 11—22 px');next.bodyFontSize=patch.bodyFontSize;}

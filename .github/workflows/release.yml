@@ -24,6 +24,7 @@ jobs:
       - run: npm run test:reset
       - run: npm run test:onboarding
       - run: npm run test:local-pace
+      - run: npm run test:calendar-reset
       - run: npm run test:timezone
       - run: npm run test:calendar
       - run: npm run build
@@ -47,6 +48,11 @@ jobs:
         run: |
           $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
           npm run test:onboarding
+      - name: Verify installed official reset calendar clearing
+        shell: pwsh
+        run: |
+          $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
+          npm run test:calendar-reset
       - name: Verify installed local refill pacing
         shell: pwsh
         run: |

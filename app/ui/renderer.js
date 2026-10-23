@@ -58,6 +58,7 @@ function cardMarkup(s) {
   </article>`;
 }
 function render(next) {
+  if(next.calendarResetClearedBy&&next.calendarResetClearedBy!==state?.calendarResetClearedBy&&!next.settings.calendarTarget){calendarDate=null;$('calendar-hour').value='';$('calendar-result').textContent='';}
   state=next;
   const nextZone=DashboardTimeZone.normalize(state.settings.timeZone);
   if(zone!==nextZone){zone=nextZone;dateFormat=new Intl.DateTimeFormat('zh-CN',{timeZone:zone,month:'numeric',day:'numeric'});timeFormat=new Intl.DateTimeFormat('zh-CN',{timeZone:zone,hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});calendarDate=null;temporalKey='';lastCalendarMarkup='';}
@@ -145,7 +146,7 @@ function renderCalendar(now=Date.now()){
  if(calendarDate&&(calendarDate<=model.today||calendarDate>model.end))calendarDate=null;
  const targetDay=pace.available?ResetCalendar.dateKey(pace.end,zone):null;
  const showBanked=$('calendar-show-banked').checked,showLimited=$('calendar-show-limited').checked;
- const markup=model.months.map(month=>`<section class="calendar-month"><h3 class="calendar-month-heading" style="margin-left:calc(${month.cells.findIndex(c=>c.inRange)%7} * 100% / 7)">${state.settings.language==='en'?month.month:month.month+'月'}</h3><div class="calendar-month-grid">`+month.cells.map(c=>{
+ const markup=model.months.map(month=>`<section class="calendar-month"><h3 class="calendar-month-heading" style="margin-left:calc(${month.cells.findIndex(c=>c.inRange)%7} * (100% + 4px) / 7)">${state.settings.language==='en'?month.month:month.month+'月'}</h3><div class="calendar-month-grid">`+month.cells.map(c=>{
   if(!c.inRange)return '<div class="calendar-cell empty" aria-hidden="true"></div>';
   const events=c.events.filter(e=>(showBanked||e.type!=='banked')&&(showLimited||!e.scope?.plans?.length||e.scope.plans.includes('all')));
   const assumed=targetDay===c.key,hasReset=events.some(e=>e.type!=='banked');

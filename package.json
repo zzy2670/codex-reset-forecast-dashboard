@@ -21,7 +21,8 @@
     "test:deployment": "node scripts/verify-deployment.cjs",
     "test:calendar": "node scripts/verify-calendar.cjs",
     "test:timezone": "node scripts/verify-timezone.cjs",
-    "test:local-pace": "node scripts/verify-local-pace.cjs"
+    "test:local-pace": "node scripts/verify-local-pace.cjs",
+    "test:calendar-reset": "node scripts/verify-calendar-reset.cjs"
   },
   "devDependencies": {
     "@openai/codex": "0.159.2",
