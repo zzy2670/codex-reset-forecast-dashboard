@@ -4,7 +4,7 @@ const {mergeMessage,shouldNotify,isQuiet}=require('../app/notification-policy.cj
 test('actual main event path merges near messages, stays quiet without a time and sends after unmuting',()=>{
  const source=fs.readFileSync(path.join(__dirname,'../app/main.cjs'),'utf8'),code=source.slice(source.indexOf('function addEvent('),source.indexOf('\nasync function notifyUser('));
  const state={seen:[],events:[],settings:{notify:false}},popups=[];
- const sandbox={state,Date,mergeMessage,shouldNotify,isQuiet,quotaView:()=>({planType:'pro'}),safeWrite:()=>{},publish:()=>{},smoke:false,notifyUser:(title,body,key)=>{popups.push({title,body,key});const g=state.notificationGroups.find(g=>g.id===key);g.delivered=true;g.pending=false;}};
+ const sandbox={rememberLocalQuotaReset:require('../app/local-quota-history.cjs').rememberLocalQuotaReset,state,Date,mergeMessage,shouldNotify,isQuiet,quotaView:()=>({planType:'pro'}),safeWrite:()=>{},publish:()=>{},smoke:false,notifyUser:(title,body,key)=>{popups.push({title,body,key});const g=state.notificationGroups.find(g=>g.id===key);g.delivered=true;g.pending=false;}};
  vm.createContext(sandbox);vm.runInContext(code,sandbox);
  const end=new Date(Date.now()+3600000).toISOString();const e=id=>({key:id,kind:'forecast',resetType:'global',timingKind:'announcement',end,sourceId:id,title:'Reset',body:'Timed reset'});
  sandbox.addEvent(e('a'));assert.equal(popups.length,0);

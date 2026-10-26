@@ -118,7 +118,7 @@ function quotaChanges(previous,next,settings={},now=Date.now()){
  const priorAge=now-Date.parse(previous?.fetchedAt);
  if(!a||!b||previous.state!=='ok'||!Number.isFinite(priorAge)||priorAge<0||priorAge>120000||b.stale||a.bucketId!==b.bucketId||a.key!==b.key)return [];
  const events=[],at=new Date(now).toISOString();
- if(Date.parse(b.resetsAt)>Date.parse(a.resetsAt)+60000&&b.usedPercent<a.usedPercent-.5)events.push({key:`quota-reset:${b.bucketId}:${b.key}:${b.resetsAt}`,kind:'quota_reset',bucketId:b.bucketId,windowKey:b.key,resetsAt:b.resetsAt,title:'本机额度已补充',body:`当前周期剩余 ${b.remainingPercent.toFixed(0)}%。个人重置时间已更新，请查看看板。`,at,sourceId:null,url:null});
+ if(Date.parse(b.resetsAt)>Date.parse(a.resetsAt)+60000&&b.usedPercent<a.usedPercent-.5)events.push({key:`quota-reset:${b.bucketId}:${b.key}:${b.resetsAt}`,kind:'quota_reset',bucketId:b.bucketId,windowKey:b.key,resetsAt:b.resetsAt,beforeRemainingPercent:a.remainingPercent,afterRemainingPercent:b.remainingPercent,beforeFetchedAt:previous.fetchedAt,beforeResetsAt:a.resetsAt,title:'本机额度已补充',body:`当前周期剩余 ${b.remainingPercent.toFixed(0)}%。个人重置时间已更新，请查看看板。`,at,sourceId:null,url:null});
  if(a.ordinaryUsageAllowed===true&&b.ordinaryUsageAllowed===false)events.push({key:`quota-denied:${b.bucketId}:${b.resetsAt}`,kind:'quota_denied',title:'本机额度状态发生变化',body:'本机接口报告当前不允许常规使用，请查看额度明细。',at,sourceId:null,url:null});
  return events;
 }

@@ -27,6 +27,7 @@ jobs:
       - run: npm run test:calendar-reset
       - run: npm run test:timezone
       - run: npm run test:calendar
+      - run: npm run test:quota-history
       - run: npm run build
       - run: node scripts/verify-package.cjs
       - name: Install release on a clean Windows runner
@@ -77,6 +78,7 @@ jobs:
         shell: pwsh
         run: |
           $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
+          npm run test:quota-history
           npm run test:language
       - name: Verify packaged reset lifecycle
         shell: pwsh

@@ -1,6 +1,6 @@
 {
   "name": "codex-reset-forecast-dashboard",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "private": true,
   "description": "Codex reset forecasts, local quota pacing and multi-source evidence.",
   "main": "app/main.cjs",
@@ -22,7 +22,8 @@
     "test:calendar": "node scripts/verify-calendar.cjs",
     "test:timezone": "node scripts/verify-timezone.cjs",
     "test:local-pace": "node scripts/verify-local-pace.cjs",
-    "test:calendar-reset": "node scripts/verify-calendar-reset.cjs"
+    "test:calendar-reset": "node scripts/verify-calendar-reset.cjs",
+    "test:quota-history": "node scripts/verify-quota-history.cjs"
   },
   "devDependencies": {
     "@openai/codex": "0.159.2",

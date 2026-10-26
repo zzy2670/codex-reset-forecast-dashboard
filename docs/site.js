@@ -38,7 +38,7 @@ const translations={
       ],
       [
         "Reset history",
-        "Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard."
+        "Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard. Local quota refills also appear as separate entries, with the last recorded remaining percentage before each refill highlighted on the right; older entries without that reading show “Not recorded”."
       ],
       [
         "Automatic Windows notifications",
@@ -98,7 +98,7 @@ const translations={
       ],
       [
         "历史重置记录",
-        "从 2026 年 9 月开始收录，最新记录排在最上面。展开一条记录，可以逐站比较时间并查看原帖。最近一次已核对的重置时间和距今时长，也会显示在看板顶部。"
+        "从 2026 年 9 月开始收录，最新记录排在最上面。展开一条记录，可以逐站比较时间并查看原帖。最近一次已核对的重置时间和距今时长，也会显示在看板顶部。 本机额度补充也会单独列出，右侧突出显示补充前最后一次读取的剩余百分比；旧记录没有该数据时显示“未记录”。"
       ],
       [
         "Windows 自动弹窗",
@@ -158,7 +158,7 @@ const translations={
       ],
       [
         "リセット履歴",
-        "2026年9月以降の記録を新しい順に表示します。記録を開くと各サイトの時刻と原文を比較できます。直近の照合済みリセットと経過時間は上部にも表示します。"
+        "2026年9月以降の記録を新しい順に表示します。記録を開くと各サイトの時刻と原文を比較できます。直近の照合済みリセットと経過時間は上部にも表示します。 ローカル利用枠の補充も個別に表示し、補充前の最後の読み取りで確認した残りの割合を右側に大きく表示します。読み取り値がない過去の記録は「未記録」と表示します。"
       ],
       [
         "Windows の自動通知",
@@ -218,7 +218,7 @@ const translations={
       ],
       [
         "Historial de reinicios",
-        "Consulta los registros desde septiembre de 2026, del más reciente al más antiguo. Despliega uno para comparar las horas y publicaciones de cada sitio. El último reinicio contrastado y el tiempo transcurrido también aparecen arriba."
+        "Consulta los registros desde septiembre de 2026, del más reciente al más antiguo. Despliega uno para comparar las horas y publicaciones de cada sitio. El último reinicio contrastado y el tiempo transcurrido también aparecen arriba. Las recargas de cuota local también aparecen como entradas separadas, con el último porcentaje restante registrado antes de cada recarga destacado a la derecha; las entradas antiguas sin esa lectura muestran «No registrado»."
       ],
       [
         "Notificaciones automáticas de Windows",
@@ -278,7 +278,7 @@ const translations={
       ],
       [
         "Historique des réinitialisations",
-        "Les événements depuis septembre 2026 sont classés du plus récent au plus ancien. Dépliez une entrée pour comparer les horaires et publications de chaque site. La dernière réinitialisation recoupée et le temps écoulé figurent aussi en haut."
+        "Les événements depuis septembre 2026 sont classés du plus récent au plus ancien. Dépliez une entrée pour comparer les horaires et publications de chaque site. La dernière réinitialisation recoupée et le temps écoulé figurent aussi en haut. Les rechargements du quota local figurent aussi dans des entrées distinctes, avec le dernier pourcentage restant relevé avant chaque rechargement mis en évidence à droite ; les anciennes entrées sans ce relevé affichent « Non enregistré »."
       ],
       [
         "Notifications automatiques de Windows",
@@ -338,7 +338,7 @@ const translations={
       ],
       [
         "Reset-Verlauf",
-        "Die Einträge ab September 2026 erscheinen mit dem neuesten zuerst. Klappe einen Eintrag auf, um Zeiten und Beiträge der einzelnen Websites zu vergleichen. Der letzte abgeglichene Reset und die vergangene Zeit stehen auch oben."
+        "Die Einträge ab September 2026 erscheinen mit dem neuesten zuerst. Klappe einen Eintrag auf, um Zeiten und Beiträge der einzelnen Websites zu vergleichen. Der letzte abgeglichene Reset und die vergangene Zeit stehen auch oben. Lokale Kontingentauffüllungen erscheinen als eigene Einträge. Rechts wird der zuletzt vor der Auffüllung erfasste Restprozentsatz hervorgehoben; ältere Einträge ohne diesen Messwert zeigen „Nicht erfasst“."
       ],
       [
         "Automatische Windows-Benachrichtigungen",
@@ -398,7 +398,7 @@ const translations={
       ],
       [
         "초기화 기록",
-        "2026년 9월부터의 기록을 최신순으로 표시합니다. 기록을 펼치면 사이트별 시각과 원문을 비교할 수 있습니다. 대조한 최근 초기화와 경과 시간은 화면 위에도 표시합니다."
+        "2026년 9월부터의 기록을 최신순으로 표시합니다. 기록을 펼치면 사이트별 시각과 원문을 비교할 수 있습니다. 대조한 최근 초기화와 경과 시간은 화면 위에도 표시합니다. 로컬 사용량 충전도 별도 기록으로 표시하며, 충전 전 마지막 조회에서 확인한 잔여 비율을 오른쪽에 크게 표시합니다. 해당 조회 값이 없는 이전 기록에는 “기록 없음”이 표시됩니다."
       ],
       [
         "Windows 자동 알림",

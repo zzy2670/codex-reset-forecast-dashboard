@@ -74,6 +74,8 @@ The calendar groups the past six weeks and the next week by month. Reset days ar
 
 Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard.
 
+Local quota refills also appear as separate entries, with the last recorded remaining percentage before each refill highlighted on the right; older entries without that reading show “Not recorded”.
+
 After a reset, the dashboard assumes a six-hour gap and clears older forecasts within it. New explicit announcements after the reset take priority.
 
 ## Automatic Windows notifications

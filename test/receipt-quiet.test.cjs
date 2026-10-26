@@ -9,7 +9,7 @@ function runtime(saved=null){
  const notifications=[],balloons=[],activeNotifications=new Map();
  class Native extends EventEmitter{constructor(options){super();this.options=options;notifications.push(this);}show(){this.emit('show');}close(){this.closed=true;this.emit('close',{reason:'dismissed'});}}
  const source=fs.readFileSync(path.join(__dirname,'../app/main.cjs'),'utf8');
- const sandbox={state,Date:class extends Date{constructor(...a){super(...(a.length?a:[now]));}static now(){return now;}},path,__dirname:'',URLSearchParams,Notification:Native,activeNotifications,tr:t=>I18n.text(t,state.settings.language),...Policy,
+ const sandbox={rememberLocalQuotaReset:(s,e)=>require('../app/local-quota-history.cjs').rememberLocalQuotaReset(s,e,now),state,Date:class extends Date{constructor(...a){super(...(a.length?a:[now]));}static now(){return now;}},path,__dirname:'',URLSearchParams,Notification:Native,activeNotifications,tr:t=>I18n.text(t,state.settings.language),...Policy,
  isQuiet:until=>Policy.isQuiet(until,now),shouldNotify:(g,e,u)=>Policy.shouldNotify(g,e,u,now),acknowledgeReset:(s,t,q,clickedAt=now)=>Policy.acknowledgeReset(s,t,q,clickedAt),recoverLocalReset:(s,q)=>Policy.recoverLocalReset(s,q,now),
  quotaView:(q,s)=>quotaView(q,s,now),quotaChanges:(a,b,s)=>quotaChanges(a,b,s,now),safeWrite:()=>{writes++;persisted=JSON.parse(JSON.stringify(state));},publish:()=>{},showWindow:()=>opened++,smoke:false,quotaRunning:false,
  quotaFlight:null,localQuota:{read:async()=>next},tray:{displayBalloon:v=>balloons.push(v)}};
@@ -20,7 +20,7 @@ function runtime(saved=null){
  return {state,notifications,balloons,sandbox,forecast,receipt,activeNotifications,advance:ms=>now+=ms,get now(){return now;},get opened(){return opened;},get persisted(){return persisted;},get writes(){return writes;},setNext:q=>next=q};
 }
 test('real quota-refresh path emits local confirmation; only routed receipt starts six hours',async()=>{
- const r=runtime();await r.sandbox.refreshQuota();assert.equal(r.notifications.length,1);assert.equal(r.state.notificationGroups[0].type,'local');
+ const r=runtime();await r.sandbox.refreshQuota();assert.equal(r.notifications.length,1);assert.equal(r.state.localQuotaHistory.length,1);assert.equal(r.state.localQuotaHistory[0].beforeRemainingPercent,10);assert.equal(r.state.localQuotaHistory[0].afterRemainingPercent,98);assert.equal(r.state.notificationGroups[0].type,'local');
  const n=r.notifications[0];assert.match(n.options.body,/本机确认时间/);assert.doesNotMatch(n.options.body,/适用范围：全体/);
  n.emit('close',{reason:'dismissed'});assert.equal(r.state.resetQuietUntil,undefined);
  r.sandbox.handleNotificationActivation({type:'click',arguments:`type=click&tag=${n.options.id}`});assert.equal(r.opened,1);assert.equal(r.state.resetQuietUntil,undefined);
