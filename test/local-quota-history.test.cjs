@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
 const {quotaChanges}=require('../app/codex-quota.cjs');
-const {rememberLocalQuotaReset,recoverLocalQuotaHistory,localQuotaHistoryRows}=require('../app/local-quota-history.cjs');
+const {rememberLocalQuotaReset,recoverLocalQuotaHistory,localQuotaHistoryRows,backfillLocalQuotaHistory,rememberLocalQuotaSnapshot}=require('../app/local-quota-history.cjs');
 const now=Date.parse('2026-10-26T06:00:00.000Z'),iso=value=>new Date(value).toISOString();
 function quota(usedPercent,end,at=now){return {source:'local-codex',state:'ok',fetchedAt:iso(at),limits:[{id:'codex',primary:{usedPercent,durationMins:10080,resetsAt:iso(end)}}]};}
 function event(patch={}){const resetsAt=iso(now+7*86400000);return {key:`quota-reset:codex:primary:${resetsAt}`,kind:'quota_reset',sourceId:null,bucketId:'codex',windowKey:'primary',resetsAt,at:iso(now),beforeRemainingPercent:12.25,afterRemainingPercent:100,beforeFetchedAt:iso(now-30000),beforeResetsAt:iso(now-1000),...patch};}
@@ -67,4 +67,82 @@ test('stored array and keyed-map forms recover consistently and omit unrelated p
  const state={};rememberLocalQuotaReset(state,event({body:'not retained',url:'https://private.example/',unrelated:'secret'}),now);const original=structuredClone(state.localQuotaHistory);
  state.localQuotaHistory=Object.fromEntries(original.map(row=>[row.key,{...row,unrelated:'not retained'}]));recoverLocalQuotaHistory(state,now);
  assert.deepEqual(state.localQuotaHistory,original);assert.equal('unrelated' in state.localQuotaHistory[0],false);
+});
+const verified={verified:true,file:'.verification/verified-quota.json',sha256:'a'.repeat(64),profileDevice:1234};
+function archived(patch={}){return {bucketId:'codex',windowKey:'primary',resetsAt:iso(now+86400000),durationMins:10080,remainingPercent:41,fetchedAt:iso(now-8*3600000),provenance:verified,...patch};}
+function unknownEvent(patch={}){return event({beforeRemainingPercent:null,beforeFetchedAt:null,beforeResetsAt:null,afterRemainingPercent:null,...patch});}
+test('authorized eight-hour-old snapshot backfills its recorded percentage and timestamp across restart',()=>{
+ const state={events:[unknownEvent()]},sample=archived();
+ assert.equal(backfillLocalQuotaHistory(state,[sample],now),true);
+ const [row]=localQuotaHistoryRows(state,now);assert.equal(row.beforeRemainingPercent,41);assert.equal(row.beforeFetchedAt,sample.fetchedAt);assert.equal(row.beforeBasis,'snapshot');assert.deepEqual(row.beforeProvenance,verified);
+ const restored=JSON.parse(JSON.stringify(state));recoverLocalQuotaHistory(restored,now+86400000);
+ assert.equal(localQuotaHistoryRows(restored,now+86400000)[0].beforeRemainingPercent,41);
+ assert.equal(localQuotaHistoryRows(restored,now+86400000)[0].beforeFetchedAt,sample.fetchedAt);
+});
+test('snapshot zero is recorded, while invalid or unverified sources are rejected',()=>{
+ const good={events:[unknownEvent()]};backfillLocalQuotaHistory(good,[archived({remainingPercent:0})],now);assert.equal(good.localQuotaHistory[0].beforeRemainingPercent,0);
+ for(const patch of [{provenance:{...verified,verified:false}},{provenance:{...verified,profileDevice:null}},{provenance:{...verified,sha256:'bad'}},{remainingPercent:null},{remainingPercent:101},{fetchedAt:iso(now+1)},{fetchedAt:iso(now)},{resetsAt:iso(now-9*3600000)},{durationMins:0},{durationMins:5}]){
+  const state={events:[unknownEvent()]};backfillLocalQuotaHistory(state,[archived(patch)],now);assert.equal(state.localQuotaHistory[0].beforeRemainingPercent,null,JSON.stringify(patch));
+ }
+});
+test('only the latest eligible pre-event snapshot for the same bucket and window is selected',()=>{
+ const state={events:[unknownEvent()]};const old=archived(),latest=archived({fetchedAt:iso(now-3*3600000),remainingPercent:29});
+ backfillLocalQuotaHistory(state,[latest,old,archived({bucketId:'other',fetchedAt:iso(now-1000),remainingPercent:3}),archived({windowKey:'secondary',fetchedAt:iso(now-1000),remainingPercent:4}),archived({fetchedAt:iso(now+1),remainingPercent:5}),archived({resetsAt:event().resetsAt,fetchedAt:iso(now-1000),remainingPercent:6})],now);
+ assert.equal(state.localQuotaHistory[0].beforeRemainingPercent,29);assert.equal(state.localQuotaHistory[0].beforeFetchedAt,latest.fetchedAt);
+});
+test('a snapshot cannot be borrowed across an intervening known personal refill',()=>{
+ const oldEnd=iso(now+86400000),prior=unknownEvent({key:`quota-reset:codex:primary:${oldEnd}`,resetsAt:oldEnd,at:iso(now-4*3600000)}),next=unknownEvent(),state={events:[prior,next]};
+ backfillLocalQuotaHistory(state,[archived({resetsAt:iso(now+3600000)})],now);
+ const rows=localQuotaHistoryRows(state,now);assert.equal(rows.find(r=>r.id===next.key).beforeRemainingPercent,null);assert.equal(rows.find(r=>r.id===prior.key).beforeRemainingPercent,41);
+ backfillLocalQuotaHistory(state,[archived({fetchedAt:prior.at,remainingPercent:22})],now);assert.equal(localQuotaHistoryRows(state,now).find(r=>r.id===next.key).beforeRemainingPercent,null);
+});
+test('newer snapshots upgrade older snapshot values but never replace a direct transition',()=>{
+ const state={events:[unknownEvent()]};backfillLocalQuotaHistory(state,[archived()],now);backfillLocalQuotaHistory(state,[archived({fetchedAt:iso(now-3600000),remainingPercent:30})],now);assert.equal(state.localQuotaHistory[0].beforeRemainingPercent,30);
+ rememberLocalQuotaReset(state,event({beforeRemainingPercent:12}),now);assert.equal(state.localQuotaHistory[0].beforeRemainingPercent,12);assert.equal(state.localQuotaHistory[0].beforeBasis,'transition');
+ backfillLocalQuotaHistory(state,[archived({fetchedAt:iso(now-1000),remainingPercent:99})],now);assert.equal(state.localQuotaHistory[0].beforeRemainingPercent,12);
+ recoverLocalQuotaHistory(state,now);assert.equal(state.localQuotaHistory[0].beforeRemainingPercent,12);
+});
+test('recovering an intervening historical refill clears a snapshot that now crosses that refill',()=>{
+ const state={events:[unknownEvent()]};backfillLocalQuotaHistory(state,[archived()],now);assert.equal(state.localQuotaHistory[0].beforeRemainingPercent,41);
+ const end=iso(now+3600000);state.events.push(unknownEvent({key:`quota-reset:codex:primary:${end}`,resetsAt:end,at:iso(now-4*3600000)}));recoverLocalQuotaHistory(state,now);
+ assert.equal(localQuotaHistoryRows(state,now).find(r=>r.at===iso(now)).beforeRemainingPercent,null);
+});
+test('stored snapshot metadata requires a verified source and valid sample window on every recovery',()=>{
+ const state={events:[unknownEvent()]};backfillLocalQuotaHistory(state,[archived()],now);const saved=structuredClone(state);
+ saved.localQuotaSamples=[];saved.localQuotaHistory[0].beforeProvenance.verified=false;recoverLocalQuotaHistory(saved,now);assert.equal(saved.localQuotaHistory[0].beforeRemainingPercent,null);
+ const wrong=structuredClone(state);wrong.localQuotaSamples=[];wrong.localQuotaHistory[0].beforeFetchedAt=wrong.localQuotaHistory[0].resetsAt;recoverLocalQuotaHistory(wrong,now);assert.equal(wrong.localQuotaHistory[0].beforeRemainingPercent,null);
+});
+test('successful local polls retain the last sample per cycle, including through restart and an offline refill',()=>{
+ const state={},before=quota(59,now+86400000,now-60000);
+ assert.equal(rememberLocalQuotaSnapshot(state,before,now),true);assert.equal(state.localQuotaSamples.length,1);
+ rememberLocalQuotaSnapshot(state,quota(60,now+86400000,now-30000),now);assert.equal(state.localQuotaSamples.length,1);assert.equal(state.localQuotaSamples[0].remainingPercent,40);
+ const restarted=JSON.parse(JSON.stringify(state));restarted.events=[unknownEvent()];recoverLocalQuotaHistory(restarted,now);
+ assert.equal(restarted.localQuotaHistory[0].beforeRemainingPercent,40);assert.equal(restarted.localQuotaHistory[0].beforeBasis,'snapshot');assert.deepEqual(restarted.localQuotaHistory[0].beforeProvenance,{kind:'local-poll'});
+ rememberLocalQuotaSnapshot(restarted,quota(0,now+7*86400000,now),now);assert.equal(restarted.localQuotaSamples.length,2);assert.equal(restarted.localQuotaHistory[0].beforeRemainingPercent,40);
+});
+test('invalid, expired, stale and future API samples never replace a saved local reading',()=>{
+ for(const transform of [q=>({...q,state:'error'}),q=>({...q,source:'other'}),q=>({...q,fetchedAt:iso(now-120001)}),q=>({...q,fetchedAt:iso(now+1)}),q=>({...q,limits:[{id:'codex',primary:{usedPercent:5,durationMins:10080,resetsAt:iso(now-60000)}}]})]){
+  const state={};rememberLocalQuotaSnapshot(state,quota(59,now+86400000,now-30000),now);rememberLocalQuotaSnapshot(state,transform(quota(0,now+86400000,now)),now);assert.equal(state.localQuotaSamples.length,1);assert.equal(state.localQuotaSamples[0].remainingPercent,41);
+ }
+});
+test('a sample after a prior refill observation still cannot belong to a cycle older than that refill',()=>{
+ const priorEnd=iso(now+2*86400000),prior=unknownEvent({key:`quota-reset:codex:primary:${priorEnd}`,resetsAt:priorEnd,at:iso(now-4*3600000)}),next=unknownEvent();
+ const wrong=archived({fetchedAt:iso(now-3600000),resetsAt:iso(now+86400000)}),state={events:[prior,next]};
+ backfillLocalQuotaHistory(state,[wrong],now);
+ assert.equal(localQuotaHistoryRows(state,now).find(r=>r.id===next.key).beforeRemainingPercent,null);
+ const valid=archived({fetchedAt:iso(now-2*3600000),resetsAt:priorEnd,remainingPercent:37});
+ backfillLocalQuotaHistory(state,[valid],now);
+ const result=localQuotaHistoryRows(state,now).find(r=>r.id===next.key);assert.equal(result.beforeRemainingPercent,37);assert.equal(result.beforeResetsAt,priorEnd);
+});
+test('restoring a prior refill clears a saved snapshot whose cycle end contradicts that refill',()=>{
+ const next=unknownEvent(),state={events:[next]},sample=archived({fetchedAt:iso(now-3600000)});
+ backfillLocalQuotaHistory(state,[sample],now);assert.equal(state.localQuotaHistory[0].beforeRemainingPercent,41);
+ const priorEnd=iso(now+2*86400000);state.events.push(unknownEvent({key:`quota-reset:codex:primary:${priorEnd}`,resetsAt:priorEnd,at:iso(now-4*3600000)}));
+ recoverLocalQuotaHistory(state,now);const row=localQuotaHistoryRows(state,now).find(r=>r.id===next.key);assert.equal(row.beforeRemainingPercent,null);assert.equal(row.beforeBasis,null);assert.equal(row.beforeProvenance,null);
+});
+test('cycle-end association allows only the documented one-minute tolerance',()=>{
+ const priorEnd=now+2*86400000,prior=unknownEvent({key:`quota-reset:codex:primary:${iso(priorEnd)}`,resetsAt:iso(priorEnd),at:iso(now-4*3600000)}),next=unknownEvent();
+ for(const [offset,expected] of [[-60000,41],[-60001,null],[0,41],[60000,41]]){
+  const state={events:[prior,next]};backfillLocalQuotaHistory(state,[archived({fetchedAt:iso(now-3600000),resetsAt:iso(priorEnd+offset)})],now);assert.equal(localQuotaHistoryRows(state,now).find(r=>r.id===next.key).beforeRemainingPercent,expected,String(offset));
+ }
 });

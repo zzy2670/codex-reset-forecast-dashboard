@@ -10,10 +10,11 @@ function fixture(language,withLocal=true){
  demo.history[0].text='Recorded completion from an unusually long source description. '.repeat(12);
  // Deliberately share one instant with a public record: no temporal association
  // may attach a personal balance to that official record.
- demo.localQuotaHistory=withLocal?[100,0,null].map((before,i)=>({
+ demo.localQuotaHistory=withLocal?[100,0,null,41].map((before,i)=>({
   id:`quota-reset:codex:primary:${iso(now+(i+1)*86400000)}`,
   type:'local',at:iso(now-48*3600000+i*1000),bucketId:'codex',windowKey:'primary',
-  beforeRemainingPercent:before,afterRemainingPercent:100,beforeFetchedAt:iso(now-48*3600000+i*1000-30000),
+  beforeRemainingPercent:before,afterRemainingPercent:100,beforeBasis:i===3?'snapshot':'transition',
+  beforeFetchedAt:iso(now-48*3600000+i*1000-(i===3?8*3600000:30000)),
   resetsAt:iso(now+(i+1)*86400000),sources:[],
  })):[];
  return demo;
@@ -41,13 +42,23 @@ async function main(){
    const calendarBefore=await page.locator('#reset-calendar').innerHTML();
    await page.evaluate(demo=>render(demo),fixture(language));
    assert.equal(await page.locator('#reset-calendar').innerHTML(),calendarBefore,'Local refills must not alter the official reset calendar');
-   assert.equal(await page.locator('.history-row.history-local').count(),3,'Same-day refills must stay separate');
+   assert.equal(await page.locator('.history-row.history-local').count(),4,'Same-day refills must stay separate');
    assert.equal(await page.locator('.history-row:not(.history-local) .history-quota-before').count(),0,'Official rows must not receive a guessed personal value');
    const local=page.locator('.history-row.history-local');
    const values=await local.locator('.history-quota-before strong').allTextContents();
-   assert.deepEqual(values,['100%','0%',language==='en'?'Not recorded':'未记录'].reverse(),'Newest-first local records preserve 100%, 0%, and unknown');
+   assert.deepEqual(values,['100%','0%',language==='en'?'Not recorded':'未记录','41%'].reverse(),'Newest-first local records preserve snapshots, 100%, 0%, and unknown');
    const labels=await local.locator('.history-quota-before').allTextContents();
    assert.ok(labels.every(t=>t.includes(language==='en'?'Remaining before refill':'补充前剩余')),'All refill rows have translated labels');
+   const snapshot=fixture(language).localQuotaHistory.find(row=>row.beforeBasis==='snapshot');
+   const sampledAt=new Date(snapshot.beforeFetchedAt);
+   const sampledClock=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(sampledAt);
+   const sampledDateParts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Shanghai',month:'numeric',day:'numeric'}).formatToParts(sampledAt);
+   const sampledMonth=sampledDateParts.find(part=>part.type==='month').value,sampledDay=sampledDateParts.find(part=>part.type==='day').value;
+   const snapshotNote=await local.first().locator('.history-quota-before-note').innerText();
+   assert.ok(snapshotNote.includes(language==='en'?'Snapshot':'快照'),'Older snapshot is labelled independently from a fresh transition');
+   assert.ok(snapshotNote.includes(sampledClock),'The pre-refill snapshot shows its actual sample time');
+   assert.match(snapshotNote,new RegExp('0?'+sampledMonth+'/0?'+sampledDay),'The pre-refill snapshot shows its actual sample date');
+
    for(const width of [860,1440]){
     const contentWidth=await application.evaluate(({BrowserWindow},w)=>{const win=BrowserWindow.getAllWindows()[0];win.setContentSize(w,1000);return win.getContentBounds().width;},width);
     await page.waitForFunction(w=>Math.abs(innerWidth-w)<=1,contentWidth);
@@ -87,7 +98,7 @@ async function main(){
    await page.screenshot({path:screenshot,fullPage:true,animations:'disabled'});
   }
   assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
-  console.log(JSON.stringify({ok:true,profile,checks:['real language control','three same-day refills','100% and 0%','unknown historical value','official rows unmodified','official calendar unchanged','22px narrow and wide layouts'],layouts,errors,networkRequests:network.length},null,2));
+  console.log(JSON.stringify({ok:true,profile,checks:['real language control','four same-day refills','older 41% snapshot with sample date and time','100% and 0%','unknown historical value','official rows unmodified','official calendar unchanged','22px narrow and wide layouts'],layouts,errors,networkRequests:network.length},null,2));
  }finally{await application.close();}
 }
 main().catch(error=>{console.error(error.stack);process.exitCode=1;});

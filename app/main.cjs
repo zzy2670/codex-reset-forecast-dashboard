@@ -7,7 +7,7 @@ const { SOURCES, normalize, calibratedReset, changes, freshness, safeUrl } = req
 const { LocalCodexQuota, quotaView,quotaChanges } = require('./codex-quota.cjs');
 const {historyStart,hypotheticalPace,resetHistory}=require('./dashboard-model.cjs');
 const {projectSourceHistory}=require('./history-events.cjs');
-const {rememberLocalQuotaReset,recoverLocalQuotaHistory,localQuotaHistoryRows}=require('./local-quota-history.cjs');
+const {rememberLocalQuotaReset,recoverLocalQuotaHistory,localQuotaHistoryRows,rememberLocalQuotaSnapshot}=require('./local-quota-history.cjs');
 const TimeZone=require('./ui/time-zone.js');
 const ResetCalendar=require('./ui/reset-calendar.js');
 const {initializeCalendarResets,applyOfficialCalendarReset}=require('./calendar-reset.cjs');
@@ -234,7 +234,7 @@ async function refreshQuota() {
   if(quotaRunning)return quotaFlight;
   quotaRunning = true;
   quotaFlight=(async()=>{
-    try { const previous=state.quota;state.quota=await localQuota.read();for(const e of quotaChanges(previous,state.quota,state.settings))addEvent(e);recoverLocalReset(state,quotaView(state.quota,state.settings)); }
+    try { const previous=state.quota;state.quota=await localQuota.read();rememberLocalQuotaSnapshot(state,previous);for(const e of quotaChanges(previous,state.quota,state.settings))addEvent(e);rememberLocalQuotaSnapshot(state,state.quota);recoverLocalQuotaHistory(state);recoverLocalReset(state,quotaView(state.quota,state.settings)); }
     catch (error) { state.quota = { ...state.quota, source: 'local-codex', state: 'error', message: error.message }; }
     finally { quotaRunning = false; safeWrite(); publish(); }
   })();

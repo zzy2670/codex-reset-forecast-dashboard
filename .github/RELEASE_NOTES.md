@@ -1,13 +1,9 @@
 ## Codex 重置预测看板 2.3.2
 
-- “假设 X 天”、日历预测和红色重置节奏线统一使用本机起点。预告出现或撤回时，两条节奏横条继续按各自的目标计算。
-- 日历预测支持继续编辑已保存的日期和小时；官方全局重置确认完成后自动清空。
-- 修复历史日历重复显示同一重置记录的问题，保留各站来源与原始证据。
-- 本机额度补充记录右侧新增醒目的补充前剩余百分比，显示补充前最后一次读取值；旧记录缺少该数据时显示“未记录”。
+- 历史重置列表新增本机额度补充记录，每条右侧醒目显示补充前最后记录的剩余百分比。
+- 各额度周期的最后一次有效读数保存在本机。缺失的前值可用该次补充前最后一份可信快照补齐，并显示采样时间；没有可用读数或快照时显示“未记录”。
 
 ## English
 
-- The assumed X-day pace, calendar forecast and red reset pacing line now share a local starting point. New or withdrawn forecasts leave both pacing bars on their chosen schedules.
-- Saved calendar dates and hours can be edited again. The target clears after a confirmed official global reset.
-- Fixed duplicate reset records in the calendar while preserving source records and original evidence.
-- Local quota refill entries now highlight the last remaining percentage recorded before the refill on the right. Older entries without that reading show “Not recorded”.
+- Reset history includes local quota refill entries, with the last remaining percentage recorded before each refill highlighted on the right.
+- The last valid reading from each quota cycle is saved locally. The last trusted snapshot before a refill can fill a missing reading and show its sampling time; entries without a usable reading or snapshot show “Not recorded”.
