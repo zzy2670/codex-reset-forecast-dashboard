@@ -74,7 +74,7 @@ The calendar groups the past six weeks and the next week by month. Reset days ar
 
 Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard.
 
-Automatic reset records on the same day are combined into one entry, using the local refill time when available. Expand it to compare original source records and quota sampling times. The last remaining percentage recorded before the refill is highlighted on the right. The last trusted snapshot before that refill can fill a missing reading, with its sampling time shown; entries with neither a reading nor a usable snapshot show “Not recorded”.
+Official completion times define a reset window. Records within that window or three hours on either side are grouped as one global reset, using the local receipt time when available. A later refill after the quota reaches zero is shown as a personal reset-card use. Expand it to compare original source records and quota sampling times. The last remaining percentage recorded before the refill is highlighted on the right. The last trusted snapshot before that refill can fill a missing reading, with its sampling time shown; entries with neither a reading nor a usable snapshot show “Not recorded”.
 
 Reset-card records have a pale yellow background and retain the original issuance or usage notice.
 

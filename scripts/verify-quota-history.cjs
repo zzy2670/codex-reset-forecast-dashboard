@@ -38,18 +38,25 @@ async function main(){
   await page.evaluate(demo=>render(demo),merged);
   assert.equal(await page.locator('.history-row').count(),1,'Nearby public/local reset records merge into one row');
   assert.equal(await page.locator('.history-row.history-local .history-quota-before strong').innerText(),'75%');
+  assert.equal(await page.locator('.history-row .pill').innerText(),'全局重置','The matched local receipt is labelled global');
+  assert.equal(await page.locator('.history-time > span').innerText(),'本机到账时间');
+  assert.equal(await page.locator('.history-row.history-banked').count(),0,'The global reset is not a personal card');
   assert.equal(await page.locator('.history-row time strong').innerText(),new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date(localAt)),'Merged clock is the local reset time');
   await page.locator('.history-proof summary').click();
   assert.ok((await page.locator('.history-proof').innerText()).includes('Feed A'));
   assert.ok((await page.locator('.history-proof').innerText()).includes('Feed B'));
-  const cardView=fixture('zh-CN',false);
-  cardView.history=[{id:'banked-card',type:'banked',at:iso(now-7200000),sources:[],text:'Reset card source evidence'}];
+  const cardView=structuredClone(merged);
+  cardView.localQuotaHistory.push({id:'personal-card',type:'local',at:iso(now-1800000),bucketId:'codex',windowKey:'primary',beforeRemainingPercent:0,afterRemainingPercent:100,beforeFetchedAt:iso(now-1830000),sources:[]});
   for(const theme of ['light','dark']){
    cardView.settings.theme=theme;await page.evaluate(demo=>render(demo),cardView);
-   const background=await page.locator('.history-row.history-banked').evaluate(row=>getComputedStyle(row).backgroundColor);
-   assert.notEqual(background,'rgba(0, 0, 0, 0)','Banked card whole row has a distinct background');
+   assert.equal(await page.locator('.history-row[data-history-type="personal_card"] .pill').innerText(),'个人重置卡');
+   const background=await page.locator('.history-row[data-history-type="personal_card"]').evaluate(row=>getComputedStyle(row).backgroundColor);
+   assert.notEqual(background,'rgba(0, 0, 0, 0)','Personal card whole row has a distinct background');
    assert.notEqual(background,'transparent');
+   assert.equal(await page.locator('.history-row[data-history-type="global"] .pill').innerText(),'全局重置');
   }
+  const issued=fixture('zh-CN',false);issued.history=[{id:'issued-card',type:'banked',at:iso(now-7200000),sources:[],text:'Reset card source evidence'}];await page.evaluate(demo=>render(demo),issued);
+  assert.equal(await page.locator('[data-history-type="personal_card"]').count(),0,'Official card issuance never claims personal use');
   const layouts=[];
   for(const language of ['zh-CN','en','zh-CN']){
    // Exercise the actual language setting before supplying the synthetic view.
@@ -117,7 +124,7 @@ async function main(){
    await page.screenshot({path:screenshot,fullPage:true,animations:'disabled'});
   }
   assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
-  console.log(JSON.stringify({ok:true,profile,checks:['real language control','four distinct daily refills','older 41% snapshot with sample date and time','100% and 0%','unknown historical value','local-clock daily merge preserves source details','official calendar unchanged','22px narrow and wide layouts'],layouts,errors,networkRequests:network.length},null,2));
+  console.log(JSON.stringify({ok:true,profile,checks:['real language control','four distinct daily refills','older 41% snapshot with sample date and time','100% and 0%','unknown historical value','official interval plus/minus three hours uses local receipt clock and global label','subsequent exhausted refill shows personal card separately','official calendar unchanged','22px narrow and wide layouts'],layouts,errors,networkRequests:network.length},null,2));
  }finally{await application.close();}
 }
 main().catch(error=>{console.error(error.stack);process.exitCode=1;});
