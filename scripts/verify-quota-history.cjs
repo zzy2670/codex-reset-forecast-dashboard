@@ -8,10 +8,8 @@ function fixture(language,withLocal=true){
  const demo=makeDemo(now,{language});
  demo.settings={...demo.settings,bodyFontSize:22,notify:false,sound:false,autoStart:false,timeZone:'Asia/Shanghai'};
  demo.history[0].text='Recorded completion from an unusually long source description. '.repeat(12);
- demo.history[0].lastLocalReading={remainingPercent:100,fetchedAt:iso(now-3*86400000),bucketId:'codex',windowKey:'primary',basis:'last-known'};
- demo.history.push({id:'observation-without-local-reading',type:'observation',at:iso(now-47*3600000),text:'Operator observation',sources:[]});
- // Share an instant without treating the public announcement as a personal refill.
- // A separately labelled last local reading is supplied as a snapshot projection.
+ // Deliberately share one instant with a public record: no temporal association
+ // may attach a personal balance to that official record.
  demo.localQuotaHistory=withLocal?[100,0,null,41].map((before,i)=>({
   id:`quota-reset:codex:primary:${iso(now+(i+1)*86400000)}`,
   type:'local',at:iso(now-48*3600000+i*1000),bucketId:'codex',windowKey:'primary',
@@ -45,16 +43,7 @@ async function main(){
    await page.evaluate(demo=>render(demo),fixture(language));
    assert.equal(await page.locator('#reset-calendar').innerHTML(),calendarBefore,'Local refills must not alter the official reset calendar');
    assert.equal(await page.locator('.history-row.history-local').count(),4,'Same-day refills must stay separate');
-   assert.equal(await page.locator('.history-row:not(.history-local) .history-quota-before').count(),0,'Official rows must not receive a personal pre-refill badge');
-   const reference=page.locator('.history-last-reading');
-   assert.equal(await reference.count(),1,'Only the public row with a saved reading receives a reference badge');
-   assert.equal(await reference.locator('strong').innerText(),'100%');
-   assert.ok((await reference.innerText()).includes(language==='en'?'Last local reading':'本机上次记录'),'Public reference reading is labelled separately from an actual pre-refill value');
-   const readingTime=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(fixture(language).history[0].lastLocalReading.fetchedAt));
-   const referenceNote=await reference.locator('.history-quota-before-note').innerText();
-   assert.ok(referenceNote.includes(language==='en'?'Read at':'读取'),'Public reading keeps its own observation label');
-   assert.ok(referenceNote.includes(readingTime),'Public reading retains the saved reading time');
-   assert.equal(await page.locator('.history-row').filter({hasText:'Operator observation'}).locator('.history-last-reading').count(),0,'Operator observations do not acquire a public reset reference badge');
+   assert.equal(await page.locator('.history-row:not(.history-local) .history-quota-before').count(),0,'Official rows must not receive a guessed personal value');
    const local=page.locator('.history-row.history-local');
    const values=await local.locator('.history-quota-before strong').allTextContents();
    assert.deepEqual(values,['100%','0%',language==='en'?'Not recorded':'未记录','41%'].reverse(),'Newest-first local records preserve snapshots, 100%, 0%, and unknown');
@@ -76,8 +65,8 @@ async function main(){
     await page.evaluate(demo=>render(demo),fixture(language));
     const metrics=await page.evaluate(()=>({
      width:innerWidth,pageOverflow:document.documentElement.scrollWidth>innerWidth+1,
-     rows:[...document.querySelectorAll('.history-row')].filter(row=>row.querySelector('.history-quota-before,.history-last-reading')).map(row=>{
-      const badge=row.querySelector('.history-quota-before,.history-last-reading'),content=row.querySelector('.history-content'),value=badge.querySelector('strong');
+     rows:[...document.querySelectorAll('.history-local')].map(row=>{
+      const badge=row.querySelector('.history-quota-before'),content=row.querySelector('.history-content'),value=badge.querySelector('strong');
       const a=badge.getBoundingClientRect(),b=content.getBoundingClientRect(),r=row.getBoundingClientRect(),v=value.getBoundingClientRect();
       return {badgeRight:a.right,rowRight:r.right,badgeLeft:a.left,contentRight:b.right,badgeWidth:a.width,valueWidth:v.width,
        badgeHeight:a.height,valueHeight:v.height,fontSize:parseFloat(getComputedStyle(value).fontSize),
@@ -109,7 +98,7 @@ async function main(){
    await page.screenshot({path:screenshot,fullPage:true,animations:'disabled'});
   }
   assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
-  console.log(JSON.stringify({ok:true,profile,checks:['real language control','four same-day refills','older 41% snapshot with sample date and time','100% and 0%','unknown historical value','public last-reading reference stays separate from pre-refill values','official calendar unchanged','22px narrow and wide layouts'],layouts,errors,networkRequests:network.length},null,2));
+  console.log(JSON.stringify({ok:true,profile,checks:['real language control','four same-day refills','older 41% snapshot with sample date and time','100% and 0%','unknown historical value','official rows unmodified','official calendar unchanged','22px narrow and wide layouts'],layouts,errors,networkRequests:network.length},null,2));
  }finally{await application.close();}
 }
 main().catch(error=>{console.error(error.stack);process.exitCode=1;});

@@ -38,7 +38,7 @@ const translations={
       ],
       [
         "Reset history",
-        "Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard. Local quota refills appear as separate entries, with the last remaining percentage recorded before each refill highlighted on the right. The last trusted snapshot before that refill can fill a missing reading, with its sampling time shown; entries with neither a reading nor a usable snapshot show “Not recorded”. When available, public reset entries also show the last local quota reading saved before the recorded reset time, together with its reading time."
+        "Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard. Local quota refills appear as separate entries, with the last remaining percentage recorded before each refill highlighted on the right. The last trusted snapshot before that refill can fill a missing reading, with its sampling time shown; entries with neither a reading nor a usable snapshot show “Not recorded”."
       ],
       [
         "Automatic Windows notifications",
@@ -98,7 +98,7 @@ const translations={
       ],
       [
         "历史重置记录",
-        "从 2026 年 9 月开始收录，最新记录排在最上面。展开一条记录，可以逐站比较时间并查看原帖。最近一次已核对的重置时间和距今时长，也会显示在看板顶部。 本机额度补充会单独列出，右侧突出显示补充前最后记录的剩余百分比。缺失的旧读数可用该次补充前最后一份可信快照补齐，并标明采样时间；没有可用读数或快照时显示“未记录”。 有本机读数时，公开重置记录右侧也会显示该条记录时间之前最后保存的数值与读取时间。"
+        "从 2026 年 9 月开始收录，最新记录排在最上面。展开一条记录，可以逐站比较时间并查看原帖。最近一次已核对的重置时间和距今时长，也会显示在看板顶部。 本机额度补充会单独列出，右侧突出显示补充前最后记录的剩余百分比。缺失的旧读数可用该次补充前最后一份可信快照补齐，并标明采样时间；没有可用读数或快照时显示“未记录”。"
       ],
       [
         "Windows 自动弹窗",
@@ -158,7 +158,7 @@ const translations={
       ],
       [
         "リセット履歴",
-        "2026年9月以降の記録を新しい順に表示します。記録を開くと各サイトの時刻と原文を比較できます。直近の照合済みリセットと経過時間は上部にも表示します。 ローカル利用枠の補充も個別に表示し、補充前に最後に記録した残りの割合を右側に大きく表示します。読み取り値がない場合は、その補充前の最後の信頼できるスナップショットで補い、取得時刻を表示できます。利用できる記録がなければ「未記録」と表示します。 ローカルの読み取り記録がある場合、公開リセットの記録にも、その記録の時刻より前に最後に保存した残りの割合と取得時刻を右側に表示します。"
+        "2026年9月以降の記録を新しい順に表示します。記録を開くと各サイトの時刻と原文を比較できます。直近の照合済みリセットと経過時間は上部にも表示します。 ローカル利用枠の補充も個別に表示し、補充前に最後に記録した残りの割合を右側に大きく表示します。読み取り値がない場合は、その補充前の最後の信頼できるスナップショットで補い、取得時刻を表示できます。利用できる記録がなければ「未記録」と表示します。"
       ],
       [
         "Windows の自動通知",
@@ -218,7 +218,7 @@ const translations={
       ],
       [
         "Historial de reinicios",
-        "Consulta los registros desde septiembre de 2026, del más reciente al más antiguo. Despliega uno para comparar las horas y publicaciones de cada sitio. El último reinicio contrastado y el tiempo transcurrido también aparecen arriba. Las recargas de cuota local aparecen como entradas separadas, con el último porcentaje restante registrado antes de cada recarga destacado a la derecha. La última captura fiable anterior a esa recarga puede completar una lectura ausente e indicar su hora de muestreo; si no hay una lectura ni una captura utilizable, aparece «No registrado». Cuando existe una lectura local, las entradas de reinicios públicos también muestran a la derecha el último porcentaje restante guardado antes de la hora registrada del reinicio y su hora de lectura."
+        "Consulta los registros desde septiembre de 2026, del más reciente al más antiguo. Despliega uno para comparar las horas y publicaciones de cada sitio. El último reinicio contrastado y el tiempo transcurrido también aparecen arriba. Las recargas de cuota local aparecen como entradas separadas, con el último porcentaje restante registrado antes de cada recarga destacado a la derecha. La última captura fiable anterior a esa recarga puede completar una lectura ausente e indicar su hora de muestreo; si no hay una lectura ni una captura utilizable, aparece «No registrado»."
       ],
       [
         "Notificaciones automáticas de Windows",
@@ -278,7 +278,7 @@ const translations={
       ],
       [
         "Historique des réinitialisations",
-        "Les événements depuis septembre 2026 sont classés du plus récent au plus ancien. Dépliez une entrée pour comparer les horaires et publications de chaque site. La dernière réinitialisation recoupée et le temps écoulé figurent aussi en haut. Les rechargements du quota local figurent dans des entrées distinctes, avec le dernier pourcentage restant relevé avant chaque rechargement mis en évidence à droite. Le dernier instantané fiable précédant ce rechargement peut compléter un relevé manquant, avec son heure de capture ; sans relevé ni instantané utilisable, l’entrée affiche « Non enregistré ». Lorsqu’un relevé local est disponible, les réinitialisations publiques affichent aussi à droite le dernier pourcentage restant enregistré avant l’heure de réinitialisation indiquée dans l’entrée, avec son heure de lecture."
+        "Les événements depuis septembre 2026 sont classés du plus récent au plus ancien. Dépliez une entrée pour comparer les horaires et publications de chaque site. La dernière réinitialisation recoupée et le temps écoulé figurent aussi en haut. Les rechargements du quota local figurent dans des entrées distinctes, avec le dernier pourcentage restant relevé avant chaque rechargement mis en évidence à droite. Le dernier instantané fiable précédant ce rechargement peut compléter un relevé manquant, avec son heure de capture ; sans relevé ni instantané utilisable, l’entrée affiche « Non enregistré »."
       ],
       [
         "Notifications automatiques de Windows",
@@ -338,7 +338,7 @@ const translations={
       ],
       [
         "Reset-Verlauf",
-        "Die Einträge ab September 2026 erscheinen mit dem neuesten zuerst. Klappe einen Eintrag auf, um Zeiten und Beiträge der einzelnen Websites zu vergleichen. Der letzte abgeglichene Reset und die vergangene Zeit stehen auch oben. Lokale Kontingentauffüllungen erscheinen als eigene Einträge. Rechts wird der zuletzt vor der Auffüllung erfasste Restprozentsatz hervorgehoben. Der letzte vertrauenswürdige Snapshot vor dieser Auffüllung kann einen fehlenden Messwert mit seiner Erfassungszeit ergänzen; ohne nutzbaren Messwert oder Snapshot erscheint „Nicht erfasst“. Falls ein lokaler Messwert vorliegt, zeigen öffentliche Reset-Einträge rechts auch den letzten vor der im Eintrag angegebenen Reset-Zeit gespeicherten Restprozentsatz mit seiner Erfassungszeit."
+        "Die Einträge ab September 2026 erscheinen mit dem neuesten zuerst. Klappe einen Eintrag auf, um Zeiten und Beiträge der einzelnen Websites zu vergleichen. Der letzte abgeglichene Reset und die vergangene Zeit stehen auch oben. Lokale Kontingentauffüllungen erscheinen als eigene Einträge. Rechts wird der zuletzt vor der Auffüllung erfasste Restprozentsatz hervorgehoben. Der letzte vertrauenswürdige Snapshot vor dieser Auffüllung kann einen fehlenden Messwert mit seiner Erfassungszeit ergänzen; ohne nutzbaren Messwert oder Snapshot erscheint „Nicht erfasst“."
       ],
       [
         "Automatische Windows-Benachrichtigungen",
@@ -398,7 +398,7 @@ const translations={
       ],
       [
         "초기화 기록",
-        "2026년 9월부터의 기록을 최신순으로 표시합니다. 기록을 펼치면 사이트별 시각과 원문을 비교할 수 있습니다. 대조한 최근 초기화와 경과 시간은 화면 위에도 표시합니다. 로컬 사용량 충전은 별도 기록으로 표시하며, 충전 전에 마지막으로 기록한 잔여 비율을 오른쪽에 크게 표시합니다. 조회 값이 없으면 해당 충전 전의 마지막 신뢰할 수 있는 스냅샷으로 보완하고 조회 시각을 표시할 수 있습니다. 사용할 기록이나 스냅샷이 없으면 “기록 없음”으로 표시합니다. 로컬 조회 기록이 있으면 공개 초기화 기록의 오른쪽에도 해당 기록의 시각 전에 마지막으로 저장한 잔여 비율과 조회 시각을 표시합니다."
+        "2026년 9월부터의 기록을 최신순으로 표시합니다. 기록을 펼치면 사이트별 시각과 원문을 비교할 수 있습니다. 대조한 최근 초기화와 경과 시간은 화면 위에도 표시합니다. 로컬 사용량 충전은 별도 기록으로 표시하며, 충전 전에 마지막으로 기록한 잔여 비율을 오른쪽에 크게 표시합니다. 조회 값이 없으면 해당 충전 전의 마지막 신뢰할 수 있는 스냅샷으로 보완하고 조회 시각을 표시할 수 있습니다. 사용할 기록이나 스냅샷이 없으면 “기록 없음”으로 표시합니다."
       ],
       [
         "Windows 자동 알림",

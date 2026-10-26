@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
 const {quotaChanges}=require('../app/codex-quota.cjs');
-const {rememberLocalQuotaReset,recoverLocalQuotaHistory,localQuotaHistoryRows,backfillLocalQuotaHistory,rememberLocalQuotaSnapshot,historyWithLastLocalReading}=require('../app/local-quota-history.cjs');
+const {rememberLocalQuotaReset,recoverLocalQuotaHistory,localQuotaHistoryRows,backfillLocalQuotaHistory,rememberLocalQuotaSnapshot}=require('../app/local-quota-history.cjs');
 const now=Date.parse('2026-10-26T06:00:00.000Z'),iso=value=>new Date(value).toISOString();
 function quota(usedPercent,end,at=now){return {source:'local-codex',state:'ok',fetchedAt:iso(at),limits:[{id:'codex',primary:{usedPercent,durationMins:10080,resetsAt:iso(end)}}]};}
 function event(patch={}){const resetsAt=iso(now+7*86400000);return {key:`quota-reset:codex:primary:${resetsAt}`,kind:'quota_reset',sourceId:null,bucketId:'codex',windowKey:'primary',resetsAt,at:iso(now),beforeRemainingPercent:12.25,afterRemainingPercent:100,beforeFetchedAt:iso(now-30000),beforeResetsAt:iso(now-1000),...patch};}
@@ -145,57 +145,4 @@ test('cycle-end association allows only the documented one-minute tolerance',()=
  for(const [offset,expected] of [[-60000,41],[-60001,null],[0,41],[60000,41]]){
   const state={events:[prior,next]};backfillLocalQuotaHistory(state,[archived({fetchedAt:iso(now-3600000),resetsAt:iso(priorEnd+offset)})],now);assert.equal(localQuotaHistoryRows(state,now).find(r=>r.id===next.key).beforeRemainingPercent,expected,String(offset));
  }
-});
-
-const selectedQuota={source:'local-codex',bucketId:'codex',key:'primary'};
-function receipt(at=now-4*3600000,end=now+2*86400000,patch={}){
- return unknownEvent({key:`quota-reset:codex:primary:${iso(end)}`,resetsAt:iso(end),at:iso(at),body:'当前周期剩余 100%。个人重置时间已更新，请查看看板。\n本机确认时间：历史时间（北京时间）',...patch});
-}
-test('only an exact legacy local refill receipt restores its observed post-refill percentage',()=>{
- for(const remaining of [0,100]){
-  const e=receipt(undefined,undefined,{body:`当前周期剩余 ${remaining}%。个人重置时间已更新，请查看看板。`}),state={events:[e]};
-  recoverLocalQuotaHistory(state,now);assert.equal(state.localQuotaHistory[0].afterRemainingPercent,remaining);assert.equal(state.localQuotaHistory[0].beforeRemainingPercent,null);
-  const saved=JSON.parse(JSON.stringify(state));saved.events=[];recoverLocalQuotaHistory(saved,now);assert.equal(saved.localQuotaHistory[0].afterRemainingPercent,remaining);
- }
- const exact='当前周期剩余 100%。个人重置时间已更新，请查看看板。';
- const english={events:[receipt(undefined,undefined,{body:require('../app/ui/i18n.js').text(exact,'en')})]};recoverLocalQuotaHistory(english,now);assert.equal(english.localQuotaHistory[0].afterRemainingPercent,100);
- for(const body of ['当前周期剩余 100%。','prefix '+exact,exact+' unsolicited suffix','当前周期剩余 101%。个人重置时间已更新，请查看看板。','当前周期剩余 00%。个人重置时间已更新，请查看看板。']){
-  const state={events:[receipt(undefined,undefined,{body})]};recoverLocalQuotaHistory(state,now);assert.equal(state.localQuotaHistory[0].afterRemainingPercent,null,body);
- }
- const state={events:[receipt(undefined,undefined,{body:exact,afterRemainingPercent:17})]};recoverLocalQuotaHistory(state,now);assert.equal(state.localQuotaHistory[0].afterRemainingPercent,17);
- const invalid={events:[receipt(undefined,undefined,{body:exact,afterRemainingPercent:101})]};recoverLocalQuotaHistory(invalid,now);assert.equal(invalid.localQuotaHistory[0].afterRemainingPercent,null);
- for(const patch of [{sourceId:'public'},{kind:'confirmed'},{bucketId:'wrong'}]){const s={events:[receipt(undefined,undefined,{body:exact,...patch})]};recoverLocalQuotaHistory(s,now);assert.deepEqual(s.localQuotaHistory,[]);}
-});
-test('the October 25 announcement can show the October 24 receipt instead of an older snapshot or later current quota',()=>{
- const refillAt=Date.parse('2026-10-23T17:40:46.018Z'),end=Date.parse('2026-10-30T17:40:45.000Z'),announcement={id:'public-last-reset',type:'global',at:'2026-10-25T06:06:16.000Z',sources:[]};
- const state={events:[receipt(refillAt,end)],localQuotaSamples:[archived({fetchedAt:'2026-10-23T09:22:42.930Z',resetsAt:'2026-10-29T17:09:48.000Z'}),archived({remainingPercent:92,fetchedAt:'2026-10-26T02:00:00.000Z',resetsAt:'2026-11-01T06:19:50.000Z'})],quota:{remainingPercent:92}};
- const before=JSON.stringify(state),original=JSON.stringify(announcement),[row]=historyWithLastLocalReading(state,[announcement],selectedQuota,now);
- assert.equal(row.lastLocalReading.remainingPercent,100);assert.equal(row.lastLocalReading.fetchedAt,iso(refillAt));assert.equal(row.lastLocalReading.basis,'last-known');assert.equal(row.lastLocalReading.source,'refill-receipt');
- assert.equal(JSON.stringify(state),before);assert.equal(JSON.stringify(announcement),original);assert.equal('lastLocalReading' in announcement,false);
-});
-test('a later eligible snapshot is preferred, while readings at or after the announcement never displace it',()=>{
- const target=now-3600000,state={events:[receipt()],localQuotaSamples:[archived({fetchedAt:iso(now-2*3600000),resetsAt:iso(now+2*86400000),remainingPercent:73}),archived({fetchedAt:iso(target),resetsAt:iso(now+2*86400000),remainingPercent:13}),archived({fetchedAt:iso(now),resetsAt:iso(now+2*86400000),remainingPercent:2})]};
- const [row]=historyWithLastLocalReading(state,[{type:'global',at:iso(target)}],selectedQuota,now);
- assert.equal(row.lastLocalReading.remainingPercent,73);assert.equal(row.lastLocalReading.fetchedAt,iso(now-2*3600000));assert.equal(row.lastLocalReading.source,'quota-snapshot');
-});
-test('public last-reading badges only project matching local windows on actual completed records',()=>{
- const state={events:[receipt()]},at=iso(now-3600000),rows=['global','banked','global_and_banked','observation','commentary','repair'].map(type=>({id:type,type,at}));
- const result=historyWithLastLocalReading(state,rows,selectedQuota,now);assert.deepEqual(result.filter(r=>r.lastLocalReading).map(r=>r.type),['global','banked','global_and_banked']);
- for(const q of [null,{...selectedQuota,source:'public'},{...selectedQuota,key:'secondary'},{...selectedQuota,bucketId:'other'}])assert.ok(historyWithLastLocalReading(state,rows,q,now).every(r=>!r.lastLocalReading));
- for(const patch of [{at:iso(now+1)},{at:'invalid'},{evidenceOnly:true},{phase:'forecast'},{phase:'observation'}])assert.equal(historyWithLastLocalReading(state,[{type:'global',at,...patch}],selectedQuota,now)[0].lastLocalReading,undefined);
- const [stale]=historyWithLastLocalReading(state,[{type:'observation',at,lastLocalReading:{remainingPercent:88}}],selectedQuota,now);assert.equal(stale.lastLocalReading,undefined);
-});
-test('a stale-cycle reading cannot override a later known personal refill cycle',()=>{
- const prior=receipt(now-4*3600000,now+3*86400000),wrong=archived({fetchedAt:iso(now-2*3600000),resetsAt:iso(now+86400000),remainingPercent:41});
- const [row]=historyWithLastLocalReading({events:[prior],localQuotaSamples:[wrong]},[{type:'global',at:iso(now-3600000)}],selectedQuota,now);
- assert.equal(row.lastLocalReading.remainingPercent,100);assert.equal(row.lastLocalReading.fetchedAt,prior.at);
-});
-test('expired readings and observed newer cycles do not become a guessed public pre-reset balance',()=>{
- const target=now-3600000,expired={events:[receipt(now-4*3600000,now-2*3600000)]};
- assert.equal(historyWithLastLocalReading(expired,[{type:'global',at:iso(target)}],selectedQuota,now)[0].lastLocalReading,undefined);
- const observedEnd=iso(now+4*86400000),state={events:[receipt()],localReset:{key:`quota-reset:codex:primary:${observedEnd}`,kind:'observed-cycle',bucketId:'codex',windowKey:'primary',resetsAt:observedEnd,observedAt:iso(now-2*3600000)}};
- assert.equal(historyWithLastLocalReading(state,[{type:'global',at:iso(target)}],selectedQuota,now)[0].lastLocalReading,undefined);
- assert.equal(state.localQuotaHistory,undefined,'Projection cannot invent or persist a refill for the observed cycle');
- state.localQuotaSamples=[archived({fetchedAt:iso(now-90*60000),resetsAt:observedEnd,remainingPercent:0})];
- assert.equal(historyWithLastLocalReading(state,[{type:'global',at:iso(target)}],selectedQuota,now)[0].lastLocalReading.remainingPercent,0);
 });
