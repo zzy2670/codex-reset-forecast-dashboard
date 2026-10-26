@@ -12,9 +12,9 @@ function fixture(language,withLocal=true){
  // may attach a personal balance to that official record.
  demo.localQuotaHistory=withLocal?[100,0,null,41].map((before,i)=>({
   id:`quota-reset:codex:primary:${iso(now+(i+1)*86400000)}`,
-  type:'local',at:iso(now-48*3600000+i*1000),bucketId:'codex',windowKey:'primary',
+  type:'local',at:iso(now-(5-i)*86400000),bucketId:'codex',windowKey:'primary',
   beforeRemainingPercent:before,afterRemainingPercent:100,beforeBasis:i===3?'snapshot':'transition',
-  beforeFetchedAt:iso(now-48*3600000+i*1000-(i===3?8*3600000:30000)),
+  beforeFetchedAt:iso(now-(5-i)*86400000-(i===3?8*3600000:30000)),
   resetsAt:iso(now+(i+1)*86400000),sources:[],
  })):[];
  return demo;
@@ -31,6 +31,25 @@ async function main(){
   const userData=await application.evaluate(({app})=>app.getPath('userData'));
   assert.ok(userData.includes(profile),'Must use an isolated verification profile');
   await page.evaluate(value=>{const RealDate=Date;window.Date=class extends RealDate{constructor(...args){super(...(args.length?args:[value]));}static now(){return value;}};},now);
+  const merged=fixture('zh-CN');
+  const localAt=iso(now-3600000);
+  merged.history=[{id:'public-completion',type:'global',at:iso(now-3540000),sources:[{id:'feed-a',name:'Feed A',family:'chain-a',url:'https://example.com/a',at:iso(now-3540000)}]}, {id:'effective-completion',type:'global',at:iso(now-3480000),timeBasis:'effective',sources:[{id:'feed-b',name:'Feed B',family:'chain-b',url:'https://example.com/b',at:iso(now-3480000)}]}];
+  merged.localQuotaHistory=[{id:'local-reset',type:'local',at:localAt,bucketId:'codex',windowKey:'primary',beforeRemainingPercent:75,afterRemainingPercent:100,beforeFetchedAt:iso(now-3630000),sources:[]}];
+  await page.evaluate(demo=>render(demo),merged);
+  assert.equal(await page.locator('.history-row').count(),1,'Nearby public/local reset records merge into one row');
+  assert.equal(await page.locator('.history-row.history-local .history-quota-before strong').innerText(),'75%');
+  assert.equal(await page.locator('.history-row time strong').innerText(),new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date(localAt)),'Merged clock is the local reset time');
+  await page.locator('.history-proof summary').click();
+  assert.ok((await page.locator('.history-proof').innerText()).includes('Feed A'));
+  assert.ok((await page.locator('.history-proof').innerText()).includes('Feed B'));
+  const cardView=fixture('zh-CN',false);
+  cardView.history=[{id:'banked-card',type:'banked',at:iso(now-7200000),sources:[],text:'Reset card source evidence'}];
+  for(const theme of ['light','dark']){
+   cardView.settings.theme=theme;await page.evaluate(demo=>render(demo),cardView);
+   const background=await page.locator('.history-row.history-banked').evaluate(row=>getComputedStyle(row).backgroundColor);
+   assert.notEqual(background,'rgba(0, 0, 0, 0)','Banked card whole row has a distinct background');
+   assert.notEqual(background,'transparent');
+  }
   const layouts=[];
   for(const language of ['zh-CN','en','zh-CN']){
    // Exercise the actual language setting before supplying the synthetic view.
@@ -42,7 +61,7 @@ async function main(){
    const calendarBefore=await page.locator('#reset-calendar').innerHTML();
    await page.evaluate(demo=>render(demo),fixture(language));
    assert.equal(await page.locator('#reset-calendar').innerHTML(),calendarBefore,'Local refills must not alter the official reset calendar');
-   assert.equal(await page.locator('.history-row.history-local').count(),4,'Same-day refills must stay separate');
+   assert.equal(await page.locator('.history-row.history-local').count(),4,'Distinct daily refills stay separate');
    assert.equal(await page.locator('.history-row:not(.history-local) .history-quota-before').count(),0,'Official rows must not receive a guessed personal value');
    const local=page.locator('.history-row.history-local');
    const values=await local.locator('.history-quota-before strong').allTextContents();
@@ -98,7 +117,7 @@ async function main(){
    await page.screenshot({path:screenshot,fullPage:true,animations:'disabled'});
   }
   assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
-  console.log(JSON.stringify({ok:true,profile,checks:['real language control','four same-day refills','older 41% snapshot with sample date and time','100% and 0%','unknown historical value','official rows unmodified','official calendar unchanged','22px narrow and wide layouts'],layouts,errors,networkRequests:network.length},null,2));
+  console.log(JSON.stringify({ok:true,profile,checks:['real language control','four distinct daily refills','older 41% snapshot with sample date and time','100% and 0%','unknown historical value','local-clock daily merge preserves source details','official calendar unchanged','22px narrow and wide layouts'],layouts,errors,networkRequests:network.length},null,2));
  }finally{await application.close();}
 }
 main().catch(error=>{console.error(error.stack);process.exitCode=1;});

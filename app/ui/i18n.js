@@ -1,6 +1,7 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
+ '同日重置已合并':'Same-day reset records merged',
  '从本机最近补充起算':'From the latest local quota refill',
  '从本机额度周期起算':'From the local quota-cycle start','从本机额度周期起点起算':'from the local quota-cycle start','本机额度周期起点':'Local quota-cycle start','本机最近补充':'Latest local refill',
  '红线从本机额度周期起点起算':'The red line starts at the local quota-cycle start','红线从本机最近补充起算':'The red line starts at the latest local quota refill',

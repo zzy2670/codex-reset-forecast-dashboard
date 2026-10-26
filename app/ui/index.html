@@ -65,7 +65,7 @@
         <aside class="calendar-options">
           <h3>指定重置时间</h3><p class="calendar-hint">点击未来日期，再选择小时</p>
           <label class="field">已选日期<input id="calendar-selected" readonly placeholder="请先选择未来日期"></label>
-          <label class="field"><span id="calendar-hour-label">小时（北京时间）</span><input id="calendar-hour" type="number" min="0" max="23" step="1" value="15"></label>
+          <label class="field"><span id="calendar-hour-label">小时（北京时间）</span><input id="calendar-hour" type="number" min="0" max="23" step="1" value="12"></label>
           <p id="calendar-preview" class="calendar-preview"></p><div class="calendar-actions"><button id="calendar-confirm" class="primary-button" disabled>确定</button><button id="calendar-clear" class="secondary-button">清除日期假设</button></div><p id="calendar-result" class="calendar-result" role="status"></p>
           <div class="calendar-filters"><label><input id="calendar-show-limited" type="checkbox" checked>限定套餐重置</label><label><input id="calendar-show-banked" type="checkbox">重置卡记录</label></div>
           <div class="calendar-legend"><span class="legend-reset-text">已记录重置</span><span class="legend-assumed-text">指定时间</span></div><p id="calendar-current" class="calendar-current"></p>
@@ -109,6 +109,7 @@
   <script src="time-zone.js"></script>
   <script src="reset-calendar.js"></script>
   <script src="bar-order.js"></script>
+  <script src="history-groups.js"></script>
   <script src="renderer.js"></script>
 </body>
 </html>

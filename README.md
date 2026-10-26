@@ -68,13 +68,15 @@ Each card shows the site’s next reset time, announcement and update time. Expa
 
 ## Reset history
 
-The calendar groups the past six weeks and the next week by month. Reset days are red; today has a blue border and a blue date circle. Dates and times default to Beijing time (UTC+8). Choose another time zone in Settings. Select a future date, enter an hour and confirm to set the separate calendar pace bar.
+The calendar groups the past six weeks and the next week by month. Reset days are red; today has a blue border and a blue date circle. Dates and times default to Beijing time (UTC+8). Choose another time zone in Settings. Select a future date to start at 12:00, adjust the hour if needed and confirm to set the separate calendar pace bar.
 
 ![Latest reset and an expanded history record.](docs/assets/feature-history.png)
 
 Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard.
 
-Local quota refills appear as separate entries, with the last remaining percentage recorded before each refill highlighted on the right. The last trusted snapshot before that refill can fill a missing reading, with its sampling time shown; entries with neither a reading nor a usable snapshot show “Not recorded”.
+Automatic reset records on the same day are combined into one entry, using the local refill time when available. Expand it to compare original source records and quota sampling times. The last remaining percentage recorded before the refill is highlighted on the right. The last trusted snapshot before that refill can fill a missing reading, with its sampling time shown; entries with neither a reading nor a usable snapshot show “Not recorded”.
+
+Reset-card records have a pale yellow background and retain the original issuance or usage notice.
 
 After a reset, the dashboard assumes a six-hour gap and clears older forecasts within it. New explicit announcements after the reset take priority.
 

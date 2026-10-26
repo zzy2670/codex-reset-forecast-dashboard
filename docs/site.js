@@ -38,7 +38,7 @@ const translations={
       ],
       [
         "Reset history",
-        "Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard. Local quota refills appear as separate entries, with the last remaining percentage recorded before each refill highlighted on the right. The last trusted snapshot before that refill can fill a missing reading, with its sampling time shown; entries with neither a reading nor a usable snapshot show “Not recorded”."
+        "Browse resets from September 2026, newest first. Automatic reset records on the same day are combined into one entry, using the local refill time when available. Expand it to compare original source records and quota sampling times. The remaining percentage recorded before the refill is highlighted on the right; a missing reading can use the last trusted snapshot before that refill, with its sampling time shown. Entries without a usable reading or snapshot show “Not recorded”. Reset-card records have a pale yellow background and retain the original notice. Selecting a calendar date defaults to 12:00; you can change the hour before confirming."
       ],
       [
         "Automatic Windows notifications",
@@ -98,7 +98,7 @@ const translations={
       ],
       [
         "历史重置记录",
-        "从 2026 年 9 月开始收录，最新记录排在最上面。展开一条记录，可以逐站比较时间并查看原帖。最近一次已核对的重置时间和距今时长，也会显示在看板顶部。 本机额度补充会单独列出，右侧突出显示补充前最后记录的剩余百分比。缺失的旧读数可用该次补充前最后一份可信快照补齐，并标明采样时间；没有可用读数或快照时显示“未记录”。"
+        "从 2026 年 9 月开始收录，最新记录排在最上面。同一天的自动重置合并为一条，有本机补充记录时以本机时间为准；展开可查看各站原始记录和额度采样时间。右侧突出显示补充前最后记录的剩余百分比，缺失的旧读数可用该次补充前最后一份可信快照补齐，并标明采样时间；没有可用读数或快照时显示“未记录”。重置卡记录整条以淡黄色显示，保留原始发卡或使用消息。选择日历日期时默认 12:00，可修改小时后确认。"
       ],
       [
         "Windows 自动弹窗",
@@ -158,7 +158,7 @@ const translations={
       ],
       [
         "リセット履歴",
-        "2026年9月以降の記録を新しい順に表示します。記録を開くと各サイトの時刻と原文を比較できます。直近の照合済みリセットと経過時間は上部にも表示します。 ローカル利用枠の補充も個別に表示し、補充前に最後に記録した残りの割合を右側に大きく表示します。読み取り値がない場合は、その補充前の最後の信頼できるスナップショットで補い、取得時刻を表示できます。利用できる記録がなければ「未記録」と表示します。"
+        "2026年9月以降の記録を新しい順に表示します。同じ日の自動リセットは1件にまとめ、ローカル利用枠の補充記録があればその時刻を使います。展開すると各サイトの元の記録と利用枠の取得時刻を確認できます。補充前に最後に記録した残りの割合を右側に大きく表示します。読み取り値がない場合は、その補充前の最後の信頼できるスナップショットで補い、取得時刻を表示します。利用できる記録がなければ「未記録」と表示します。リセットカードの記録は行全体を淡い黄色で表示し、配布や使用についての元の告知を残します。カレンダーで日付を選ぶと初期時刻は12:00になり、確定前に変更できます。"
       ],
       [
         "Windows の自動通知",
@@ -218,7 +218,7 @@ const translations={
       ],
       [
         "Historial de reinicios",
-        "Consulta los registros desde septiembre de 2026, del más reciente al más antiguo. Despliega uno para comparar las horas y publicaciones de cada sitio. El último reinicio contrastado y el tiempo transcurrido también aparecen arriba. Las recargas de cuota local aparecen como entradas separadas, con el último porcentaje restante registrado antes de cada recarga destacado a la derecha. La última captura fiable anterior a esa recarga puede completar una lectura ausente e indicar su hora de muestreo; si no hay una lectura ni una captura utilizable, aparece «No registrado»."
+        "Consulta los registros desde septiembre de 2026, del más reciente al más antiguo. Los reinicios automáticos del mismo día se agrupan en una entrada, con la hora de la recarga local cuando está disponible. Despliega la entrada para comparar los registros originales y las horas de lectura de la cuota. El último porcentaje restante registrado antes de la recarga se destaca a la derecha. La última captura fiable anterior a esa recarga puede completar una lectura ausente, con su hora de muestreo; sin una lectura o captura utilizable aparece «No registrado». Las entradas de tarjetas de reinicio tienen un fondo amarillo claro y conservan el aviso original de entrega o uso. Al elegir una fecha en el calendario, la hora predeterminada es 12:00 y se puede cambiar antes de confirmar."
       ],
       [
         "Notificaciones automáticas de Windows",
@@ -278,7 +278,7 @@ const translations={
       ],
       [
         "Historique des réinitialisations",
-        "Les événements depuis septembre 2026 sont classés du plus récent au plus ancien. Dépliez une entrée pour comparer les horaires et publications de chaque site. La dernière réinitialisation recoupée et le temps écoulé figurent aussi en haut. Les rechargements du quota local figurent dans des entrées distinctes, avec le dernier pourcentage restant relevé avant chaque rechargement mis en évidence à droite. Le dernier instantané fiable précédant ce rechargement peut compléter un relevé manquant, avec son heure de capture ; sans relevé ni instantané utilisable, l’entrée affiche « Non enregistré »."
+        "Les événements depuis septembre 2026 sont classés du plus récent au plus ancien. Les réinitialisations automatiques d’une même journée sont regroupées dans une entrée, avec l’heure du rechargement local lorsqu’elle est disponible. Dépliez l’entrée pour comparer les relevés d’origine et les heures de lecture du quota. Le dernier pourcentage restant relevé avant le rechargement est mis en évidence à droite. Le dernier instantané fiable précédant ce rechargement peut compléter un relevé manquant, avec son heure de capture ; sans relevé ni instantané utilisable, « Non enregistré » s’affiche. Les entrées de cartes de réinitialisation ont un fond jaune pâle et conservent l’annonce d’origine de distribution ou d’utilisation. La sélection d’une date dans le calendrier règle l’heure sur 12:00 ; vous pouvez la modifier avant de confirmer."
       ],
       [
         "Notifications automatiques de Windows",
@@ -338,7 +338,7 @@ const translations={
       ],
       [
         "Reset-Verlauf",
-        "Die Einträge ab September 2026 erscheinen mit dem neuesten zuerst. Klappe einen Eintrag auf, um Zeiten und Beiträge der einzelnen Websites zu vergleichen. Der letzte abgeglichene Reset und die vergangene Zeit stehen auch oben. Lokale Kontingentauffüllungen erscheinen als eigene Einträge. Rechts wird der zuletzt vor der Auffüllung erfasste Restprozentsatz hervorgehoben. Der letzte vertrauenswürdige Snapshot vor dieser Auffüllung kann einen fehlenden Messwert mit seiner Erfassungszeit ergänzen; ohne nutzbaren Messwert oder Snapshot erscheint „Nicht erfasst“."
+        "Die Einträge ab September 2026 erscheinen mit dem neuesten zuerst. Automatische Resets am selben Tag werden zu einem Eintrag zusammengefasst. Wenn eine lokale Auffüllung erfasst wurde, gilt deren Zeitpunkt. Klappe den Eintrag auf, um Originalmeldungen und Erfassungszeiten des Kontingents zu vergleichen. Rechts steht der zuletzt vor der Auffüllung erfasste Restprozentsatz. Der letzte vertrauenswürdige Snapshot vor dieser Auffüllung kann einen fehlenden Messwert samt Erfassungszeit ergänzen; ohne nutzbaren Messwert oder Snapshot erscheint „Nicht erfasst“. Einträge zu Reset-Karten sind durchgehend hellgelb hinterlegt und behalten die ursprüngliche Meldung zur Ausgabe oder Nutzung. Bei der Auswahl eines Kalenderdatums ist 12:00 voreingestellt; die Stunde kann vor dem Bestätigen geändert werden."
       ],
       [
         "Automatische Windows-Benachrichtigungen",
@@ -398,7 +398,7 @@ const translations={
       ],
       [
         "초기화 기록",
-        "2026년 9월부터의 기록을 최신순으로 표시합니다. 기록을 펼치면 사이트별 시각과 원문을 비교할 수 있습니다. 대조한 최근 초기화와 경과 시간은 화면 위에도 표시합니다. 로컬 사용량 충전은 별도 기록으로 표시하며, 충전 전에 마지막으로 기록한 잔여 비율을 오른쪽에 크게 표시합니다. 조회 값이 없으면 해당 충전 전의 마지막 신뢰할 수 있는 스냅샷으로 보완하고 조회 시각을 표시할 수 있습니다. 사용할 기록이나 스냅샷이 없으면 “기록 없음”으로 표시합니다."
+        "2026년 9월부터의 기록을 최신순으로 표시합니다. 같은 날의 자동 초기화는 하나로 묶고, 로컬 사용량 충전 기록이 있으면 그 시각을 사용합니다. 기록을 펼치면 출처별 원래 기록과 사용량 조회 시각을 확인할 수 있습니다. 충전 전에 마지막으로 기록한 잔여 비율을 오른쪽에 크게 표시합니다. 조회 값이 없으면 해당 충전 전의 마지막 신뢰할 수 있는 스냅샷으로 보완하고 조회 시각을 표시합니다. 사용할 기록이나 스냅샷이 없으면 “기록 없음”으로 표시합니다. 초기화 카드 기록은 행 전체를 연한 노란색으로 표시하며 원래의 배포 또는 사용 공지를 보존합니다. 달력에서 날짜를 선택하면 기본 시각은 12:00이며 확인 전에 바꿀 수 있습니다."
       ],
       [
         "Windows 자동 알림",
