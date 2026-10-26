@@ -8,6 +8,13 @@ const isoTime=value=>{
  return Number.isFinite(dayValue)&&new Date(dayValue).toISOString().slice(0,10)===day&&Number.isFinite(at)?at:null;
 };
 const percent=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=100?value:null;
+function legacyRefillRemaining(body){
+ if(typeof body!=='string')return null;
+ // These are the complete first sentences emitted by the local refill event
+ // implementation, not a generic percentage search over arbitrary messages.
+ const match=body.match(/^当前周期剩余 (100|[1-9]?\d)%。个人重置时间已更新，请查看看板。(?:\r?\n|$)/)||body.match(/^Remaining this cycle (100|[1-9]?\d)(?:%\. |%。)Your personal reset time has changed\. See the dashboard\.(?:\r?\n|$)/);
+ return match?percent(Number(match[1])):null;
+}
 function verifiedProvenance(value){
  if(value?.kind==='local-poll')return {kind:'local-poll'};
  if(value?.verified!==true||!Number.isSafeInteger(value.profileDevice)||value.profileDevice<=0||typeof value.file!=='string'||!value.file.trim()||value.file.length>1024||/[\u0000-\u001f]/.test(value.file)||typeof value.sha256!=='string'||!/^[a-f\d]{64}$/i.test(value.sha256))return null;
@@ -41,7 +48,7 @@ function normalized(value,now,event=false){
  const beforeValid=beforeAt!==null&&beforeAt<=at&&previousEnd!==null&&previousEnd<end-60000&&(snapshot?!!provenance&&beforeAt<at&&beforeAt<previousEnd&&Number.isFinite(duration)&&duration>0&&beforeAt>=previousEnd-duration*60000:at-beforeAt<=120000);
  return {key:value.key,kind:'quota-reset',bucketId,windowKey,resetsAt,observedAt,
   beforeRemainingPercent:beforeValid?percent(value.beforeRemainingPercent):null,
-  afterRemainingPercent:percent(value.afterRemainingPercent),
+  afterRemainingPercent:percent(value.afterRemainingPercent)??(event&&value.afterRemainingPercent==null?legacyRefillRemaining(value.body):null),
   beforeFetchedAt:beforeValid?value.beforeFetchedAt:null,beforeResetsAt:beforeValid?value.beforeResetsAt:null,
   beforeBasis:beforeValid&&percent(value.beforeRemainingPercent)!==null?(snapshot?'snapshot':'transition'):null,
   beforeDurationMins:beforeValid&&snapshot?duration:null,beforeProvenance:beforeValid&&snapshot?provenance:null};
@@ -122,4 +129,27 @@ function localQuotaHistoryRows(state,now=Date.now()){
   beforeRemainingPercent:row.beforeRemainingPercent,afterRemainingPercent:row.afterRemainingPercent,
   beforeFetchedAt:row.beforeFetchedAt,beforeResetsAt:row.beforeResetsAt,beforeBasis:row.beforeBasis,beforeDurationMins:row.beforeDurationMins,beforeProvenance:row.beforeProvenance,sources:[]}));
 }
-module.exports={rememberLocalQuotaReset,recoverLocalQuotaHistory,localQuotaHistoryRows,backfillLocalQuotaHistory,rememberLocalQuotaSnapshot};
+function historyWithLastLocalReading(state,publicRows,quotaDisplay,now=Date.now()){
+ const rows=Array.isArray(publicRows)?publicRows:[];
+ const selected=quotaDisplay?.source==='local-codex'&&typeof quotaDisplay.bucketId==='string'&&['primary','secondary'].includes(quotaDisplay.key)?{bucketId:quotaDisplay.bucketId,windowKey:quotaDisplay.key}:null;
+ // Recover into a temporary container: projecting public history must not alter
+ // stored public rows, personal observations, notifications or settings.
+ const personal={localQuotaHistory:state.localQuotaHistory,localQuotaSamples:state.localQuotaSamples,events:state.events,localResetProofs:state.localResetProofs,localReset:state.localReset};
+ recoverLocalQuotaHistory(personal,now);
+ const refills=personal.localQuotaHistory.filter(row=>selected&&row.bucketId===selected.bucketId&&row.windowKey===selected.windowKey);
+ const readings=[...(Array.isArray(state.localQuotaSamples)?state.localQuotaSamples:[]).map(value=>snapshotSample(value,now)).filter(Boolean),...refills.filter(row=>row.afterRemainingPercent!==null).map(row=>({bucketId:row.bucketId,windowKey:row.windowKey,resetsAt:row.resetsAt,remainingPercent:row.afterRemainingPercent,fetchedAt:row.observedAt,provenance:{kind:'local-refill',key:row.key}}))].filter(row=>selected&&row.bucketId===selected.bucketId&&row.windowKey===selected.windowKey);
+ const observed=state.localReset?.kind==='observed-cycle'?normalized({...state.localReset,kind:'quota-reset'},now):null;
+ const boundaries=[...refills,...(observed&&selected&&observed.bucketId===selected.bucketId&&observed.windowKey===selected.windowKey?[observed]:[])];
+ const completed=new Set(['global','regular','reset','automatic','global_and_banked','both','combined','banked']);
+ return rows.map(row=>{
+  if(!row||typeof row!=='object')return row;
+  const {lastLocalReading:discarded,...result}=row;
+  const at=isoTime(row.at);
+  if(!selected||!completed.has(row.type)||row.evidenceOnly||row.phase&&!['completion','confirmed'].includes(row.phase)||at===null||at>now)return result;
+  const prior=boundaries.filter(value=>Date.parse(value.observedAt)<at).sort((a,b)=>Date.parse(b.observedAt)-Date.parse(a.observedAt)||Date.parse(b.resetsAt)-Date.parse(a.resetsAt))[0];
+  const reading=readings.filter(value=>Date.parse(value.fetchedAt)<at&&Date.parse(value.resetsAt)>at&&(!prior||Date.parse(value.fetchedAt)>=Date.parse(prior.observedAt)&&Date.parse(value.resetsAt)+60000>=Date.parse(prior.resetsAt))).sort((a,b)=>Date.parse(b.fetchedAt)-Date.parse(a.fetchedAt)||Date.parse(b.resetsAt)-Date.parse(a.resetsAt))[0];
+  if(reading)result.lastLocalReading={remainingPercent:reading.remainingPercent,fetchedAt:reading.fetchedAt,bucketId:reading.bucketId,windowKey:reading.windowKey,resetsAt:reading.resetsAt,basis:'last-known',source:reading.provenance.kind==='local-refill'?'refill-receipt':'quota-snapshot'};
+  return result;
+ });
+}
+module.exports={rememberLocalQuotaReset,recoverLocalQuotaHistory,localQuotaHistoryRows,backfillLocalQuotaHistory,rememberLocalQuotaSnapshot,historyWithLastLocalReading};

@@ -7,7 +7,7 @@ const { SOURCES, normalize, calibratedReset, changes, freshness, safeUrl } = req
 const { LocalCodexQuota, quotaView,quotaChanges } = require('./codex-quota.cjs');
 const {historyStart,hypotheticalPace,resetHistory}=require('./dashboard-model.cjs');
 const {projectSourceHistory}=require('./history-events.cjs');
-const {rememberLocalQuotaReset,recoverLocalQuotaHistory,localQuotaHistoryRows,rememberLocalQuotaSnapshot}=require('./local-quota-history.cjs');
+const {rememberLocalQuotaReset,recoverLocalQuotaHistory,localQuotaHistoryRows,rememberLocalQuotaSnapshot,historyWithLastLocalReading}=require('./local-quota-history.cjs');
 const TimeZone=require('./ui/time-zone.js');
 const ResetCalendar=require('./ui/reset-calendar.js');
 const {initializeCalendarResets,applyOfficialCalendarReset}=require('./calendar-reset.cjs');
@@ -95,7 +95,7 @@ function snapshot() {
   sources=projectAfterReset(sources,quotaDisplay,state.localReset,now);
   const consensus=calibratedReset(sources,now);
   const history=resetHistory(sources,state.history||[],now);
-  return { ...state, localQuotaHistory:localQuotaHistoryRows(state,now), quotaConnection:smoke&&!deploymentCheck?{checking:false,authenticated:true,needsLogin:false}:connection, sources, consensus, history,historyStart:new Date(historyStart()).toISOString(),hypothetical:hypotheticalPace(consensus,state.settings.hypotheticalDays,now,history,{quota:quotaDisplay,localReset:state.localReset}), quotaDisplay, now: new Date(now).toISOString(), refreshing: running, version: app.getVersion(), notificationSupported: Notification.isSupported() };
+  return { ...state, localQuotaHistory:localQuotaHistoryRows(state,now), quotaConnection:smoke&&!deploymentCheck?{checking:false,authenticated:true,needsLogin:false}:connection, sources, consensus, history:historyWithLastLocalReading(state,history,quotaDisplay,now),historyStart:new Date(historyStart()).toISOString(),hypothetical:hypotheticalPace(consensus,state.settings.hypotheticalDays,now,history,{quota:quotaDisplay,localReset:state.localReset}), quotaDisplay, now: new Date(now).toISOString(), refreshing: running, version: app.getVersion(), notificationSupported: Notification.isSupported() };
 }
 function publish() { if (win && !win.isDestroyed()) win.webContents.send('dashboard:state', snapshot()); }
 function showWindow() { if (!win || win.isDestroyed()) return; if (win.isMinimized()) win.restore(); win.show(); win.focus(); }
