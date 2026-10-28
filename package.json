@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@openai/codex": "0.159.2",
-    "electron": "44.6.0",
+    "electron": "44.9.3",
     "electron-builder": "26.15.3",
     "playwright-core": "1.58.2"
   },
