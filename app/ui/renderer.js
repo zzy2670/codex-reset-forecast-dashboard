@@ -21,6 +21,13 @@ function cardMarkup(s) {
   const raw=s.forecast||{state:'none'},remaining=PaceTiming.remainingSchedule(raw),f={...remaining,state:PaceTiming.forecastState(raw)},fresh=isFresh(s);
   const status={retrying:['重试中','warn'],ok:['已更新',''],stale:['待更新','warn'],error:['连接异常','error'],blocked:['已暂停','error'],loading:['读取中','muted']}[!fresh&&s.status==='ok'?'stale':s.status] || ['待更新','muted'];
   let value='无', valueClass='', note=s.archivedForecasts?.length?'旧排期时间已过或已有完成记录，尚无有效的下次预告':'尚无明确的下次重置预告';
+  if(s.archivedForecasts?.length){
+    const latest=[...s.archivedForecasts].sort((a,b)=>(Date.parse(b.issuedAt||b.end||b.start)||0)-(Date.parse(a.issuedAt||a.end||a.start)||0))[0];
+    const reasons=[latest.retiredReason];
+    if(reasons.some(r=>['fulfilled','completed','local-reset'].includes(r)))note='已收录完成记录，原预告不再作为下次预计';
+    else if(reasons.every(r=>['cancelled','revoked'].includes(r)))note='原预告已撤销，尚无新的重置预告';
+    else note='旧预告时间已过，尚无新的重置预告';
+  }
   if (!fresh && f.state==='none') { value=s.status==='loading'?'读取中':'待核实'; valueClass='unknown'; note=s.error || '等待新数据，暂不判断是否有预告'; }
   else if(f.state==='invalid'){value='时间待核实';valueClass='unknown';note='站方窗口起止时间有矛盾，请核对原帖';}
   else if (f.state==='untimed') { value='时间未定'; valueClass='unknown'; note=`已收录${f.kindLabel || '重置'}预告，未给出具体时刻`; }
@@ -34,6 +41,8 @@ function cardMarkup(s) {
     if(f.clippedStart)note+=' · 起点已过，只显示截止';
     if(f.resetGapClipped)note+=' · 默认间隔 6 小时，仅显示原截止';
     if(f.timingKind==='hint')note='站方推断的观察窗口 · 非明确承诺';
+    if(f.timingKind==='inferred'||f.sourceTimeVerified===false)note+=' · 站方换算，待核实';
+    if(f.timeZone)note+=` · ${f.timeZone}`;
     const plans=f.scope?.plans;if(plans?.length&&!plans.includes('all'))note+=` · ${plans.map(p=>p.toUpperCase()).join('、')} 专属`;
     if (!fresh) note+=' · 数据待更新';
   }

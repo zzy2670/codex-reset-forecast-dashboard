@@ -13,8 +13,11 @@ function postId(value){
 const identity=row=>postId(row.url)||String(row.id??'');
 const idsOf=row=>new Set([identity(row),String(row.id??'')].filter(Boolean));
 function phase(row){
+ // A link landing is not a quota-reset completion, even if a feed labels it so.
+ // Preserve the post as commentary through both fresh normalization and cache replay.
+ if(/^\s*https?:\/\/\S+\s+(?:has\s+)?landed[.!]?\s*$/i.test(row.text||''))return 'commentary';
  if(observationsToCompletions.has(identity(row))||row.type==='observation'||row.phase==='observation'||/^\s*Reset observed\b[^\n]*\bawaiting\b/i.test(row.text||''))return 'observation';
- if(identity(row)==='2097183639356489952'||row.type==='commentary'||row.phase==='commentary')return 'commentary';
+ if(['2097183639356489952','2115297093879472332'].includes(identity(row))||row.type==='commentary'||row.phase==='commentary')return 'commentary';
  if(identity(row)==='2106239435461579088'||row.type==='repair'||row.phase==='repair')return 'repair';
  if(row.evidenceOnly===true)return 'observation';
  if(row.sources?.length&&row.sources.every(source=>source.evidenceOnly||['observation','commentary','repair'].includes(source.phase)))return 'observation';

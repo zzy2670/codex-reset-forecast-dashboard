@@ -103,6 +103,9 @@
   const local=cycle&&localReset?.kind==='quota-reset'&&localReset.bucketId===quota?.bucketId&&localReset.windowKey===quota?.key&&localReset.resetsAt===quota?.resetsAt&&Number.isFinite(observed)&&observed>=cycle.at&&observed<=now?cycle:null;
   const completions=[];
   for(const s of projected)for(const record of [s.lastReset,...(s.historyEvents||[])]){
+   // A stale or unverified collector cannot invalidate another source's live ETA.
+   // Observations and generic product-landed messages are not reset evidence.
+   if(!isFresh(s,now)||s.family==='unverified-feed'||s.id==='today'||record?.evidenceOnly||['observation','commentary','repair','forecast'].includes(record?.phase)||/^\s*https?:\/\/\S+\s+(?:has\s+)?landed[.!]?\s*$/i.test(record?.text||''))continue;
    const at=Date.parse(record?.at);
    if(record&&automatic.has(record.type)&&Number.isFinite(at)&&at<=now&&completionPost(record))completions.push({...record,at,kind:'completion-record',sourceId:s.id});
   }

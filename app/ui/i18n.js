@@ -1,6 +1,10 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
+ '已收录完成记录，原预告不再作为下次预计':'A completion was recorded; the previous forecast is retired',
+ '原预告已撤销，尚无新的重置预告':'The previous forecast was withdrawn; no new forecast',
+ '旧预告时间已过，尚无新的重置预告':'The previous forecast expired; no new forecast',
+ '站方换算，待核实':'Source time interpretation; needs verification',
  '相近重置记录已合并':'Nearby reset records merged','本机到账时间':'Local receipt time','本机到账记录':'Local receipt record','个人重置卡':'Personal reset card',
  '从本机最近补充起算':'From the latest local quota refill',
  '从本机额度周期起算':'From the local quota-cycle start','从本机额度周期起点起算':'from the local quota-cycle start','本机额度周期起点':'Local quota-cycle start','本机最近补充':'Latest local refill',

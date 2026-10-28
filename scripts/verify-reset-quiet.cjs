@@ -24,7 +24,7 @@ async function main(){try{
  assert.equal((await page.locator('.forecast-value').allInnerTexts()).filter(x=>x==='无').length,5);results.push('Already-refilled cycle retires old source estimates and red line on first snapshot');await stop();
  const wide=fixture(),originalStart=iso(now+5*3600000),originalEnd=iso(now+9*3600000);
  wide.sources[2].forecast={...wide.sources[0].forecast,id:'six-hour-window',start:originalStart,end:originalEnd,precision:'window'};
- wide.sources[4].lastReset={id:'2100000000000000003',type:'global',at:iso(cycleStart+60000),url:'https://x.com/thsottiaux/status/2100000000000000003',text:'Completed reset'};
+ wide.sources[3].lastReset={id:'2100000000000000003',type:'global',at:iso(cycleStart+60000),url:'https://x.com/thsottiaux/status/2100000000000000003',text:'Completed reset'};
  fs.writeFileSync(file,JSON.stringify(wide));await launch();
  const clipped=(await page.evaluate(()=>window.dashboard.get())).sources[2].forecast;
  assert.equal(clipped.start,null);assert.equal(clipped.originalStart,originalStart);assert.equal(clipped.end,originalEnd);assert.equal(clipped.resetGapClipped,true);

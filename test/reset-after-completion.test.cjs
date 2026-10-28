@@ -159,7 +159,7 @@ test('explicit cross-source completion relationships beat reporting lag and a di
 
 test('a reporting lag after two hours cannot hide a later structured official completion',()=>{
  const t=Date.parse(stamp(17,10)),f=forecast('new',stamp(15),stamp(17,30));
- const completed=done({at:stamp(17)});
+ const completed={...done({at:stamp(17)}),updatedAt:stamp(17,9),fetchedAt:stamp(17,9)};
  const p=view([source(f),completed],{...quota,fetchedAt:stamp(17,9)},actualLocalProof,t)[0];
  assert.equal(p.forecast.state,'none');assert.equal(p.archivedForecasts[0].retiredReason,'completed');
 });
