@@ -257,8 +257,9 @@ async function refreshConnection(){
 }
 async function beginQuotaLogin(){
   if(smoke)return snapshot();
+  connection={...connection,checking:true,errorCode:null};publish();
   try{
-    const result=await localQuota.login();
+    const result=await localQuota.login({reauthenticate:true});
     if(result.alreadyConnected){await refreshQuota();await refreshConnection();return snapshot();}
     const url=new URL(result.authUrl);
     if(url.protocol!=='https:'||url.username||url.password||url.port&&!['443'].includes(url.port)||!['auth.openai.com','chatgpt.com'].includes(url.hostname))throw new Error('LOGIN_RESPONSE_INVALID');

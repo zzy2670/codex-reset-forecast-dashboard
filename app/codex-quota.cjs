@@ -63,14 +63,23 @@ class LocalCodexQuota extends EventEmitter {
    return {runtimeAvailable:true,authenticated,needsLogin:!authenticated,ready:authenticated&&this.quotaReady,authType,loginPending:!!this.loginAttempt,requiresAccountSwitch:!authenticated&&(!!type||result?.requiresOpenaiAuth===false),managed:this.managed};
   }catch(error){return {runtimeAvailable:true,authenticated:false,needsLogin:false,ready:false,authType:null,loginPending:!!this.loginAttempt,requiresAccountSwitch:false,managed:this.managed,errorCode:error.code||'CONNECTION_CLOSED'};}
  }
- async login(){
+ async login(options={}){
   if(this.loginFlight)return this.loginFlight;
-  const flight=this.beginLogin();this.loginFlight=flight;
+  const flight=this.beginLogin(options);this.loginFlight=flight;
   try{return await flight;}finally{if(this.loginFlight===flight)this.loginFlight=null;}
  }
- async beginLogin(){
+ async beginLogin({reauthenticate=false}={}){
+  if(this.loginAttempt)return {...this.loginAttempt};
+  // Only an explicit reconnect may replace authentication. Restart the reader
+  // so an account switched outside this process cannot leave stale auth cached.
+  if(reauthenticate){
+   if(this.managedHome&&!this.managed){
+    try{fs.mkdirSync(this.managedHome,{recursive:true,mode:0o700});}catch{throw protocolError('MANAGED_HOME_UNAVAILABLE','本机额度服务未就绪');}
+    this.stop();this.managed=true;
+   }else this.stop();
+  }
   let status=await this.setupStatus();
-  if(status.authenticated)return {alreadyConnected:true};
+  if(status.authenticated&&!reauthenticate)return {alreadyConnected:true};
   if(status.errorCode)throw protocolError(status.errorCode,'本机额度服务未就绪');
   if(status.requiresAccountSwitch&&!this.managed&&this.managedHome){
    try{fs.mkdirSync(this.managedHome,{recursive:true,mode:0o700});}catch{throw protocolError('MANAGED_HOME_UNAVAILABLE','本机额度服务未就绪');}

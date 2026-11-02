@@ -9,7 +9,7 @@ const production=main.slice(start,end);
 function harness(options={}){
  const localQuota=new EventEmitter(),calls=[],opened=[];
  localQuota.setupStatus=async()=>{calls.push('status');return options.status||{runtimeAvailable:true,authenticated:false,needsLogin:true,loginPending:true};};
- localQuota.login=async()=>{calls.push('login');if(options.error)throw options.error;return options.login||{loginId:'mock-login',authUrl:'https://auth.openai.com/oauth/authorize?state=fixture'};};
+ localQuota.login=async args=>{assert.equal(args.reauthenticate,true);calls.push('login');if(options.error)throw options.error;return options.login||{loginId:'mock-login',authUrl:'https://auth.openai.com/oauth/authorize?state=fixture'};};
  const sandbox={localQuota,URL,smoke:!!options.smoke,connection:{checking:false},connectionFlight:null,
   refreshQuota:async()=>{calls.push('quota');},publish:()=>calls.push('publish'),
   shell:{openExternal:async url=>{calls.push('browser');opened.push(url);}},
@@ -20,7 +20,7 @@ function harness(options={}){
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
 test('production connection: already authenticated refreshes real quota path without opening browser',async()=>{
  const f=harness({login:{alreadyConnected:true},status:{authenticated:true,ready:true}});
- const result=await f.sandbox.beginQuotaLogin();assert.equal(result.ready,true);assert.deepEqual(f.opened,[]);assert.deepEqual(f.calls,['login','quota','status','publish']);
+ const result=await f.sandbox.beginQuotaLogin();assert.equal(result.ready,true);assert.deepEqual(f.opened,[]);assert.deepEqual(f.calls,['publish','login','quota','status','publish']);
 });
 test('production connection: unauthenticated opens official authorization after updating pending status',async()=>{
  const f=harness();const result=await f.sandbox.beginQuotaLogin();assert.equal(result.loginPending,true);assert.deepEqual(f.opened,['https://auth.openai.com/oauth/authorize?state=fixture']);assert(f.calls.indexOf('status')<f.calls.indexOf('browser'));assert(!f.calls.includes('quota'));

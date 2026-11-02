@@ -18,6 +18,23 @@ function fixture(responder,options={}){
  return {client,calls,children,spawned};
 }
 function respond(m,child,result){child.send({id:m.id,result});}
+
+test('explicit reconnect restarts stale ChatGPT reader and opens dedicated authorization without global logout',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'codex-reconnect-')),managedHome=path.join(temp,'account');
+ const f=fixture((m,c)=>respond(m,c,m.method==='account/read'?{account:{type:'chatgpt'}}:m.method==='account/login/start'?{loginId:'reconnect',authUrl:'https://auth.openai.com/oauth/authorize?state=fixture'}:{}),{managedHome});
+ try{
+  assert.equal((await f.client.setupStatus()).authenticated,true);
+  const login=await f.client.login({reauthenticate:true});assert.equal(login.loginId,'reconnect');
+  assert.equal(f.children.length,2);assert.equal(f.children[0].stdin.writableEnded,true);assert.equal(f.spawned[1].env.CODEX_HOME,managedHome);
+  assert.deepEqual(await f.client.login({reauthenticate:true}),login);assert.equal(f.calls.filter(c=>c.method==='account/login/start').length,1);
+  assert.ok(!f.calls.some(c=>c.method==='account/logout'||c.method.startsWith('config/')));
+  await f.client.cancelLogin();assert.equal((await f.client.login({reauthenticate:true})).loginId,'reconnect');
+  await f.client.cancelLogin();
+  const count=f.calls.filter(c=>c.method==='account/login/start').length;
+  const [one,two]=await Promise.all([f.client.login({reauthenticate:true}),f.client.login({reauthenticate:true})]);
+  assert.deepEqual(one,two);assert.equal(f.calls.filter(c=>c.method==='account/login/start').length,count+1);
+ }finally{f.client.stop();fs.rmSync(temp,{recursive:true,force:true});}
+});
 test('bundled native binary wins and discovery never executes command shims',()=>{
  const candidates=codexCandidates({resourcesPath:'bundle',env:{APPDATA:'roaming',PATH:'"custom prefix";other',npm_config_prefix:'custom npm'},delimiter:';',home:'home',arch:'x64'});
  assert.equal(candidates[0],path.join('bundle','codex','codex.exe'));

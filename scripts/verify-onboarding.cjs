@@ -41,6 +41,7 @@ async function main(){try{
  for(const connection of [{needsLogin:true},{loginPending:true},{requiresAccountSwitch:true},{checking:true},{errorCode:'LOGIN_FAILED'},{errorCode:'MANAGED_HOME_UNAVAILABLE'}]){
   const demo=fixture(connection,'en');await push(demo);await page.waitForTimeout(30);assert.deepEqual(await residual(),[],`untranslated connection state ${JSON.stringify(connection)}`);
   assert.equal(await page.locator('#quota-connection [data-connect-quota]').count(),1);assert.equal(await page.locator('#quota-connection [data-cancel-quota-login]').count(),connection.loginPending?1:0);
+  assert.equal(await page.locator('#quota-connection [data-connect-quota]').isDisabled(),!!connection.checking);
  }
  results.push('all connection states translated, including retry and dedicated sign-in');
  for(const usedPercent of [0,100]){

@@ -112,7 +112,7 @@ function quotaConnectionMarkup(){
  const c=state.quotaConnection||{},connected=state.quotaDisplay&&!state.quotaDisplay.stale&&state.quota?.state==='ok';
  if(connected)return '<strong>额度已连接</strong>';
  const note=c.loginPending?'已打开登录页，完成授权后自动读取额度。':c.checking?'正在验证额度…':c.errorCode?'连接未完成，请重试。':c.requiresAccountSwitch?'为看板单独登录 ChatGPT，以读取个人额度。':'内置 Codex 已就绪，登录后即可显示个人额度。';
- return `<p>${esc(note)}</p><div class="connection-actions"><button class="primary-button" data-connect-quota>${c.loginPending?'重新打开登录页':'登录 ChatGPT 并接入额度'}</button>${c.loginPending?'<button class="text-button" data-cancel-quota-login>取消本次登录</button>':''}</div>`;
+ return `<p>${esc(note)}</p><div class="connection-actions"><button class="primary-button" data-connect-quota ${c.checking?'disabled':''}>${c.checking?'正在验证额度…':c.loginPending?'重新打开登录页':'登录 ChatGPT 并接入额度'}</button>${c.loginPending?'<button class="text-button" data-cancel-quota-login>取消本次登录</button>':''}</div>`;
 }
 function renderQuota(refreshDetails=true) {
   const stored=state.quotaDisplay,now=Date.now();
