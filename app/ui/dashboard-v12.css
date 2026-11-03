@@ -46,6 +46,12 @@ body{--body-font-size:var(--body-font-size);font-size:var(--body-font-size)}
 .dark .history-row.history-banked{background:#393421;--text:#fff1bd;--secondary:#ddce9b;--border:#665936}
 .history-banked .text-button{color:#75601b}
 .dark .history-banked .text-button{color:#f1d878}
+.history-row.history-issued{background:#f1ebff;--text:#34264f;--secondary:#68557e;--border:#cdbfe3;color:var(--text)}
+.dark .history-row.history-issued{background:#302a3d;--text:#eee1ff;--secondary:#c7b5dc;--border:#554765}
+.history-issued .text-button{color:#6a428e}
+.dark .history-issued .text-button{color:#dbc0fa}
+.history-issued .pill{background:#e2d4f7;color:#563872}
+.dark .history-issued .pill{background:#49385d;color:#e4cbff}
 .history-time time{display:flex;flex-direction:column;font-size:var(--body-font-size);color:var(--secondary)}
 .history-time strong{font-size:21px;line-height:1.8;color:var(--text);font-weight:450;font-variant-numeric:tabular-nums}
 .history-time>span{font-size:calc(var(--body-font-size) - 3px);color:var(--secondary)}

@@ -1,6 +1,6 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.HistoryGroups=api;})(globalThis,()=>{
  'use strict';
- const MARGIN=3*3600000;
+ const MARGIN=6*3600000;
  const automatic=new Set(['global','automatic','regular','reset','global_and_banked','both','combined']);
  const validPercent=x=>Number.isFinite(x)&&x>=0&&x<=100;
  const stamp=x=>Date.parse(x.at);
@@ -41,6 +41,7 @@
   }
   const unmatched=[];
   for(const row of locals){
+   if(row.type==='plan_upgrade'){separate.push({...row,sources:[...(row.sources||[])]});continue;}
    const group=groups.filter(g=>distance(stamp(row),g)<=MARGIN).sort((a,b)=>distance(stamp(row),a)-distance(stamp(row),b))[0];
    if(group){
     const prior=group.members.find(r=>r.type==='local'&&compatible(r,row)&&stamp(r)<stamp(row)&&!sameReceipt(r,row));
@@ -56,7 +57,15 @@
     if(existing)existing.members.push(row);else unmatched.push({members:[row]});
    }
   }
-  return [...separate,...groups.map(combine),...unmatched.map(combine)].sort((a,b)=>stamp(b)-stamp(a));
+  // Nearby observations and commentary are supporting messages, not extra resets.
+  // They never establish or widen an official window and never add completion votes.
+  const combined=[...groups.map(combine),...unmatched.map(combine)],remaining=[];
+  for(const row of separate){
+   const target=['observation','commentary'].includes(row.type)&&!limited(row)?combined.filter(g=>Math.abs(stamp(g)-stamp(row))<=MARGIN).sort((a,b)=>Math.abs(stamp(a)-stamp(row))-Math.abs(stamp(b)-stamp(row)))[0]:null;
+   if(target){target.members=[...(target.members||[]),row];target.sources=sourcesOf(target.members);target.mergedCount=target.members.length;}
+   else remaining.push(row);
+  }
+  return [...remaining,...combined].sort((a,b)=>stamp(b)-stamp(a));
  }
  return {rows};
 });

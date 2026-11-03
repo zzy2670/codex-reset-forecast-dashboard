@@ -8,10 +8,10 @@ test('14:07 local receipt is the global reset with its own clock and 75% before-
  const h=[official('2026-10-26T06:08:46Z'),official('2026-10-26T06:10:00Z')],before=JSON.stringify([h,l]);
  const result=rows(h,[l],opts);assert.equal(result.length,1);assert.equal(result[0].type,'global');assert.equal(result[0].hasLocalReset,true);assert.equal(result[0].at,l.at);assert.equal(result[0].beforeRemainingPercent,75);assert.equal(result[0].members.length,3);assert.equal(result[0].sources.length,2);assert.equal(JSON.stringify([h,l]),before);
 });
-test('the multi-source completion interval accepts a local receipt up to three hours before and after',()=>{
+test('the multi-source completion interval accepts a local receipt up to six hours before and after',()=>{
  const h=[official('2026-10-26T06:00:00Z'),official('2026-10-26T07:00:00Z')];
- for(const at of ['2026-10-26T03:00:00Z','2026-10-26T10:00:00Z']){const result=rows(h,[local(at)],opts);assert.equal(result.length,1);assert.equal(result[0].at,at);assert.equal(result[0].hasLocalReset,true);}
- assert.equal(rows(h,[local('2026-10-26T10:00:00.001Z')],opts).length,2);
+ for(const at of ['2026-10-26T00:00:00Z','2026-10-26T13:00:00Z']){const result=rows(h,[local(at)],opts);assert.equal(result.length,1);assert.equal(result[0].at,at);assert.equal(result[0].hasLocalReset,true);}
+ assert.equal(rows(h,[local('2026-10-26T13:00:00.001Z')],opts).length,2);
 });
 test('nearby official/local records merge across midnight',()=>{
  const result=rows([official('2026-10-25T15:59:59Z')],[local('2026-10-25T16:00:00Z')],opts);assert.equal(result.length,1);assert.equal(result[0].hasLocalReset,true);
@@ -20,7 +20,7 @@ test('same-day official resets outside the time range are not blindly merged',()
  const result=rows([official('2026-10-26T00:00:00Z'),official('2026-10-26T12:00:00Z')],[],opts);assert.equal(result.length,2);
 });
 test('observations cannot establish a global reset for a local receipt',()=>{
- const result=rows([official('2026-10-26T06:00:00Z',{type:'observation'})],[local('2026-10-26T06:07:40Z')],opts);assert.equal(result.length,2);assert.equal(result.find(r=>r.type==='local').hasLocalReset,undefined);
+ const result=rows([official('2026-10-26T06:00:00Z',{type:'observation'})],[local('2026-10-26T06:07:40Z')],opts);assert.equal(result.length,1);assert.equal(result[0].type,'local');assert.equal(result[0].hasLocalReset,undefined);
 });
 test('the first depleted local receipt in the official range is still a global reset',()=>{
  const result=rows([official('2026-10-26T06:08:46Z')],[local('2026-10-26T06:07:40Z',{beforeRemainingPercent:0})],opts);assert.equal(result[0].type,'global');assert.equal(result[0].beforeRemainingPercent,0);
@@ -42,7 +42,7 @@ test('main window and genuine earlier snapshot retain 41% and sample time',()=>{
  const result=rows([official('2026-10-26T06:08:46Z')],[s,p],opts);assert.equal(result[0].at,p.at);assert.equal(result[0].beforeRemainingPercent,41);assert.equal(result[0].beforeBasis,'snapshot');assert.equal(result[0].beforeFetchedAt,p.beforeFetchedAt);
 });
 test('public card issuance, repairs, commentary and limited plans remain their own records',()=>{
- const h=['banked','repair','commentary'].map(type=>official('2026-10-26T06:08:46Z',{id:type,type}));h.push(official('2026-10-26T06:10:00Z',{scope:{plans:['pro500']}}));const result=rows(h,[local('2026-10-26T06:07:40Z')],opts);assert.equal(result.length,5);assert.equal(result.filter(r=>r.type==='personal_card').length,0);
+ const h=['banked','repair','commentary'].map(type=>official('2026-10-26T06:08:46Z',{id:type,type}));h.push(official('2026-10-26T06:10:00Z',{scope:{plans:['pro500']}}));const result=rows(h,[local('2026-10-26T06:07:40Z')],opts);assert.equal(result.length,4);assert.equal(result.filter(r=>r.type==='personal_card').length,0);assert.ok(result.some(r=>r.type==='banked'));
 });
 test('unknown/invalid/future evidence does not infer a personal card or global reset',()=>{
  const result=rows([official('invalid'),official('2026-10-29T00:00:00Z')],[local('2026-10-26T06:07:40Z'),local('2026-10-26T10:07:40Z',{beforeRemainingPercent:0})],opts);assert.equal(result.length,2);assert.ok(result.every(r=>r.type==='local'));
@@ -55,5 +55,5 @@ test('later exhausted refill has no arbitrary one-day card cutoff',()=>{
  const h=[official('2026-10-26T06:08:46Z')],first=local('2026-10-26T06:07:40Z',{beforeRemainingPercent:75}),later=local('2026-10-27T18:07:40Z',{beforeRemainingPercent:0});assert.equal(rows(h,[first,later],opts)[0].type,'personal_card');
 });
 test('a newly supplied later official completion reclassifies the later receipt as global',()=>{
- const first=local('2026-10-26T06:07:40Z',{beforeRemainingPercent:75}),later=local('2026-10-26T12:07:40Z',{beforeRemainingPercent:0}),h=[official('2026-10-26T06:08:46Z')];assert.equal(rows(h,[first,later],opts)[0].type,'personal_card');h.push(official('2026-10-26T12:08:46Z'));const result=rows(h,[first,later],opts);assert.equal(result.length,2);assert.ok(result.every(r=>r.type==='global'));
+ const first=local('2026-10-26T06:07:40Z',{beforeRemainingPercent:75}),later=local('2026-10-26T13:07:40Z',{beforeRemainingPercent:0}),h=[official('2026-10-26T06:08:46Z')];assert.equal(rows(h,[first,later],opts)[0].type,'personal_card');h.push(official('2026-10-26T13:08:46Z'));const result=rows(h,[first,later],opts);assert.equal(result.length,2);assert.ok(result.every(r=>r.type==='global'));
 });

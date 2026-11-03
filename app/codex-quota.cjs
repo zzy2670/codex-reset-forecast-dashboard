@@ -109,7 +109,7 @@ function sanitize(result){
  const window=w=>w&&Number.isFinite(w.usedPercent)&&Number.isFinite(w.windowDurationMins)&&w.windowDurationMins>0?{usedPercent:Math.min(100,Math.max(0,w.usedPercent)),durationMins:w.windowDurationMins,resetsAt:Number.isFinite(w.resetsAt)&&w.resetsAt>0?new Date(w.resetsAt*1000).toISOString():null}:null;
  const limits=source.filter(Boolean).map((b,i)=>({id:String(b.limitId||`quota-${i}`).slice(0,100),name:String(b.limitName||b.limitId||'Codex').slice(0,100),primary:window(b.primary),secondary:window(b.secondary),planType:typeof b.planType==='string'?b.planType:null,reached:b.rateLimitReachedType||null})).filter(b=>b.primary||b.secondary);
  if(!limits.length)throw new Error('当前本机账户未提供额度窗口数据');
- return {state:'ok',source:'local-codex',fetchedAt:new Date().toISOString(),limits,ordinaryUsageAllowed:typeof result.ordinaryUsageAllowed==='boolean'?result.ordinaryUsageAllowed:null,resetCredits:Number.isFinite(result.rateLimitResetCredits?.availableCount)?result.rateLimitResetCredits.availableCount:null};
+ return {state:'ok',source:'local-codex',fetchedAt:new Date().toISOString(),limits,...(typeof result.accountId==='string'?{accountFingerprint:require('node:crypto').createHash('sha256').update(result.accountId).digest('hex')}:{}),ordinaryUsageAllowed:typeof result.ordinaryUsageAllowed==='boolean'?result.ordinaryUsageAllowed:null,resetCredits:Number.isFinite(result.rateLimitResetCredits?.availableCount)?result.rateLimitResetCredits.availableCount:null};
 }
 function quotaView(quota,settings={},now=Date.now()){
  if(quota?.source!=='local-codex'||!Array.isArray(quota.limits)||!quota.limits.length)return null;
@@ -122,13 +122,16 @@ function quotaView(quota,settings={},now=Date.now()){
   primary:bucket.primary,secondary:bucket.secondary,resetCredits:quota.resetCredits,ordinaryUsageAllowed:quota.ordinaryUsageAllowed,
   stale:quota.state!=='ok'||now-Date.parse(quota.fetchedAt)>120000||(Number.isFinite(end)&&end<=now),fetchedAt:quota.fetchedAt};
 }
-function quotaChanges(previous,next,settings={},now=Date.now()){
+function quotaChanges(previous,next,settings={},now=Date.now(),options={}){
  const a=quotaView(previous,settings,now),b=quotaView(next,settings,now);
  const priorAge=now-Date.parse(previous?.fetchedAt);
- if(!a||!b||previous.state!=='ok'||!Number.isFinite(priorAge)||priorAge<0||priorAge>120000||b.stale||a.bucketId!==b.bucketId||a.key!==b.key)return [];
+ if(previous?.accountFingerprint&&next?.accountFingerprint&&previous.accountFingerprint!==next.accountFingerprint)return [];
+ const recovery=options.recoverInterrupted===true&&previous?.accountFingerprint&&previous.accountFingerprint===next?.accountFingerprint;
+ if(!a||!b||previous.state!=='ok'||!Number.isFinite(priorAge)||priorAge<0||priorAge>(recovery?300000:120000)||b.stale||a.bucketId!==b.bucketId||a.key!==b.key)return [];
  const events=[],at=new Date(now).toISOString();
  if(Date.parse(b.resetsAt)>Date.parse(a.resetsAt)+60000&&b.usedPercent<a.usedPercent-.5)events.push({key:`quota-reset:${b.bucketId}:${b.key}:${b.resetsAt}`,kind:'quota_reset',bucketId:b.bucketId,windowKey:b.key,resetsAt:b.resetsAt,beforeRemainingPercent:a.remainingPercent,afterRemainingPercent:b.remainingPercent,beforeFetchedAt:previous.fetchedAt,beforeResetsAt:a.resetsAt,title:'本机额度已补充',body:`当前周期剩余 ${b.remainingPercent.toFixed(0)}%。个人重置时间已更新，请查看看板。`,at,sourceId:null,url:null});
  if(a.ordinaryUsageAllowed===true&&b.ordinaryUsageAllowed===false)events.push({key:`quota-denied:${b.bucketId}:${b.resetsAt}`,kind:'quota_denied',title:'本机额度状态发生变化',body:'本机接口报告当前不允许常规使用，请查看额度明细。',at,sourceId:null,url:null});
+ if(recovery&&priorAge>120000)for(const e of events.filter(e=>e.kind==='quota_reset'))Object.assign(e,{beforeBasis:'snapshot',beforeDurationMins:a.durationMins,beforeProvenance:{kind:'local-poll'}});
  return events;
 }
 module.exports={LocalCodexQuota,findCodex,sanitize,quotaView,quotaChanges};

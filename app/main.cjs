@@ -234,7 +234,7 @@ async function refreshQuota() {
   if(quotaRunning)return quotaFlight;
   quotaRunning = true;
   quotaFlight=(async()=>{
-    try { const previous=state.quota;state.quota=await localQuota.read();rememberLocalQuotaSnapshot(state,previous);for(const e of quotaChanges(previous,state.quota,state.settings))addEvent(e);rememberLocalQuotaSnapshot(state,state.quota);recoverLocalQuotaHistory(state);recoverLocalReset(state,quotaView(state.quota,state.settings)); }
+    try { const previous=state.quota;if(previous?.state==='ok')state.lastGoodQuota=previous;state.quota=await localQuota.read();const before=previous?.state==='ok'?previous:state.lastGoodQuota;rememberLocalQuotaSnapshot(state,previous);for(const e of quotaChanges(before,state.quota,state.settings,Date.now(),{recoverInterrupted:true}))addEvent(e);state.lastGoodQuota=state.quota;rememberLocalQuotaSnapshot(state,state.quota);recoverLocalQuotaHistory(state);recoverLocalReset(state,quotaView(state.quota,state.settings)); }
     catch (error) { state.quota = { ...state.quota, source: 'local-codex', state: 'error', message: error.message }; }
     finally { quotaRunning = false; safeWrite(); publish(); }
   })();

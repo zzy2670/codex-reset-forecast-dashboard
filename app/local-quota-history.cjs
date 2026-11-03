@@ -27,6 +27,13 @@ function mergeSamples(values,now){
  return [...samples.values()].sort((a,b)=>Date.parse(a.fetchedAt)-Date.parse(b.fetchedAt)||sampleIdentity(a).localeCompare(sampleIdentity(b)));
 }
 function normalized(value,now,event=false){
+ if(!event&&value?.kind==='plan-upgrade'){
+  const before=snapshotSample(value.beforeSample,now),after=snapshotSample(value.afterSample,now);
+  if(value.confirmedBy!=='user'||!before||!after||before.bucketId!==after.bucketId||before.windowKey!==after.windowKey||Date.parse(before.fetchedAt)>=Date.parse(after.fetchedAt)||after.remainingPercent<=before.remainingPercent||!Number.isFinite(value.beforeMultiplier)||!Number.isFinite(value.afterMultiplier)||value.beforeMultiplier<=0||value.afterMultiplier<=value.beforeMultiplier)return null;
+  const key=`plan-upgrade:${after.bucketId}:${after.windowKey}:${after.fetchedAt}`;
+  if(value.key!==key)return null;
+  return {...value,key,kind:'plan-upgrade',bucketId:after.bucketId,windowKey:after.windowKey,resetsAt:after.resetsAt,observedAt:after.fetchedAt,beforeRemainingPercent:before.remainingPercent,afterRemainingPercent:after.remainingPercent,beforeFetchedAt:before.fetchedAt,beforeResetsAt:before.resetsAt,beforeBasis:'snapshot',beforeDurationMins:before.durationMins,beforeProvenance:before.provenance,beforeSample:before,afterSample:after};
+ }
  if(!value||typeof value!=='object'||(event?(value.kind!=='quota_reset'||value.sourceId!==null):value.kind!=='quota-reset'))return null;
  if(Object.hasOwn(value,'sourceId')&&value.sourceId!==null)return null;
  const match=typeof value.key==='string'&&value.key.match(/^quota-reset:(.+):(primary|secondary):(.+)$/);
@@ -117,7 +124,7 @@ function rememberLocalQuotaSnapshot(state,quota,now=Date.now()){
  return before!==JSON.stringify(next)||historyChanged;
 }
 function localQuotaHistoryRows(state,now=Date.now()){
- return sorted(collected(state,now)).map(row=>({id:row.key,at:row.observedAt,type:'local',
+ return sorted(collected(state,now)).map(row=>({id:row.key,at:row.observedAt,type:row.kind==='plan-upgrade'?'plan_upgrade':'local',beforeMultiplier:row.beforeMultiplier,afterMultiplier:row.afterMultiplier,
   bucketId:row.bucketId,windowKey:row.windowKey,resetsAt:row.resetsAt,
   beforeRemainingPercent:row.beforeRemainingPercent,afterRemainingPercent:row.afterRemainingPercent,
   beforeFetchedAt:row.beforeFetchedAt,beforeResetsAt:row.beforeResetsAt,beforeBasis:row.beforeBasis,beforeDurationMins:row.beforeDurationMins,beforeProvenance:row.beforeProvenance,sources:[]}));

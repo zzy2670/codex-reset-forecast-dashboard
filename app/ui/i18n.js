@@ -1,6 +1,8 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
+ '发卡公告':'Reset-card issuance','仅发放重置卡，未表示本机额度已补充':'Reset cards were issued; this does not indicate a local quota refill',
+ '套餐升级补充':'Plan upgrade refill','起点 ':'Start ',
  '已收录完成记录，原预告不再作为下次预计':'A completion was recorded; the previous forecast is retired',
  '原预告已撤销，尚无新的重置预告':'The previous forecast was withdrawn; no new forecast',
  '旧预告时间已过，尚无新的重置预告':'The previous forecast expired; no new forecast',
