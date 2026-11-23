@@ -1,4 +1,5 @@
 'use strict';
+const {rememberUsage}=require('./quota-usage-forecast.cjs');
 
 // Personal refill observations are separate from public reset announcements.
 // In particular, their timestamps never establish a relationship to a public post.
@@ -135,6 +136,7 @@ function rememberLocalQuotaSnapshot(state,quota,now=Date.now(),options={}){
   added.push({bucketId:bucket.id,windowKey,resetsAt:window.resetsAt,durationMins:window.durationMins,remainingPercent:100-window.usedPercent,fetchedAt:quota.fetchedAt,provenance:{kind:'local-poll'},...(fingerprint(quota.accountFingerprint)?{accountFingerprint:fingerprint(quota.accountFingerprint)}:{})});
  }
  const valid=added.map(value=>snapshotSample(value,now)).filter(Boolean);if(!valid.length)return false;
+ rememberUsage(state,valid,now);
  const existing=Array.isArray(state.localQuotaSamples)?state.localQuotaSamples:[],unrecognized=existing.filter(value=>!snapshotSample(value,now));
  const before=JSON.stringify(state.localQuotaSamples),next=[...mergeSamples([...existing,...valid],now),...unrecognized];
  state.localQuotaSamples=next;

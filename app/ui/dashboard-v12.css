@@ -145,3 +145,6 @@ body[data-language=en] .forecasts-heading>div{flex-wrap:wrap}
 .history-proof p{overflow-wrap:anywhere}
 .source-proof{flex-wrap:wrap}
 .panel-bottom>span{min-width:0;overflow-wrap:anywhere}
+.usage-forecast-dot{position:absolute;top:50%;width:5px;height:5px;transform:translate(-50%,-50%);border-radius:50%;background:#ffdf00;box-shadow:0 0 3px #ffcf00;z-index:3}
+.weekly-legends{display:inline-flex;flex-wrap:wrap;gap:5px 12px;align-items:center}.weekly-forecast-legend{display:inline-flex;align-items:center;gap:5px;color:var(--secondary);font-size:calc(var(--body-font-size) - 3px)}.weekly-forecast-legend i{width:5px;height:5px;border-radius:50%;background:#ffdf00;box-shadow:0 0 3px #ffcf00}#usage-forecast-summary{min-height:1.4em}
+#usage-forecast-summary:not(:empty)::before{content:"";display:inline-block;width:5px;height:5px;margin-inline-end:7px;vertical-align:.15em;border-radius:50%;background:#ffdf00;box-shadow:0 0 3px #ffcf00}

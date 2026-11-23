@@ -30,7 +30,7 @@
         <div id="consensus-note" class="consensus-note">正在比对公开完成记录</div>
         <div id="source-proof" class="source-proof"></div>
         <section class="weekly-accounts" aria-labelledby="weekly-accounts-heading">
-          <div class="weekly-accounts-heading"><h3 id="weekly-accounts-heading">账号周额度 · 实际消耗</h3><span class="weekly-pace-legend" title="红线表示七天周期已过去的比例，抵达右端表示已到预计重置时间"><i aria-hidden="true"></i>7 天平均节奏</span></div>
+          <div class="weekly-accounts-heading"><h3 id="weekly-accounts-heading">账号周额度 · 实际消耗</h3><span class="weekly-legends"><span class="weekly-forecast-legend"><i aria-hidden="true"></i><span>当天消耗预测</span></span><span class="weekly-pace-legend" title="红线表示七天周期已过去的比例，抵达右端表示已到预计重置时间"><i aria-hidden="true"></i>7 天平均节奏</span></span></div>
           <div id="weekly-accounts-list" class="weekly-accounts-list" role="list" aria-label="账号周额度" tabindex="0"></div>
           <p id="weekly-accounts-empty" class="weekly-accounts-empty">连接账号后自动记录周额度</p>
         </section>
@@ -52,7 +52,7 @@
         <p id="forecast-warning" class="forecast-warning" role="status" hidden></p>
         <p class="pace-note" id="hypothetical-note">假设节奏以最近已核对的全局重置为起点</p>
         <p class="pace-note" id="calendar-pace-note">未设置日历预测</p>
-        <p class="bar-sort-hint">拖动左侧把手可调整横条顺序</p><span id="bar-sort-status" class="sr-only" role="status" aria-live="polite"></span>
+        <p class="pace-note" id="usage-forecast-summary"></p><span id="bar-sort-status" class="sr-only" role="status" aria-live="polite"></span>
         <div class="panel-bottom"><span id="quota-reset">个人周期独立于全局重置预告</span><button class="text-button" id="quota-open">刷新额度</button></div>
       </section>
     </div>

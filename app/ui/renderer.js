@@ -73,6 +73,23 @@ function weeklyPace(account,now){
  const {reset,week}=schedule;
  return Math.max(0,Math.min(100,(now-(reset-week))/week*100));
 }
+function renderUsageDot(track,forecast,now,resetsAt){
+ if(!track)return;
+ let dot=track.querySelector('.usage-forecast-dot');
+ const visible=forecast&&Number.isFinite(forecast.percent)&&now<forecast.validUntil;
+ if(!visible){if(dot)dot.hidden=true;return;}
+ if(!dot){dot=document.createElement('span');dot.className='usage-forecast-dot';track.append(dot);}
+ dot.hidden=false;
+ dot.style.left=`clamp(2.5px, ${forecast.percent}%, calc(100% - 2.5px))`;
+ const earlyMs=Date.parse(resetsAt)-Date.parse(forecast.emptyAt);
+ const earlyMinutes=Math.floor(earlyMs/60000);
+ const hours=Math.floor(earlyMinutes/60),minutes=earlyMinutes%60;
+ const earlyDuration=earlyMinutes<1?'不到 1 分钟':hours?`${hours} 小时${minutes?` ${minutes} 分钟`:''}`:`${minutes} 分钟`;
+ const lead=earlyMs>0?`（提前 ${earlyDuration}）`:'';
+ const description=forecast.emptyAt?`预计提前用完 ${full(forecast.emptyAt)}${lead}`:`重置时预计剩余 ${Number((100-forecast.percent).toFixed(1))}%`;
+ const label=DashboardI18n.text(description,state?.settings.language||'zh-CN');
+ setAttribute(dot,'title',label);setAttribute(dot,'aria-label',label);setAttribute(dot,'role','img');return label;
+}
 function renderWeeklyAccounts(now=Date.now()){
  const list=$('weekly-accounts-list'),empty=$('weekly-accounts-empty');if(!list||!empty)return;
  const accounts=Array.isArray(state?.weeklyAccounts)?state.weeklyAccounts:[];
@@ -90,6 +107,7 @@ function renderWeeklyAccounts(now=Date.now()){
   node.classList.toggle('current',active);setLiveLocalizedText(node.querySelector('.weekly-account-name'),label);setLiveLocalizedText(node.querySelector('.weekly-account-plan'),plan);setLiveLocalizedText(node.querySelector('.weekly-account-badge'),badge);setLiveLocalizedText(node.querySelector('.weekly-account-percent'),used===null?'未提供':`${Number(used.toFixed(1))}%`);
   const track=node.querySelector('.weekly-account-track'),fill=track.querySelector('i'),marker=track.querySelector('.weekly-account-pace'),pace=weeklyPace(a,now),language=state?.settings.language||'zh-CN';
   track.classList.toggle('unknown',used===null);fill.hidden=used===null;setWidth(fill,`${used??0}%`);if(used===null)track.removeAttribute('aria-valuenow');else setAttribute(track,'aria-valuenow',used);
+  renderUsageDot(track,live?a.usageForecast:null,now,a?.resetsAt);
   marker.hidden=pace===null;if(pace!==null&&marker.style.left!==`${pace}%`)marker.style.left=`${pace}%`;
   const labelText=`${used===null?'实际消耗未提供':`已消耗 ${Number(used.toFixed(1))}%`}${pace===null?'':` · ${weeklyResetSchedule(a,now)?.simulated?'模拟周期已过':'七天周期已过'} ${Number(pace.toFixed(1))}%`}`;
   setAttribute(track,'aria-label',DashboardI18n.text('周额度实际消耗',language));setAttribute(track,'aria-valuetext',DashboardI18n.text(labelText,language));setAttribute(track,'title',DashboardI18n.text(labelText,language));
@@ -217,6 +235,9 @@ function renderQuota(refreshDetails=true) {
   const c=state.quotaConnection||{},checking=identityPending(state),top=$('quota-top')||document.querySelector('.quota-top');
   const connectionPanel=$('quota-connection');connectionPanel.hidden=!!q||checking;
   if(!connectionPanel.hidden){const markup=quotaConnectionMarkup();if(markup!==lastConnectionMarkup){setMarkup(connectionPanel,markup);lastConnectionMarkup=markup;}}
+  const forecastLabel=renderUsageDot($('actual-track'),q&&!q.stale&&!checking?state.usageForecast:null,now,q?.resetsAt);
+  const forecastSummary=$('usage-forecast-summary');
+  if(forecastSummary&&forecastSummary.textContent!==(forecastLabel||''))forecastSummary.textContent=forecastLabel||'';
   if (!q) {
     setText($('quota-caption'),'本机 Codex · 剩余额度');
     setMarkup($('quota-value'),'—<span>%</span>');

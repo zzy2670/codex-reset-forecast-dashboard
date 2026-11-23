@@ -1,4 +1,5 @@
 'use strict';
+const {forecastUsage}=require('./quota-usage-forecast.cjs');
 
 // Retain one last verified weekly reading per account. The stored identity is
 // never sent to the renderer; an ordinal supplies the visible account label.
@@ -61,7 +62,10 @@ function weeklyAccountRows(state,quota,{verified=false,hint=null,aliases=[],chec
   const useStored=live&&!available&&row.remainingPercent!==null;
   const isStale=isCurrent&&!checking&&(!live||useStored||!!available?.resetsAt&&Date.parse(available.resetsAt)<=now);
   const useLive=live&&!useStored;
-  return {id:`account-${row.ordinal}`,label:`账号 ${row.ordinal}`,planType:useLive?reading.planType:row.planType,
+  const bucket=quota?.limits?.find(b=>String(b.id).toLowerCase()==='codex')||quota?.limits?.find(b=>String(b.name).toLowerCase()==='codex');
+  const key=['primary','secondary'].find(k=>bucket?.[k]?.durationMins===10080&&bucket[k].resetsAt===available?.resetsAt&&bucket[k].usedPercent===100-available?.remainingPercent);
+  const usageForecast=useLive&&available&&key?forecastUsage(state,{...bucket[key],bucketId:bucket.id,key,accountFingerprint:current,fetchedAt:quota.fetchedAt},now,state.settings?.timeZone):null;
+  return {...(usageForecast?{usageForecast}:{}),id:`account-${row.ordinal}`,label:`账号 ${row.ordinal}`,planType:useLive?reading.planType:row.planType,
    remainingPercent:useLive?(available?.remainingPercent??null):row.remainingPercent,resetsAt:useLive?(available?.resetsAt??null):row.resetsAt,
    fetchedAt:useLive?quota.fetchedAt:row.fetchedAt,isCurrent,isChecking:isCurrent&&checking,isStale,isLive:!!(live&&!isStale&&available)};
  });

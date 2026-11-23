@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { SOURCES, normalize, calibratedReset, changes, freshness, safeUrl } = require('./core.cjs');
 
+const {forecastUsage}=require('./quota-usage-forecast.cjs');
 const { LocalCodexQuota, quotaView,quotaChanges } = require('./codex-quota.cjs');
 const {historyStart,hypotheticalPace,resetHistory}=require('./dashboard-model.cjs');
 const {projectSourceHistory}=require('./history-events.cjs');
@@ -113,10 +114,11 @@ function snapshot() {
     hypothetical=hypotheticalPace(consensus,state.settings.hypotheticalDays,now,history,{quota:calculationQuota,localReset:calculationReset});
     if(!identityChecking&&accountVerified&&typeof lastVerifiedProjection!=='undefined')lastVerifiedProjection={sources,consensus,history,hypothetical};
   }
-  const {localQuotaSamples,localResetProofs,lastGoodQuota,accountIdentityHints,ambiguousAccountOwners,weeklyAccountSnapshots,notificationGroups,localResetReceipts,...viewState}=state;
+  const {recentQuotaUsage,localQuotaSamples,localResetProofs,lastGoodQuota,accountIdentityHints,ambiguousAccountOwners,weeklyAccountSnapshots,notificationGroups,localResetReceipts,...viewState}=state;
   const events=(state.events||[]).filter(e=>!['quota_reset','quota_refill','quota_denied'].includes(e.kind)||(!identityChecking||quotaCacheChecking)&&(!e.accountFingerprint||[currentOwner,...activeAccountAliases].includes(e.accountFingerprint)));
   const weeklyAccounts=weeklyAccountRows(state,visibleQuota,{verified:accountVerified&&(!identityChecking||quotaCacheChecking),hint:activeAccountHint,aliases:activeAccountAliases,checking:quotaCacheChecking,now});
-  return { ...viewState,quota:visibleQuota,localReset,events,weeklyAccounts,localQuotaHistory:identityChecking&&!quotaCacheChecking?[]:localQuotaHistoryRows(state,now,currentOwner,activeAccountAliases),quotaCacheChecking, quotaConnection:smoke&&!deploymentCheck?{checking:false,authenticated:true,needsLogin:false}:connection, sources, consensus, history,historyStart:new Date(historyStart()).toISOString(),hypothetical, quotaDisplay, now: new Date(now).toISOString(), refreshing: running, version: app.getVersion(), notificationSupported: Notification.isSupported() };
+  const usageForecast=!identityChecking&&quotaDisplay&&!quotaDisplay.stale&&typeof forecastUsage==='function'?forecastUsage(state,quotaDisplay,now,state.settings.timeZone):null;
+  return { ...viewState,usageForecast,quota:visibleQuota,localReset,events,weeklyAccounts,localQuotaHistory:identityChecking&&!quotaCacheChecking?[]:localQuotaHistoryRows(state,now,currentOwner,activeAccountAliases),quotaCacheChecking, quotaConnection:smoke&&!deploymentCheck?{checking:false,authenticated:true,needsLogin:false}:connection, sources, consensus, history,historyStart:new Date(historyStart()).toISOString(),hypothetical, quotaDisplay, now: new Date(now).toISOString(), refreshing: running, version: app.getVersion(), notificationSupported: Notification.isSupported() };
 }
 function publish() { if (win && !win.isDestroyed()) win.webContents.send('dashboard:state', snapshot()); }
 function showWindow() { if (!windowUiReady || !win || win.isDestroyed()) { pendingWindowShow=true; return; } pendingWindowShow=false; if (win.isMinimized()) win.restore(); win.show(); win.focus(); }
