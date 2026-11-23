@@ -15,7 +15,7 @@
     <div class="toolbar">
       <span id="live-state" class="live-state"><i></i>正在连接</span>
       <button class="icon-button" id="refresh" title="立即检查" aria-label="立即检查"><svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 18 17"/></svg></button>
-      <button class="icon-button notification-button" id="events-button" title="变化记录" aria-label="变化记录"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i id="unread-dot" hidden></i></button>
+      <button class="icon-button notification-button" id="events-button" title="变化记录" aria-label="变化记录"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></button>
       <button class="icon-button" id="settings-button" title="设置" aria-label="设置"><svg viewBox="0 0 24 24"><path d="m9 3 1-1h4l1 3 3 1 3 1v4l-2 2-1 3 1 3-3 2-3-1-3 1-3-2 1-3-1-3-2-2V7l3-1z"/><circle cx="12" cy="11.5" r="3"/></svg></button>
     </div>
     <div class="window-controls"><button data-window="minimize" aria-label="最小化">─</button><button data-window="maximize" aria-label="最大化">□</button><button data-window="close" aria-label="关闭窗口">×</button></div>
@@ -23,13 +23,17 @@
 
   <main>
     <div class="page-heading"><div><h1>把握下一次重置。</h1><p>预告、确认与额度节奏，放在一起看。</p></div><div class="local-date" id="local-date"></div></div>
-    <button id="change-banner" class="change-banner" hidden></button>
     <div class="overview">
       <section class="panel reset-panel" aria-labelledby="last-reset-heading">
         <div class="section-line"><h2 id="last-reset-heading">上一次全局重置</h2><span id="consensus-status" class="pill muted">核对中</span></div>
         <div id="last-reset-value" class="last-reset-value"><div class="reset-date">等待信息</div><div class="reset-clock">—<span></span></div></div>
         <div id="consensus-note" class="consensus-note">正在比对公开完成记录</div>
         <div id="source-proof" class="source-proof"></div>
+        <section class="weekly-accounts" aria-labelledby="weekly-accounts-heading">
+          <div class="weekly-accounts-heading"><h3 id="weekly-accounts-heading">账号周额度 · 实际消耗</h3><span class="weekly-pace-legend" title="红线表示七天周期已过去的比例，抵达右端表示已到预计重置时间"><i aria-hidden="true"></i>7 天平均节奏</span></div>
+          <div id="weekly-accounts-list" class="weekly-accounts-list" role="list" aria-label="账号周额度" tabindex="0"></div>
+          <p id="weekly-accounts-empty" class="weekly-accounts-empty">连接账号后自动记录周额度</p>
+        </section>
         <div class="panel-bottom"><span id="reset-semantics">公开完成公告时间</span><button class="text-button" id="original-post" disabled>查看原帖 <span>↗</span></button></div>
       </section>
       <section class="panel quota-panel" aria-labelledby="quota-heading">
@@ -57,7 +61,7 @@
       <div class="forecasts-heading"><div><h2 id="forecasts-heading">下一次重置</h2><span id="forecast-subtitle">五个信源 · 北京时间</span></div></div>
       <div id="sources-grid" class="sources-grid" aria-live="polite"></div>
     </section>
-    <footer><div><span id="poll-dot" class="status-dot"></span><span id="poll-status">每 30 秒检查</span><span class="footer-separator"></span><span id="display-zone">北京时间 UTC+8</span></div><button id="pause" class="text-button">暂停监控</button></footer>
+    <footer><div><span id="poll-dot" class="status-dot"></span><span id="poll-status" data-original>每 30 秒检查</span><span class="footer-separator"></span><span id="display-zone">北京时间 UTC+8</span></div><button id="pause" class="text-button">暂停监控</button></footer>
     <section class="calendar-section" aria-labelledby="calendar-heading">
       <div class="history-heading"><h2 id="calendar-heading">历史重置日历</h2><span id="calendar-range">过去6周 · 未来1周 · 北京时间</span></div>
       <div class="calendar-layout">
@@ -67,8 +71,8 @@
           <label class="field">已选日期<input id="calendar-selected" readonly placeholder="请先选择未来日期"></label>
           <label class="field"><span id="calendar-hour-label">小时（北京时间）</span><input id="calendar-hour" type="number" min="0" max="23" step="1" value="12"></label>
           <p id="calendar-preview" class="calendar-preview"></p><div class="calendar-actions"><button id="calendar-confirm" class="primary-button" disabled>确定</button><button id="calendar-clear" class="secondary-button">清除日期假设</button></div><p id="calendar-result" class="calendar-result" role="status"></p>
-          <div class="calendar-filters"><label><input id="calendar-show-limited" type="checkbox" checked>限定套餐重置</label><label><input id="calendar-show-banked" type="checkbox">重置卡记录</label></div>
-          <div class="calendar-legend"><span class="legend-reset-text">已记录重置</span><span class="legend-assumed-text">指定时间</span></div><p id="calendar-current" class="calendar-current"></p>
+          <div class="calendar-filters"><label><input id="calendar-show-limited" type="checkbox" checked>限定套餐重置</label><label><input id="calendar-show-banked" type="checkbox" checked>重置卡记录</label></div>
+          <div class="calendar-legend"><span class="legend-reset-text">已记录重置</span><span class="legend-card-text">重置卡</span><span class="legend-periodic-text">周期额度补充</span><span class="legend-assumed-text">指定时间</span></div><p id="calendar-current" class="calendar-current"></p>
         </aside>
       </div>
     </section>
@@ -107,9 +111,9 @@
   <script src="i18n.js"></script>
   <script src="pace-timing.js"></script>
   <script src="time-zone.js"></script>
+  <script src="history-groups.js"></script>
   <script src="reset-calendar.js"></script>
   <script src="bar-order.js"></script>
-  <script src="history-groups.js"></script>
   <script src="renderer.js"></script>
 </body>
 </html>

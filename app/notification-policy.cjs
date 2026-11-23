@@ -54,23 +54,30 @@ function mergeMessage(groups,event,now=Date.now(),planType=null,timeZone='Asia/S
 }
 const xml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const shouldNotify=(group,enabled,quietUntil=null,now=Date.now())=>!!group&&enabled&&!group.delivered&&!group.pending&&!group.suppressedAt&&!isQuiet(quietUntil,now);
+const accountFingerprint=value=>typeof value==='string'&&/^[a-f\d]{64}$/i.test(value)?value.toLowerCase():null;
+function parseResetKey(key){
+ const match=typeof key==='string'&&key.match(/^quota-reset:(?:([a-f\d]{64}):)?(.+):(primary|secondary):(.+)$/i);
+ return match?{accountFingerprint:accountFingerprint(match[1]),bucketId:match[2],windowKey:match[3],resetsAt:match[4]}:null;
+}
 function actualResetProof(value,now){
  if(value?.kind!=='quota-reset'||!value.bucketId||!['primary','secondary'].includes(value.windowKey))return null;
- const at=Date.parse(value.observedAt),end=Date.parse(value.resetsAt),key=`quota-reset:${value.bucketId}:${value.windowKey}:${value.resetsAt}`;
- if(value.key!==key||!Number.isFinite(at)||!Number.isFinite(end)||at>now||at>=end)return null;
- return {key,bucketId:value.bucketId,windowKey:value.windowKey,resetsAt:value.resetsAt,observedAt:value.observedAt,kind:'quota-reset',...(value.acknowledgedAt?{acknowledgedAt:value.acknowledgedAt}:{})};
+ const fields=parseResetKey(value.key),supplied=accountFingerprint(value.accountFingerprint);
+ if(!fields||value.accountFingerprint!=null&&!supplied||fields.accountFingerprint&&supplied&&fields.accountFingerprint!==supplied||fields.bucketId!==value.bucketId||fields.windowKey!==value.windowKey||fields.resetsAt!==value.resetsAt)return null;
+ const at=Date.parse(value.observedAt),end=Date.parse(value.resetsAt),owner=supplied||fields.accountFingerprint;
+ if(!Number.isFinite(at)||!Number.isFinite(end)||at>now||at>=end)return null;
+ return {key:value.key,bucketId:value.bucketId,windowKey:value.windowKey,resetsAt:value.resetsAt,observedAt:value.observedAt,kind:'quota-reset',...(owner?{accountFingerprint:owner}:{}),...(value.acknowledgedAt?{acknowledgedAt:value.acknowledgedAt}:{})};
 }
 function legacyResetEvent(event){
- const match=typeof event.key==='string'&&event.key.match(/^quota-reset:(.+):(primary|secondary):(.+)$/);
- if(!match)return null;
- const [,bucketId,windowKey,resetsAt]=match;
+ const parsed=parseResetKey(event.key);if(!parsed)return null;
+ const {bucketId,windowKey,resetsAt}=parsed,owner=accountFingerprint(event.accountFingerprint)||parsed.accountFingerprint;
+ if(event.accountFingerprint!=null&&!accountFingerprint(event.accountFingerprint)||parsed.accountFingerprint&&accountFingerprint(event.accountFingerprint)&&parsed.accountFingerprint!==accountFingerprint(event.accountFingerprint))return null;
  const stamp=resetsAt.match(/^(\d{4}-\d{2}-\d{2})T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,3})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/);
  if(!stamp||!Number.isFinite(Date.parse(resetsAt)))return null;
  const day=Date.parse(`${stamp[1]}T00:00:00.000Z`);
  if(!Number.isFinite(day)||new Date(day).toISOString().slice(0,10)!==stamp[1])return null;
  const fields={bucketId,windowKey,resetsAt};
  for(const [key,value] of Object.entries(fields))if(Object.hasOwn(event,key)&&event[key]!==value)return null;
- return {...fields,...event,kind:'quota-reset',observedAt:event.at};
+ return {...fields,...event,...(owner?{accountFingerprint:owner}:{}),kind:'quota-reset',observedAt:event.at};
 }
 function recoverActualProofs(state,now){
  const proofs=new Map();
@@ -82,27 +89,35 @@ function recoverActualProofs(state,now){
  for(const [key,value] of Object.entries(state.localResetProofs||{}))if(value?.key===key)remember(value);
  for(const event of state.events||[])if(event.kind==='quota_reset'&&event.sourceId===null)remember(legacyResetEvent(event));
  remember(state.localReset);
- if(proofs.size||state.localResetProofs)state.localResetProofs=Object.fromEntries([...proofs].sort((a,b)=>Date.parse(a[1].observedAt)-Date.parse(b[1].observedAt)).slice(-200));
+ const unrecognized=Object.entries(state.localResetProofs||{}).filter(([key,value])=>value?.key===key&&!actualResetProof(value,now));
+ if(proofs.size||state.localResetProofs)state.localResetProofs=Object.fromEntries([...unrecognized,...[...proofs].sort((a,b)=>Date.parse(a[1].observedAt)-Date.parse(b[1].observedAt)).slice(-200)]);
  return proofs;
 }
-function recoverLocalReset(state,quota,now=Date.now()){
+function recoverLocalReset(state,quota,now=Date.now(),options={}){
  const proofs=recoverActualProofs(state,now);
+ const owner=accountFingerprint(quota?.accountFingerprint);
+ if(options.requireIdentity===true&&!owner){state.localReset=null;return;}
  if(!quota||!quota.bucketId||!quota.key||!quota.resetsAt)return;
- const key=`quota-reset:${quota.bucketId}:${quota.key}:${quota.resetsAt}`;
+ const key=`quota-reset:${owner?`${owner}:`:''}${quota.bucketId}:${quota.key}:${quota.resetsAt}`;
  const same=state.localReset?.key===key;
- const actual=proofs.get(key);
+ const accepted=new Set(owner?[owner,...(options.accountAliases||[]).map(accountFingerprint).filter(Boolean)]:[null]);
+ const actual=proofs.get(key)||[...proofs.values()].find(p=>accepted.has(accountFingerprint(p.accountFingerprint))&&p.bucketId===quota.bucketId&&p.windowKey===quota.key&&p.resetsAt===quota.resetsAt);
  if(actual){state.localReset={...(same?state.localReset:{}),...actual,...(same&&state.localReset.acknowledgedAt?{acknowledgedAt:state.localReset.acknowledgedAt}:state.localResetReceipts?.[key]?{acknowledgedAt:state.localResetReceipts[key]}:{})};return;}
  if(same&&state.localReset.kind)return;
- const cycle=!quota.stale&&quota.source==='local-codex'&&localCycleCompletion(quota,null,now);
+ // Short cycles are valid local observations even though they must never
+ // retire a public global-reset forecast.
+ const duration=Number(quota.durationMins)*60000,end=Date.parse(quota.resetsAt),observed=Date.parse(quota.fetchedAt),start=end-duration;
+ const shortCycle=duration>0&&duration<=360*60000&&Number.isFinite(start)&&start<=now&&Number.isFinite(observed)&&observed>=start&&observed<=now+60000;
+ const cycle=!quota.stale&&quota.source==='local-codex'&&(shortCycle||localCycleCompletion(quota,null,now));
  if(same){if(cycle)state.localReset.kind='observed-cycle';return;}
- if(cycle)state.localReset={key,bucketId:quota.bucketId,windowKey:quota.key,resetsAt:quota.resetsAt,observedAt:quota.fetchedAt,kind:'observed-cycle',...(state.localResetReceipts?.[key]?{acknowledgedAt:state.localResetReceipts[key]}:{})};
+ if(cycle)state.localReset={key,bucketId:quota.bucketId,windowKey:quota.key,resetsAt:quota.resetsAt,observedAt:quota.fetchedAt,kind:'observed-cycle',...(owner?{accountFingerprint:owner}:{}),...(state.localResetReceipts?.[key]?{acknowledgedAt:state.localResetReceipts[key]}:{})};
 }
 function acknowledgeReset(state,tag,quota,now=Date.now()){
  const group=state.notificationGroups?.find(g=>notificationId(g.id)===tag);
  if(!group||!group.delivered||group.acknowledgedAt)return {received:false,quietStarted:false};
  group.acknowledgedAt=new Date(now).toISOString();
  const reset=state.localReset;
- if(!reset||reset.acknowledgedAt||state.localResetReceipts?.[reset.key]||!quota||quota.stale||reset.bucketId!==quota.bucketId||reset.windowKey!==quota.key||reset.resetsAt!==quota.resetsAt||(group.type==='local'?group.localResetKey!==reset.key:group.localResetKeyAtDelivery!==reset.key))return {received:true,quietStarted:false};
+ if(!reset||reset.acknowledgedAt||state.localResetReceipts?.[reset.key]||!quota||quota.stale||accountFingerprint(reset.accountFingerprint)!==accountFingerprint(quota.accountFingerprint)||reset.bucketId!==quota.bucketId||reset.windowKey!==quota.key||reset.resetsAt!==quota.resetsAt||(group.type==='local'?group.localResetKey!==reset.key:group.localResetKeyAtDelivery!==reset.key))return {received:true,quietStarted:false};
  reset.acknowledgedAt=group.acknowledgedAt;
  state.localResetReceipts={...state.localResetReceipts,[reset.key]:reset.acknowledgedAt};
  state.localResetReceipts=Object.fromEntries(Object.entries(state.localResetReceipts).slice(-200));

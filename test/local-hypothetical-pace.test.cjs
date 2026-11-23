@@ -5,7 +5,8 @@ const day=86400000,localAt=Date.parse('2026-10-22T17:09:48.000Z'),now=Date.parse
 const global={state:'confirmed',at:'2026-10-20T06:33:48.000Z'};
 function proof(at=localAt,durationMins=10080,key='primary',bucketId='codex'){
  const resetsAt=new Date(at+durationMins*60000).toISOString(),observedAt=new Date(at+10000).toISOString();
- return {quota:{source:'local-codex',state:'ok',bucketId,key,durationMins,resetsAt,usedPercent:2,fetchedAt:observedAt},localReset:{kind:'quota-reset',bucketId,windowKey:key,resetsAt,observedAt}};
+ const accountFingerprint='a'.repeat(64);
+ return {quota:{source:'local-codex',state:'ok',bucketId,key,durationMins,resetsAt,usedPercent:2,fetchedAt:observedAt,accountFingerprint},localReset:{kind:'quota-reset',bucketId,windowKey:key,resetsAt,observedAt,accountFingerprint}};
 }
 function history(at=localAt-day){const stamp=new Date(at).toISOString(),url='https://x.com/thsottiaux/status/2112432076767289678';return [{id:'2112432076767289678',type:'global',at:stamp,url,sources:[{id:'codex',family:'codex-reset',at:stamp,url},{id:'did',family:'didcodexreset',at:stamp,url}]}];}
 
@@ -56,6 +57,17 @@ test('five-hour, weekly and distinct bucket proofs apply only to their selected 
   assert.equal(Date.parse(pace.anchor),Date.parse(options.quota.resetsAt)-options.quota.durationMins*60000);
  }
  for(const [quota,localReset] of [[primary.quota,secondary.localReset],[secondary.quota,primary.localReset],[other.quota,primary.localReset]])assert.equal(Pace.hypotheticalPace(global,3,now,[],{quota,localReset}).origin,'cycle');
+});
+
+test('refill proof is never borrowed across accounts or from an unidentified legacy record',()=>{
+ const options=proof();
+ assert.equal(Pace.hypotheticalPace(global,3,now,[],options).origin,'local');
+ for(const fingerprint of ['b'.repeat(64),undefined,'invalid']){
+  const localReset={...options.localReset,accountFingerprint:fingerprint};
+  assert.equal(Pace.hypotheticalPace(global,3,now,[],{...options,localReset}).origin,'cycle');
+ }
+ const legacy={quota:{...options.quota,accountFingerprint:undefined},localReset:{...options.localReset,accountFingerprint:undefined}};
+ assert.equal(Pace.hypotheticalPace(global,3,now,[],legacy).origin,'cycle');
 });
 
 test('invalid, future and mismatched refill proof never overrides current or historical global fallback',()=>{
@@ -115,7 +127,7 @@ test('calendar pacing retains the local receipt through aging, temporary errors 
 });
 
 test('calendar pacing falls back only when neither actual proof nor a valid API cycle is available',()=>{
- const target={anchor:global.at,at:'2026-10-28T07:00:00.000Z'},expected=Pace.calendarPace(target,now);
+ const target={anchor:global.at,anchorScope:'public',at:'2026-10-28T07:00:00.000Z'},expected=Pace.calendarPace(target,now);
  for(const options of [undefined,null,{},proof(now+60000)]){
   const actual=Pace.calendarPace(target,now,options);assert.equal(actual.anchor,global.at);assert.equal(actual.end,target.at);assert.equal(actual.progress,expected.progress);
  }
@@ -144,7 +156,7 @@ test('calendar progress reaches the selected absolute deadline exactly and stays
 });
 
 test('a later local refill preserves an expired calendar deadline at 100 percent until it is cleared',()=>{
- const target={anchor:global.at,at:'2026-10-28T07:00:00.000Z'},deadline=Date.parse(target.at),current=deadline+2*day,options=proof(deadline+day);
+ const target={anchor:global.at,anchorScope:'public',at:'2026-10-28T07:00:00.000Z'},deadline=Date.parse(target.at),current=deadline+2*day,options=proof(deadline+day);
  const actual=Pace.calendarPace(target,current,options);assert.equal(actual.available,true);assert.equal(actual.progress,1);assert.equal(actual.overdue,true);assert.equal(actual.end,target.at);assert.equal(actual.anchor,target.anchor);assert.equal(actual.origin,'saved');
 });
 
@@ -187,11 +199,21 @@ test('one-second API end jitter cannot fall back to the old global completion',(
 });
 
 test('a disappearing quota window falls back explicitly and the reappearing valid window restores the API-cycle axis',()=>{
- const options=proof();options.localReset.kind='observed-cycle';const target={anchor:global.at,at:new Date(now+2*day).toISOString()};
+ const options=proof();options.localReset.kind='observed-cycle';const target={anchor:global.at,anchorScope:'public',at:new Date(now+2*day).toISOString()};
  assert.equal(Pace.hypotheticalPace(global,3,now,[],options).origin,'cycle');
  assert.equal(Pace.hypotheticalPace(global,3,now,[],{...options,quota:{state:'error'}}).origin,'current');
  assert.equal(Pace.calendarPace(target,now,{...options,quota:null}).origin,'saved');
  const restored=JSON.parse(JSON.stringify(options));assert.equal(Pace.hypotheticalPace(global,3,now,[],restored).origin,'cycle');assert.equal(Pace.calendarPace(target,now,restored).origin,'cycle');
+});
+
+test('saved account anchors require the same verified identity, while public anchors remain usable',()=>{
+ const accountFingerprint='a'.repeat(64),target={anchor:new Date(localAt).toISOString(),at:new Date(now+2*day).toISOString(),anchorScope:'account',accountFingerprint};
+ const unavailableQuota={source:'local-codex',accountFingerprint};
+ assert.equal(Pace.calendarPace(target,now,{quota:unavailableQuota}).origin,'saved');
+ assert.equal(Pace.calendarPace(target,now,{quota:{...unavailableQuota,accountFingerprint:'b'.repeat(64)}}).available,false);
+ assert.equal(Pace.calendarPace(target,now,{quota:null}).available,false);
+ assert.equal(Pace.calendarPace({...target,anchorScope:undefined,accountFingerprint:undefined},now,{quota:unavailableQuota}).available,false);
+ assert.equal(Pace.calendarPace({...target,anchorScope:'public'},now,{quota:null}).origin,'saved');
 });
 
 test('cached observed cycles survive failure and expiry without fabricating another cycle',()=>{

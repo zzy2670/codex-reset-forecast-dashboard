@@ -40,8 +40,13 @@ async function main(){try{
  results.push('Chinese and English settings switch the real connection controls');
  for(const connection of [{needsLogin:true},{loginPending:true},{requiresAccountSwitch:true},{checking:true},{errorCode:'LOGIN_FAILED'},{errorCode:'MANAGED_HOME_UNAVAILABLE'}]){
   const demo=fixture(connection,'en');await push(demo);await page.waitForTimeout(30);assert.deepEqual(await residual(),[],`untranslated connection state ${JSON.stringify(connection)}`);
-  assert.equal(await page.locator('#quota-connection [data-connect-quota]').count(),1);assert.equal(await page.locator('#quota-connection [data-cancel-quota-login]').count(),connection.loginPending?1:0);
-  assert.equal(await page.locator('#quota-connection [data-connect-quota]').isDisabled(),!!connection.checking);
+   if(connection.checking){
+    assert.equal(await page.locator('#quota-connection').isVisible(),false,'identity verification keeps the connection panel collapsed');
+    assert.equal(await page.locator('#quota-side [data-connect-quota]').getAttribute('aria-disabled'),'true','identity verification shows a non-active placeholder');
+   }else{
+    assert.equal(await page.locator('#quota-connection [data-connect-quota]').count(),1);assert.equal(await page.locator('#quota-connection [data-cancel-quota-login]').count(),connection.loginPending?1:0);
+    assert.equal(await page.locator('#quota-connection [data-connect-quota]').isDisabled(),false);
+   }
  }
  results.push('all connection states translated, including retry and dedicated sign-in');
  for(const usedPercent of [0,100]){

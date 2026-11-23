@@ -45,11 +45,22 @@ async function main(){
   await page.locator('.history-proof summary').click();
   assert.ok((await page.locator('.history-proof').innerText()).includes('Feed A'));
   assert.ok((await page.locator('.history-proof').innerText()).includes('Feed B'));
+  const twoWindows=structuredClone(merged),owner='d'.repeat(64),primaryAt=iso(now-3600000),secondaryAt=iso(now-3300000);
+  twoWindows.quotaDisplay.accountFingerprint=owner;
+  twoWindows.localQuotaHistory=[{...twoWindows.localQuotaHistory[0],id:'primary-receipt',accountFingerprint:owner,at:primaryAt,windowKey:'primary',beforeRemainingPercent:41},{...twoWindows.localQuotaHistory[0],id:'secondary-receipt',accountFingerprint:owner,at:secondaryAt,windowKey:'secondary',beforeRemainingPercent:90}];
+  await page.evaluate(demo=>render(demo),twoWindows);
+  const both=page.locator('.history-local');assert.equal(await both.count(),2,'Distinct quota windows each retain their own receipt');
+  for(const [label,value,at] of [['主额度窗口','41%',primaryAt],['副额度窗口','90%',secondaryAt]]){
+   const row=both.filter({hasText:label});assert.equal(await row.count(),1);assert.equal(await row.locator('.history-quota-before strong').innerText(),value);
+   const expected=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date(at));
+   assert.equal(await row.locator('.history-time time strong').innerText(),expected,'Each window shows its own actual receipt time');
+  }
+  assert.equal(await page.locator('body').evaluate((e,key)=>e.innerHTML.includes(key),owner),false,'Account fingerprint is not written to DOM');
   const cardView=structuredClone(merged);
   cardView.localQuotaHistory.push({id:'personal-card',type:'local',at:iso(now-1800000),bucketId:'codex',windowKey:'primary',beforeRemainingPercent:0,afterRemainingPercent:100,beforeFetchedAt:iso(now-1830000),sources:[]});
   for(const theme of ['light','dark']){
    cardView.settings.theme=theme;await page.evaluate(demo=>render(demo),cardView);
-   assert.equal(await page.locator('.history-row[data-history-type="personal_card"] .pill').innerText(),'个人重置卡');
+   assert.equal(await page.locator('.history-row[data-history-type="personal_card"] .pill').innerText(),'疑似重置卡 · 原因待核实');
    const background=await page.locator('.history-row[data-history-type="personal_card"]').evaluate(row=>getComputedStyle(row).backgroundColor);
    assert.notEqual(background,'rgba(0, 0, 0, 0)','Personal card whole row has a distinct background');
    assert.notEqual(background,'transparent');
@@ -67,7 +78,12 @@ async function main(){
    await page.evaluate(demo=>render(demo),fixture(language,false));
    const calendarBefore=await page.locator('#reset-calendar').innerHTML();
    await page.evaluate(demo=>render(demo),fixture(language));
-   assert.equal(await page.locator('#reset-calendar').innerHTML(),calendarBefore,'Local refills must not alter the official reset calendar');
+   assert.notEqual(await page.locator('#reset-calendar').innerHTML(),calendarBefore,'Local refill times are shown on the calendar');
+   for(const row of fixture(language).localQuotaHistory){
+    const key=await page.evaluate(at=>ResetCalendar.dateKey(at,zone),row.at);
+    const time=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(row.at));
+    assert.match(await page.locator('[data-calendar-day="'+key+'"] .calendar-time').allTextContents().then(values=>values.join(' ')),new RegExp(time),'Local refill marker retains its real time');
+   }
    assert.equal(await page.locator('.history-row.history-local').count(),4,'Distinct daily refills stay separate');
    assert.equal(await page.locator('.history-row:not(.history-local) .history-quota-before').count(),0,'Official rows must not receive a guessed personal value');
    const local=page.locator('.history-row.history-local');
@@ -124,7 +140,7 @@ async function main(){
    await page.screenshot({path:screenshot,fullPage:true,animations:'disabled'});
   }
   assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
-  console.log(JSON.stringify({ok:true,profile,checks:['real language control','four distinct daily refills','older 41% snapshot with sample date and time','100% and 0%','unknown historical value','official interval plus/minus three hours uses local receipt clock and global label','subsequent exhausted refill shows personal card separately','official calendar unchanged','22px narrow and wide layouts'],layouts,errors,networkRequests:network.length},null,2));
+  console.log(JSON.stringify({ok:true,profile,checks:['real language control','two account windows preserve 41% and 90% and their own times','four distinct daily refills','older 41% snapshot with sample date and time','100% and 0%','unknown historical value','official interval plus/minus three hours uses local receipt clock and global label','subsequent exhausted refill is visibly tentative','calendar reflects genuine local refill times','22px narrow and wide layouts'],layouts,errors,networkRequests:network.length},null,2));
  }finally{await application.close();}
 }
 main().catch(error=>{console.error(error.stack);process.exitCode=1;});

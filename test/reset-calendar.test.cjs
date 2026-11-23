@@ -4,6 +4,16 @@ const Calendar=require('../app/ui/reset-calendar.js');
 const now=Date.parse('2026-10-21T08:09:10+08:00');
 const row=(id,at,extra={})=>({id,at,type:'global',scope:{plans:['all']},url:`https://x.com/thsottiaux/status/${id}`,...extra});
 
+test('short-cycle receipt and official reset at the same time remain distinct calendar marks',()=>{
+ const at='2026-10-20T07:00:00Z',fingerprint='a'.repeat(64);
+ const periodic={id:'periodic',at,type:'local',bucketId:'codex',windowKey:'primary',durationMins:300,periodicWindow:true,accountFingerprint:fingerprint,beforeRemainingPercent:0};
+ const weekly={id:'weekly',at,type:'local',bucketId:'codex',windowKey:'secondary',durationMins:10080,accountFingerprint:fingerprint,beforeRemainingPercent:41};
+ const model=Calendar.calendar([row('101',at)],now,undefined,{localHistory:[periodic,weekly],currentAccountFingerprint:fingerprint});
+ const events=model.cells.find(cell=>cell.key==='2026-10-20').events;
+ assert.equal(events.length,2);assert.equal(events.find(event=>event.periodicWindow).type,'local');assert.equal(events.find(event=>!event.periodicWindow).type,'global');
+ assert.ok(events.every(event=>event.time==='15:00'));assert.ok(events.every(event=>!event.cardInferred));
+});
+
 test('Beijing date keys cross midnight, month and year without using the host timezone',()=>{
  for(const [input,key] of [['2026-10-20T15:59:59.999Z','2026-10-20'],['2026-10-20T16:00:00Z','2026-10-21'],['2026-10-31T16:00:00Z','2026-11-01'],['2026-12-31T16:00:00Z','2027-01-01'],['2028-02-28T16:00:00Z','2028-02-29']])assert.equal(Calendar.dateKey(input),key);
  assert.equal(Calendar.dateKey(now),'2026-10-21');assert.equal(Calendar.dateKey(new Date(now)),'2026-10-21');
@@ -93,7 +103,7 @@ test('multiple resets on one day remain separate, preserve scope and show their 
 
 test('source copies deduplicate by stable event ID or canonical X/twitter post URL',()=>{
  const a=row('100','2026-10-20T01:00:00Z');
- const history=[a,{...a,url:'https://x.com/thsottiaux/status/101'},row('provider-copy','2026-10-20T01:00:00Z',{url:'https://twitter.com/thsottiaux/status/100?ref=feed#post'}),row('102','2026-10-20T02:00:00Z')];
+ const history=[a,{...a,url:'https://x.com/thsottiaux/status/101'},row('provider-copy','2026-10-20T01:00:00Z',{url:'https://twitter.com/thsottiaux/status/100?ref=feed#post'}),row('102','2026-10-20T09:00:00Z')];
  const events=Calendar.calendar(history,now).cells.flatMap(c=>c.events);
  assert.deepEqual(events.map(e=>e.id),['100','102']);
 });
@@ -101,6 +111,45 @@ test('source copies deduplicate by stable event ID or canonical X/twitter post U
 test('overlapping ID and post aliases deduplicate transitively while distinct posts stay separate',()=>{
  const history=[row('b','2026-10-20T01:00:00Z',{url:'https://x.com/thsottiaux/status/102'}),row('a','2026-10-20T01:00:00Z',{url:'https://x.com/thsottiaux/status/100'}),row('b','2026-10-20T01:00:00Z',{url:'https://twitter.com/thsottiaux/status/100'})];
  assert.equal(Calendar.calendar(history,now).cells.flatMap(c=>c.events).length,1);
+});
+
+test('calendar and history share a six-hour grouping and use the local receipt time',()=>{
+ const current=Date.parse('2026-10-24T05:00:00Z');
+ const history=[row('100','2026-10-22T17:00:00Z'),row('101','2026-10-22T17:09:00Z'),row('102','2026-10-22T17:10:01Z')];
+ const localHistory=[{id:'local',type:'local',at:'2026-10-22T17:09:58.680Z',bucketId:'codex',windowKey:'primary',sources:[]}];
+ const cell=Calendar.calendar(history,current,'Asia/Shanghai',{localHistory}).cells.find(value=>value.key==='2026-10-23');
+ assert.equal(cell.events.length,1);assert.equal(cell.events[0].time,'01:09');assert.equal(cell.events[0].at,localHistory[0].at);
+ assert.equal(cell.events[0].members.length,4);
+});
+
+test('calendar deduplicates separate account rows for one official event and prefers the current account',()=>{
+ const current=Date.parse('2026-10-24T05:00:00Z'),fingerprintA='a'.repeat(64),fingerprintB='b'.repeat(64);
+ const history=[row('100','2026-10-22T17:10:01Z')],localHistory=[
+  {id:'a',type:'local',at:'2026-10-22T17:09:00Z',bucketId:'codex',windowKey:'primary',accountFingerprint:fingerprintA},
+  {id:'b',type:'local',at:'2026-10-22T17:09:58Z',bucketId:'codex',windowKey:'primary',accountFingerprint:fingerprintB},
+  {id:'unknown',type:'local',at:'2026-10-22T17:10:30Z',bucketId:'codex',windowKey:'primary',identityUnverified:true}
+ ];
+ const events=Calendar.calendar(history,current,'Asia/Shanghai',{localHistory,currentAccountFingerprint:fingerprintB}).cells.find(value=>value.key==='2026-10-23').events;
+ assert.equal(events.length,1);assert.equal(events[0].id,'b');assert.equal(events[0].time,'01:09');
+});
+
+test('unconfirmed observations and unknown scope cannot independently establish a calendar global reset',()=>{
+ const current=Date.parse('2026-10-24T05:00:00Z'),history=[row('100','2026-10-22T17:00:00Z',{type:'observation'}),row('101','2026-10-22T17:01:00Z',{scope:{plans:['unknown']}})];
+ assert.equal(Calendar.calendar(history,current).cells.flatMap(cell=>cell.events).length,0);
+ const localHistory=[{id:'receipt',type:'local',at:'2026-10-22T17:02:00Z',bucketId:'codex',windowKey:'primary',identityUnverified:true}];
+ const events=Calendar.calendar(history,current,'Asia/Shanghai',{localHistory}).cells.flatMap(cell=>cell.events);
+ assert.equal(events.length,1);assert.equal(events[0].type,'local');assert.equal(events[0].time,'01:02');
+});
+test('card issuance remains a separate calendar event even when its plan scope is unknown',()=>{
+ const current=Date.parse('2026-10-24T05:00:00Z');
+ const history=[row('card','2026-10-22T17:00:00Z',{type:'banked',scope:{plans:['unknown']}})];
+ const events=Calendar.calendar(history,current).cells.flatMap(cell=>cell.events);
+ assert.equal(events.length,1);assert.equal(events[0].type,'banked');assert.equal(events[0].time,'01:00');
+});
+test('a combined official reset and issuance retains its issuance flag without claiming personal card use',()=>{
+ const current=Date.parse('2026-10-24T05:00:00Z'),history=[row('combined','2026-10-22T17:00:00Z',{type:'global_and_banked'})];
+ const events=Calendar.calendar(history,current).cells.flatMap(cell=>cell.events);
+ assert.equal(events.length,1);assert.equal(events[0].type,'global');assert.equal(events[0].hasBankedIssuance,true);assert.equal(events[0].hasLocalReset,false);
 });
 
 test('history excludes future hours, future days, invalid records and events before the window',()=>{
@@ -154,7 +203,7 @@ test('all three APIs are identical under different host timezones',()=>{
 });
 
 test('browser UMD exposes the same pure API without requiring the Node runtime',()=>{
- const context=vm.createContext({Date,URL,Intl});vm.runInContext(fs.readFileSync(require.resolve('../app/ui/time-zone.js'),'utf8'),context);vm.runInContext(fs.readFileSync(require.resolve('../app/ui/reset-calendar.js'),'utf8'),context);
+ const context=vm.createContext({Date,URL,Intl});vm.runInContext(fs.readFileSync(require.resolve('../app/ui/time-zone.js'),'utf8'),context);vm.runInContext(fs.readFileSync(require.resolve('../app/ui/history-groups.js'),'utf8'),context);vm.runInContext(fs.readFileSync(require.resolve('../app/ui/reset-calendar.js'),'utf8'),context);
  assert.equal(context.ResetCalendar.dateKey('2026-10-20T16:00:00Z'),'2026-10-21');
  assert.equal(context.ResetCalendar.calendar([],now).cells.length,56);
  assert.equal(context.ResetCalendar.targetForDay('2026-10-22',15,now),'2026-10-22T07:00:00.000Z');
@@ -204,8 +253,8 @@ test('periods use real elapsed hours across 23 and 25 hour local days',()=>{
  assert.equal(autumn.targetAt,'2026-11-02T05:00:00.000Z');assert.equal(autumn.days,49/24);
 });
 
-test('separate resets in repeated local DST hours remain separate history events',()=>{
- const history=[row('951','2026-11-01T05:30:00Z'),row('952','2026-11-01T06:30:00Z')];
+test('a global reset and a separate card issuance retain repeated local DST hours',()=>{
+ const history=[row('951','2026-11-01T05:30:00Z'),row('952','2026-11-01T06:30:00Z',{type:'banked'})];
  const model=Calendar.calendar(history,'2026-11-01T12:00:00Z','America/New_York');
  const events=model.cells.find(c=>c.key==='2026-11-01').events;
  assert.deepEqual(events.map(e=>[e.id,e.time]),[['951','01:30'],['952','01:30']]);

@@ -1,6 +1,6 @@
 {
   "name": "codex-reset-forecast-dashboard",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "private": true,
   "description": "Codex reset forecasts, local quota pacing and multi-source evidence.",
   "main": "app/main.cjs",
@@ -88,6 +88,8 @@
     "url": "https://github.com/zzy2670/codex-reset-forecast-dashboard.git"
   },
   "overrides": {
-    "global-agent": "4.1.3"
+    "global-agent": "4.1.3",
+    "minimatch@^9.0.3": "11.0.9",
+    "minimatch@^10.2.5": "11.0.9"
   }
 }

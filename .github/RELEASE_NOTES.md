@@ -1,15 +1,13 @@
-## Codex 重置预测看板 2.3.2
+## Codex 重置预测看板 2.3.3
 
-- 更新桌面运行时及构建依赖，修复依赖安全检查发现的问题。
-- 修复无关上线消息导致重置预告提前消失的问题；参考截止时间保留信源时区，未经核实的换算明确标注。
-- 官方完成记录的时间区间及其前后 3 小时归为同一次全局重置，有本机到账记录时采用本机时间；额度耗尽后再次补充单独记录为个人重置卡。原始来源和采样时间可展开查看，右侧醒目显示补充前剩余额度。
-- 选择日历日期时默认 12:00，可修改小时后确认。重置卡记录整条以淡黄色显示，并保留原始发卡或使用消息。
-- 各额度周期的最后一次有效读数保存在本机。缺失的前值可用该次补充前最后一份可信快照补齐，并显示采样时间；没有可用读数或快照时显示“未记录”。
+- 看板跟随本机 Codex 登录账号读取额度；身份可核验时按账号分别保存最近的周额度读数。列表显示套餐、最近记录的实际消耗和预计重置倒计时；旧账号保留上次读数，时间参考线继续推进。
+- 改进重置历史和日历的记录归并，保留本机到账时间、来源及可用的补充前额度。套餐升级补充、周期额度补充和重置卡发放以不同记录区分。
+- 日历默认显示重置卡记录并用蓝色标记；选择目标日期时，进度根据本机额度周期起点和所选时间计算。
+- 移除顶部变化提示和未读红点，保留变化记录入口；改进账号核验与界面更新期间的显示稳定性。
 
 ## English
 
-- Update the desktop runtime and build dependencies to resolve the reported dependency security issues.
-- Prevent unrelated launch messages from prematurely clearing reset forecasts. Reference deadlines retain their source time zones, with unverified interpretations labeled.
-- Official completion times define a reset window. Records within that window or three hours on either side are grouped as one global reset, using the local receipt time when available. A later refill after the quota reaches zero is shown as a personal reset-card use. Expand it to view original sources and sampling times; the remaining quota before the refill is highlighted on the right.
-- Selecting a calendar date defaults to 12:00, with an editable hour. Reset-card entries have a pale yellow background and retain the original issuance or usage notice.
-- The last valid reading from each quota cycle is saved locally. The last trusted snapshot before a refill can fill a missing reading and show its sampling time; entries without a usable reading or snapshot show “Not recorded”.
+- Follow the signed-in local Codex account for quota readings. When account identity can be verified, retain the latest weekly reading separately for each account. The list shows plan, last recorded usage and estimated time until reset; previous accounts retain their last readings while their time reference continues to advance.
+- Improve grouping of reset history and calendar entries while retaining local receipt times, sources and available pre-refill balances. Plan-upgrade refills, periodic quota refills and reset-card issuance are displayed as distinct records.
+- Show reset-card entries on the calendar by default with blue markers. The selected-date progress uses the local quota-cycle start and the chosen target time.
+- Remove the top change banner and unread dot while retaining the change history entry. Improve display stability during account verification and interface updates.

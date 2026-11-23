@@ -19,6 +19,37 @@ function fixture(responder,options={}){
 }
 function respond(m,child,result){child.send({id:m.id,result});}
 
+test('following the desktop session ignores an existing dashboard login and rechecks the default session',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'codex-follow-desktop-')),managedHome=path.join(temp,'account');fs.mkdirSync(managedHome);
+ let current='account-a';
+ const f=fixture((m,c)=>respond(m,c,m.method==='account/read'?{account:{type:'chatgpt',accountId:current}}:{}),{managedHome,followDefault:true});
+ try{
+  const first=await f.client.setupStatus();assert.equal(first.authenticated,true);assert.equal(first.managed,false);assert.equal(f.spawned[0].env,undefined);
+  current='account-b';const next=await f.client.setupStatus({freshSession:true});
+  assert.equal(next.managed,false);assert.notEqual(next.accountFingerprint,first.accountFingerprint);assert.equal(f.spawned[1].env,undefined);
+  assert.equal(fs.existsSync(managedHome),true,'the previous independent login directory is preserved');
+  assert.ok(!f.calls.some(c=>c.method==='account/logout'||c.method.startsWith('config/')));
+ }finally{f.client.stop();fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('empty default session authorizes in that same session and follows it after reconnect',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'codex-follow-login-')),managedHome=path.join(temp,'account');
+ let account=null;
+ const f=fixture((m,c)=>respond(m,c,m.method==='account/read'?{account}:m.method==='account/login/start'?{loginId:'default-login',authUrl:'https://auth.openai.com/oauth/authorize?state=fixture'}:{}),{managedHome,followDefault:true});
+ try{
+  assert.equal((await f.client.setupStatus()).needsLogin,true);
+  const login=await f.client.login({reauthenticate:false});assert.equal(login.loginId,'default-login');assert.equal(f.spawned[0].env,undefined);assert.equal(fs.existsSync(managedHome),false);
+  account={type:'chatgpt',accountId:'signed-in'};f.children[0].send({method:'account/login/completed',params:{loginId:'default-login',success:true}});
+  const current=await f.client.setupStatus({freshSession:true});assert.equal(current.authenticated,true);assert.equal(current.managed,false);assert.equal(f.spawned[1].env,undefined);
+  assert.deepEqual(await f.client.login({reauthenticate:true}),{alreadyConnected:true});assert.equal(f.calls.filter(c=>c.method==='account/login/start').length,1);assert(!f.calls.some(c=>c.method==='account/logout'));
+ }finally{f.client.stop();fs.rmSync(temp,{recursive:true,force:true});}
+});
+test('default session does not silently create a separate login for an API-key account',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'codex-follow-api-')),managedHome=path.join(temp,'account');
+ const f=fixture((m,c)=>respond(m,c,m.method==='account/read'?{account:{type:'apiKey'}}:{}),{managedHome,followDefault:true});
+ try{await assert.rejects(f.client.login(),{code:'ACCOUNT_SWITCH_REQUIRED'});assert.equal(fs.existsSync(managedHome),false);assert(!f.calls.some(c=>c.method==='account/login/start'||c.method==='account/logout'));}finally{f.client.stop();fs.rmSync(temp,{recursive:true,force:true});}
+});
+
 test('explicit reconnect restarts stale ChatGPT reader and opens dedicated authorization without global logout',async()=>{
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'codex-reconnect-')),managedHome=path.join(temp,'account');
  const f=fixture((m,c)=>respond(m,c,m.method==='account/read'?{account:{type:'chatgpt'}}:m.method==='account/login/start'?{loginId:'reconnect',authUrl:'https://auth.openai.com/oauth/authorize?state=fixture'}:{}),{managedHome});
@@ -74,12 +105,22 @@ test('cancel only cancels the dashboard pending flow and does not log out',async
  const f=fixture((m,c)=>respond(m,c,m.method==='account/read'?{account:null}:m.method==='account/login/start'?{loginId:'mine',authUrl:'https://auth.openai.com/oauth/authorize'}:{}));
  try{assert.deepEqual(await f.client.cancelLogin(),{cancelled:false});await f.client.login();assert.deepEqual(await f.client.cancelLogin(),{cancelled:true});assert.deepEqual(f.calls.find(c=>c.method==='account/login/cancel').params,{loginId:'mine'});assert(!f.calls.some(c=>c.method==='account/logout'));}finally{f.client.stop();}
 });
+test('cancellation waits for an in-flight login start and cancels its eventual attempt',async()=>{
+ let release;const started=new Promise(resolve=>{release=resolve;});let reply;
+ const f=fixture((m,c)=>{if(m.method==='account/login/start'){reply=()=>respond(m,c,{loginId:'late',authUrl:'https://auth.openai.com/oauth/authorize'});release();}else respond(m,c,m.method==='account/read'?{account:null}:{});});
+ try{const login=f.client.login();await started;const cancel=f.client.cancelLogin();reply();await login;assert.deepEqual(await cancel,{cancelled:true});assert.equal(f.client.loginAttempt,null);assert.deepEqual(f.calls.find(c=>c.method==='account/login/cancel').params,{loginId:'late'});}finally{f.client.stop();}
+});
+test('immediate retry waits for cancellation and starts a distinct authorization',async()=>{
+ let release;const started=new Promise(resolve=>{release=resolve;});let reply,count=0;
+ const f=fixture((m,c)=>{if(m.method==='account/login/start'){count++;if(count===1){reply=()=>respond(m,c,{loginId:'first',authUrl:'https://auth.openai.com/oauth/authorize?state=first'});release();}else respond(m,c,{loginId:'second',authUrl:'https://auth.openai.com/oauth/authorize?state=second'});}else respond(m,c,m.method==='account/read'?{account:null}:{});});
+ try{const first=f.client.login();await started;const cancelling=f.client.cancelLogin();const retry=f.client.login();reply();await first;await cancelling;assert.equal((await retry).loginId,'second');assert.deepEqual(f.calls.filter(c=>c.method==='account/login/cancel').map(c=>c.params.loginId),['first']);assert.equal(count,2);}finally{f.client.stop();}
+});
 test('runtime missing returns a typed setup result without starting anything',async()=>{
  const f=fixture(()=>assert.fail('must not spawn'),{findCodex:()=>null});assert.equal((await f.client.setupStatus()).errorCode,'RUNTIME_MISSING');await assert.rejects(f.client.read(),{code:'RUNTIME_MISSING'});assert.equal(f.children.length,0);
 });
 test('request timeout clears pending, restarts the child, and quota succeeds on retry',async()=>{
  let ignore=true;
- const f=fixture((m,c)=>{if(m.method==='account/rateLimits/read'&&ignore)return;respond(m,c,m.method==='account/rateLimits/read'?{rateLimits:{primary:{usedPercent:9,windowDurationMins:300,resetsAt:2000000000}}}:{});},{timeoutMs:15});
+ const f=fixture((m,c)=>{if(m.method==='account/rateLimits/read'&&ignore)return;respond(m,c,m.method==='account/read'?{account:{type:'chatgpt'}}:m.method==='account/rateLimits/read'?{rateLimits:{primary:{usedPercent:9,windowDurationMins:300,resetsAt:2000000000}}}:{});},{timeoutMs:15});
  try{await assert.rejects(f.client.read(),{code:'REQUEST_TIMEOUT'});assert.equal(f.client.pending.size,0);assert.equal(f.client.child,null);ignore=false;assert.equal((await f.client.read()).limits[0].primary.usedPercent,9);assert.equal(f.children.length,2);}finally{f.client.stop();}
 });
 test('child exit rejects inflight calls and a later retry initializes a new child',async()=>{
@@ -159,4 +200,38 @@ test('empty dedicated home resumes login after cancellation without touching oth
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'codex-onboarding-empty-'));
  const f=fixture((m,c)=>respond(m,c,m.method==='account/read'?{account:null}:m.method==='account/login/start'?{loginId:'cancelled',authUrl:'https://auth.openai.com/oauth/authorize'}:{}),{managedHome:temp,env:{OpenAI_Api_Key:'private',codex_home:'original'}});
  try{assert.equal((await f.client.setupStatus()).managed,true);assert.equal(f.spawned[0].env.OpenAI_Api_Key,undefined);assert.equal(f.spawned[0].env.codex_home,undefined);await f.client.login();await f.client.cancelLogin();assert.equal((await f.client.setupStatus()).needsLogin,true);assert(!f.calls.some(c=>c.method==='account/logout'));assert.equal(fs.readdirSync(temp).length,0);}finally{f.client.stop();fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('account email and quota workspace ID are separate namespaces and raw identifiers remain private',async()=>{
+ const crypto=require('node:crypto');const account={type:'chatgpt',email:'a@example.invalid'};
+ const f=fixture((m,c)=>respond(m,c,m.method==='account/read'?{account}:m.method==='account/rateLimits/read'?{accountId:'workspace-one',rateLimits:{limitId:'codex',secondary:{usedPercent:12,windowDurationMins:10080,resetsAt:2000000000}}}:{}));
+ try{const status=await f.client.setupStatus();assert.equal(status.identityUnverified,true);const q=await f.client.read();assert.equal(q.accountFingerprint,crypto.createHash('sha256').update('workspace-one').digest('hex'));assert.equal(q.accountFingerprintKind,'account-id');assert(!JSON.stringify(q).includes('example.invalid'));assert(!JSON.stringify(q).includes('workspace-one'));assert.equal(q._accountAliases[0],crypto.createHash('sha256').update('account-id:workspace-one').digest('hex'));}finally{f.client.stop();}
+});
+test('email-only account displays quota unverified, detects mid-read account switch',async()=>{
+ let current='a@example.invalid',flip=false;
+ const f=fixture((m,c)=>{if(m.method==='account/read')return respond(m,c,{account:{type:'chatgpt',email:current}});if(m.method==='account/rateLimits/read'){if(flip)current='b@example.invalid';return respond(m,c,{rateLimits:{limitId:'codex',secondary:{usedPercent:12,windowDurationMins:10080,resetsAt:2000000000}}});}respond(m,c,{});});
+ try{const q=await f.client.read();assert.equal(q.identityUnverified,true);assert.equal(q.accountFingerprint,undefined);flip=true;await assert.rejects(f.client.read(),{code:'ACCOUNT_CHANGED'});}finally{f.client.stop();}
+});
+test('workspace change while reading quota rejects stale response',async()=>{
+ let reads=0;
+ const f=fixture((m,c)=>{if(m.method==='account/read')return respond(m,c,{account:{type:'chatgpt',email:'a@example.invalid'},workspaceRouting:{chatgptAccountId:++reads===1?'one':'two'}});if(m.method==='account/rateLimits/read')return respond(m,c,{accountId:'one',rateLimits:{limitId:'codex',secondary:{usedPercent:12,windowDurationMins:10080,resetsAt:2000000000}}});respond(m,c,{});});
+ try{await assert.rejects(f.client.read(),{code:'ACCOUNT_CHANGED'});}finally{f.client.stop();}
+});
+test('fresh idle status reconnects the reader without a login or logout request',async()=>{
+ const f=fixture((m,c)=>respond(m,c,m.method==='account/read'?{account:{type:'chatgpt',email:'a@example.invalid'}}:{}));
+ try{await f.client.setupStatus();await f.client.setupStatus({freshSession:true});assert.equal(f.children.length,2);assert(!f.calls.some(m=>/login|logout/.test(m.method)));}finally{f.client.stop();}
+});
+
+test('missing account in either account/read rejects quota ownership and refresh',async()=>{
+ for(const missingAt of [1,2]){
+  let accountReads=0,quotaReads=0;
+  const f=fixture((m,c)=>{if(m.method==='account/read')return respond(m,c,++accountReads===missingAt?{}:{account:{type:'chatgpt',email:'valid@example.invalid'}});if(m.method==='account/rateLimits/read'){quotaReads++;return respond(m,c,{accountId:'workspace-one',rateLimits:{primary:{usedPercent:5,windowDurationMins:300,resetsAt:2000000000}}});}respond(m,c,{});});
+  try{await assert.rejects(f.client.read(),{code:'LOGIN_REQUIRED'});assert.equal(f.client.quotaReady,false);assert.equal(quotaReads,missingAt===1?0:1);}finally{f.client.stop();}
+ }
+});
+
+test('fresh-reader startup notifications are tagged only during that status check',async()=>{
+ const seen=[];const f=fixture((m,c)=>{if(m.method==='initialize'){respond(m,c,{});c.send({method:'account/updated',params:{authMode:'chatgpt'}});}else respond(m,c,m.method==='account/read'?{account:{type:'chatgpt',email:'a@example.invalid'}}:{});});
+ f.client.on('account-updated',()=>seen.push(f.client.freshSessionStarting));
+ try{await f.client.setupStatus({freshSession:true});assert.deepEqual(seen,[true]);assert.equal(f.client.freshSessionStarting,false);f.children.at(-1).send({method:'account/updated',params:{authMode:'chatgpt'}});assert.deepEqual(seen,[true,false]);}finally{f.client.stop();}
 });

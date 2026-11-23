@@ -3,8 +3,9 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const {projectAfterReset,warning}=require('../app/ui/pace-timing.js');
 const stamp=(hour,minute=0)=>`2026-10-15T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00+08:00`;
 const now=Date.parse(stamp(14,40));
-const quota={bucketId:'codex',key:'secondary',planType:'pro',durationMins:10080,resetsAt:'2026-10-22T14:13:00+08:00',usedPercent:3,fetchedAt:stamp(14,39),stale:false};
-const actualLocalProof={key:'quota-reset:codex:secondary:'+quota.resetsAt,kind:'quota-reset',bucketId:'codex',windowKey:'secondary',resetsAt:quota.resetsAt,observedAt:stamp(14,14)};
+const owner='a'.repeat(64);
+const quota={accountFingerprint:owner,bucketId:'codex',key:'secondary',planType:'pro',durationMins:10080,resetsAt:'2026-10-22T14:13:00+08:00',usedPercent:3,fetchedAt:stamp(14,39),stale:false};
+const actualLocalProof={accountFingerprint:owner,key:'quota-reset:codex:secondary:'+quota.resetsAt,kind:'quota-reset',bucketId:'codex',windowKey:'secondary',resetsAt:quota.resetsAt,observedAt:stamp(14,14)};
 const forecast=(id='old',issuedAt=stamp(12,55),end=stamp(14,55))=>({id,state:'scheduled',type:'global',issuedAt,start:end,end,url:`https://x.com/thsottiaux/status/${id==='old'?'2100000000000000001':'2100000000000000002'}`,text:'Original announcement',timingKind:'announcement'});
 const source=(f=forecast())=>({id:'did',name:'Did Codex Reset',status:'ok',updatedAt:stamp(14,39),fetchedAt:stamp(14,39),maxAge:900000,forecast:f,additionalForecasts:[]});
 const done=(patch={})=>({id:'tibo',name:'TIBO',status:'ok',updatedAt:stamp(14,39),fetchedAt:stamp(14,39),maxAge:900000,forecast:{state:'none'},lastReset:{id:'2100000000000000003',type:'global',at:stamp(14,28),url:'https://x.com/thsottiaux/status/2100000000000000003',text:'Completion record',...patch}});
@@ -30,7 +31,7 @@ test('paused cached cycle evidence stays valid after freshness expires and proje
 
 test('a matching persisted local reset can supply the actual observation but a different window cannot',()=>{
  const q={...quota,fetchedAt:null,stale:true};
- const local={key:'quota-reset:codex:secondary:'+q.resetsAt,kind:'quota-reset',bucketId:'codex',windowKey:'secondary',resetsAt:q.resetsAt,observedAt:stamp(14,14)};
+ const local={accountFingerprint:owner,key:'quota-reset:codex:secondary:'+q.resetsAt,kind:'quota-reset',bucketId:'codex',windowKey:'secondary',resetsAt:q.resetsAt,observedAt:stamp(14,14)};
  assert.equal(view([source()],q,local)[0].forecast.state,'none');
  for(const changed of [{...local,bucketId:'other'},{...local,windowKey:'primary'},{...local,resetsAt:'2026-10-22T15:00:00+08:00'},{...local,observedAt:stamp(14,12)}])assert.equal(view([source()],q,changed)[0].forecast.state,'scheduled');
 });
@@ -43,6 +44,13 @@ test('ordinary five-hour and weekly observed cycles cannot retire a global forec
    assert.equal(warning([source()],q,null,3,now,proof).active,true);
   }
  }
+});
+
+test('a confirmed short periodic window refill does not retire a global forecast',()=>{
+ const shortQuota={...quota,key:'primary',durationMins:300,resetsAt:stamp(19,13)};
+ const receipt={...actualLocalProof,windowKey:'primary',resetsAt:shortQuota.resetsAt};
+ assert.equal(view([source()],shortQuota,receipt)[0].forecast.state,'scheduled');
+ assert.equal(warning([source()],shortQuota,null,3,now,receipt).active,true);
 });
 
 test('a real local refill uses its narrow two-hour relationship rather than the official six-hour assumption',()=>{
@@ -190,3 +198,7 @@ test('shared upstream records can retire fulfilled schedules without inventing m
  assert.equal('familyCount' in projected[0],false);
  assert.equal(JSON.stringify([source(),a,b]),before);
 });
+
+ test('unverified or different account refill cannot retire a current account schedule',()=>{
+  for(const proof of [{...actualLocalProof,accountFingerprint:undefined},{...actualLocalProof,accountFingerprint:'b'.repeat(64)}])assert.equal(view([source()],quota,proof)[0].forecast.state,'scheduled');
+ });

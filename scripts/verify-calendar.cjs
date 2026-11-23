@@ -23,7 +23,9 @@ async function main(){try{
  assert.deepEqual(await page.locator('.calendar-month-heading').allTextContents(),months.map(m=>m.month+'月'));
  for(let i=0;i<months.length;i++)assert.equal(await page.locator('.calendar-month').nth(i).locator('.calendar-cell').count(),months[i].cells.length);
  const completed=page.locator(`[data-calendar-day="${date}"]`);assert.equal(await completed.evaluate(e=>e.classList.contains('has-reset')),true);assert.match(await completed.innerText(),/08:11/);assert.match(await completed.innerText(),/16:35/);
- const banked=Calendar.dateKey(now-day);assert.equal(await page.locator(`[data-calendar-day="${banked}"] .banked`).count(),0);await page.locator('#calendar-show-banked').check();assert.equal(await page.locator(`[data-calendar-day="${banked}"] .banked`).count(),1);assert.equal(await page.locator(`[data-calendar-day="${banked}"]`).evaluate(e=>e.classList.contains('has-reset')),false);results.push('50 Beijing dates in independent Monday-first month grids, seven future dates, four pacing bars');
+ const banked=Calendar.dateKey(now-day),card=page.locator(`[data-calendar-day="${banked}"] .banked`);assert.equal(await page.locator('#calendar-show-banked').isChecked(),true);assert.equal(await card.count(),1);
+ const cardColors=await card.evaluate(element=>({background:getComputedStyle(element).backgroundColor,color:getComputedStyle(element).color,weight:Number(getComputedStyle(element).fontWeight)}));assert.equal(cardColors.background,'rgb(37, 99, 235)');assert.equal(cardColors.color,'rgb(255, 255, 255)');assert.ok(cardColors.weight>=700);
+ await page.locator('#calendar-show-banked').uncheck();assert.equal(await card.count(),0);await page.locator('#calendar-show-banked').check();assert.equal(await card.count(),1);assert.equal(await page.locator(`[data-calendar-day="${banked}"]`).evaluate(e=>e.classList.contains('has-reset')),false);results.push('50 Beijing dates, blue reset-card mark enabled by default and independently filterable, four pacing bars');
  await assert.rejects(()=>page.evaluate(()=>window.dashboard.saveSettings({calendarTarget:{day:'1900-01-01',hour:17}})),/请选择/);
  const before=await page.evaluate(()=>window.dashboard.get()),manualDays=before.settings.hypotheticalDays;
  const selected=Calendar.dateKey(now+2*day),target=Calendar.targetForDay(selected,17,now),targetLabel=selected.slice(5).split('-').map(Number).join('/');
@@ -60,7 +62,10 @@ async function main(){try{
  results.push('month headings align to their first date, centered cell text, today circle, no extra dots, fixed titlebar and max-font cell bounds in both languages');
  await page.locator('#calendar-clear').click();await page.waitForFunction(()=>!state.settings.calendarTarget);assert.equal((await page.evaluate(()=>window.dashboard.get())).settings.hypotheticalDays,4);assert.equal(await page.locator('#calendar-percent').innerText(),'—');assert.notEqual(await page.locator('#hypothetical-percent').innerText(),'—');
  await stop();await launch();assert.equal((await page.evaluate(()=>window.dashboard.get())).settings.calendarTarget,undefined);assert.equal((await page.evaluate(()=>window.dashboard.get())).settings.hypotheticalDays,4);results.push('clearing calendar target is independent and remains cleared after restart');
- fs.mkdirSync(path.join(root,'.verification'),{recursive:true});await page.locator('.calendar-section').screenshot({path:path.join(root,'.verification','calendar-preview.png')});
+ // Electron's hidden verification window can time out in Playwright's
+ // locator stability check even when the calendar geometry is unchanged.
+ // Capture the full rendered page without locator-driven scrolling instead.
+ fs.mkdirSync(path.join(root,'.verification'),{recursive:true});await page.screenshot({path:path.join(root,'.verification','calendar-preview.png'),fullPage:true});
  assert.deepEqual(errors,[]);assert.deepEqual(http,[]);console.log(JSON.stringify({ok:true,results,layouts,errors,networkRequests:http.length,testNotifications:false},null,2));
  }finally{if(application)await stop();}}
 main().catch(e=>{console.error(e.stack);process.exitCode=1;});

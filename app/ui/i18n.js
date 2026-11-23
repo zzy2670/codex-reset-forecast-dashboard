@@ -1,6 +1,8 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.DashboardI18n=api;})(globalThis,()=>{
  'use strict';
  const phrases={
+ '账号周额度':'Weekly quota by account','剩余周额度未提供':'Weekly quota not provided','剩余周额度':'Weekly quota remaining','周额度实际消耗':'Weekly quota used','实际消耗未提供':'Actual usage not provided','已消耗':'Used','七天周期已过':'Seven-day cycle elapsed','7 天平均节奏':'Even 7-day pace','红线表示七天周期已过去的比例，抵达右端表示已到预计重置时间':'The red line shows the elapsed share of the seven-day cycle; the right edge marks the expected reset time','连接账号后自动记录周额度':'Weekly quota is saved when an account connects','上次记录':'Last recorded','当前账号':'Current account','记录时距重置':'Time until reset when recorded','距重置':'Until reset','距预计重置':'Until expected reset','预计重置时间已到，等待确认':'Expected reset time reached; awaiting confirmation','记录于':'Recorded','更新于':'Updated','账号 ':'Account ','账号':'Account','重置时间未记录':'Reset time not recorded','已到重置时间，等待刷新':'Reset time reached; awaiting refresh','记录时已到重置时间':'Reset time had passed when recorded','未提供':'Not provided','未知':'Unknown','核验中':'Verifying',
+ '正在核实账号，完成后可修改日历预测。':'Verifying account. You can change the calendar forecast when verification finishes.','上次核验账号的缓存 · 核验中':'Previously verified account cache · verifying','正在核实账号':'Verifying account','重试读取额度':'Retry quota reading','正在读取本机额度，请稍后重试。':'Reading local quota. Try again shortly.','来源时间未记录':'Source time not recorded','周期额度补充 · 原因待核实':'Periodic quota refill · Cause unverified','周期额度补充':'Periodic quota refill','本机额度补充 · 原因待核实':'Local refill · Cause unverified','原因待核实':'Cause unverified','切换 ChatGPT 账号':'Switch ChatGPT account','在 Codex 中切换账号':'Switch account in Codex','请在 Codex 桌面端登录或切换账号，看板会自动检测。':'Sign in or switch accounts in Codex; the dashboard will detect it automatically.','账号未核实':'Account unverified','等待完成登录':'Waiting for sign-in','连接未完成':'Connection incomplete','含发卡公告':'Includes reset-card issuance','疑似重置卡 · 原因待核实':'Possible reset card · Cause unverified',
  '发卡公告':'Reset-card issuance','仅发放重置卡，未表示本机额度已补充':'Reset cards were issued; this does not indicate a local quota refill',
  '套餐升级补充':'Plan upgrade refill','起点 ':'Start ',
  '已收录完成记录，原预告不再作为下次预计':'A completion was recorded; the previous forecast is retired',
@@ -17,6 +19,7 @@
 
  '7天均匀节奏':'Even 7-day pace',
  '日历预测':'Calendar forecast','日历节奏':'Calendar pace','指定重置时间':'Choose a reset time',
+ '预览，点击确定保存':'Preview; select Confirm to save','预览':'Preview','已过时间占所选周期':'Elapsed time as a share of the selected period','请选择有效日期和小时':'Choose a valid date and hour','从本机补充记录时间起算':'From the locally recorded refill time',
  '指定时间':'Selected time','未设置日历预测':'No calendar forecast','清除日期假设':'Clear calendar target',
  '清除天数假设':'Clear assumed period','日期假设已清除':'Calendar target cleared',
  '天数假设已清除':'Assumed period cleared','已更新日历节奏':'Calendar pace updated',
@@ -216,7 +219,7 @@
  function text(value,language='zh-CN'){const s=String(value??'');if(language!=='en')return s;return s.replace(expression,m=>phrases[m]);}
  const cache=new WeakMap(),attributeCache=new WeakMap();
  function apply(document,language){
-  document.documentElement.lang=language==='en'?'en':'zh-CN';document.body.dataset.language=language;
+  const lang=language==='en'?'en':'zh-CN';if(document.documentElement.lang!==lang)document.documentElement.lang=lang;if(document.body.dataset.language!==language)document.body.dataset.language=language;
   const walker=document.createTreeWalker(document.body,4);let node;
   while(node=walker.nextNode()){
    if(node.parentElement?.closest('script,style,[data-original]'))continue;
@@ -230,7 +233,7 @@
     const translated=text(saved[name].source,language);saved[name].rendered=translated;if(current!==translated)el.setAttribute(name,translated);
    }attributeCache.set(el,saved);
   }
-  document.title=language==='en'?'Codex Reset Forecast Dashboard':'codex重置预测看板';
+  const title=language==='en'?'Codex Reset Forecast Dashboard':'codex重置预测看板';if(document.title!==title)document.title=title;
  }
  return {text,apply,phrases,locale:language=>language==='en'?'en-US':'zh-CN'};
 });

@@ -19,8 +19,13 @@
   if(!Number.isFinite(anchor)||!Number.isFinite(deadline)||deadline<=anchor)return null;
   return Math.max(0,Math.min(100,(now-anchor)/(deadline-anchor)*100));
  }
+ function sameAccount(left,right){
+  const a=left?.accountFingerprint,b=right?.accountFingerprint;
+  return typeof a==='string'&&/^[a-f0-9]{64}$/.test(a)&&a===b;
+ }
  function actualLocalResetAnchor(quota,localReset,now){
   if(quota?.source!=='local-codex'||localReset?.kind!=='quota-reset'||!quota.bucketId||!['primary','secondary'].includes(quota.key))return null;
+  if(!sameAccount(quota,localReset))return null;
   if(localReset.bucketId!==quota.bucketId||localReset.windowKey!==quota.key||localReset.resetsAt!==quota.resetsAt)return null;
   const end=Date.parse(quota.resetsAt),duration=quota.durationMins*60000,observed=Date.parse(localReset.observedAt),at=end-duration;
   if(!Number.isFinite(quota.durationMins)||!Number.isFinite(duration)||duration<=0||!Number.isFinite(at)||at>now||!Number.isFinite(observed)||observed<at||observed>=end||observed>now)return null;
@@ -53,7 +58,18 @@
   return {available:true,days,origin:chosen.origin,anchor:new Date(chosen.at).toISOString(),end:new Date(chosen.at+duration).toISOString(),elapsedHours:elapsed/3600000,progress:Math.min(1,elapsed/duration),overdue:elapsed>=duration};
  }
  function calendarPace(target,now=Date.now(),options={}){
-  const local=localPaceAnchor(options?.quota,options?.localReset,now),end=Date.parse(target?.at),useLocal=local&&local.at<end,anchor=useLocal?local.at:Date.parse(target?.anchor);
+  let local=localPaceAnchor(options?.quota,options?.localReset,now);
+  const quota=options?.quota,quotaEnd=Date.parse(quota?.resetsAt);
+  if(local&&Number.isFinite(quotaEnd)){
+   const receipt=(options?.localHistory||[]).filter(row=>['local','plan_upgrade'].includes(row.type)&&sameAccount(quota,row)&&row.bucketId===quota.bucketId&&row.windowKey===quota.key&&Number.isFinite(Date.parse(row.resetsAt))&&Math.abs(Date.parse(row.resetsAt)-quotaEnd)<=2000&&Number.isFinite(Date.parse(row.at))&&Date.parse(row.at)>=local.at-2000&&Date.parse(row.at)<=now&&Date.parse(row.at)<quotaEnd).sort((a,b)=>Date.parse(b.at)-Date.parse(a.at))[0];
+   if(receipt)local={at:Date.parse(receipt.at),origin:'receipt'};
+  }
+  const end=Date.parse(target?.at),useLocal=local&&local.at<end;
+  // Untagged legacy anchors may belong to another account. Public anchors are
+  // independent, while a saved account anchor requires a verified same identity.
+  const hasContext=!!options&&['quota','localReset','localHistory'].some(key=>Object.hasOwn(options,key));
+  const savedAllowed=target?.anchorScope==='public'||target?.anchorScope==='account'&&sameAccount(target,quota)||!hasContext&&!target?.anchorScope;
+  const anchor=useLocal?local.at:savedAllowed?Date.parse(target?.anchor):NaN;
   if(!Number.isFinite(now)||!Number.isFinite(anchor)||!Number.isFinite(end)||anchor>now||end<=anchor)return {available:false};
   return {available:true,origin:useLocal?local.origin:'saved',anchor:new Date(anchor).toISOString(),end:new Date(end).toISOString(),days:(end-anchor)/86400000,progress:paceProgress(anchor,end,now)/100,overdue:now>=end};
  }
@@ -89,9 +105,9 @@
   if(!quota||quota.state&&quota.state!=='ok'||quota.source&&quota.source!=='local-codex')return null;
   const end=Date.parse(quota.resetsAt),duration=Number(quota.durationMins)*60000,at=end-duration;
   const used=Number.isFinite(quota.usedPercent)?quota.usedPercent:Number.isFinite(quota.actual)?quota.actual*100:NaN;
-  if(!Number.isFinite(at)||duration<=0||!Number.isFinite(duration)||at>now||!Number.isFinite(used)||used<0||used>100)return null;
+  if(!Number.isFinite(at)||duration<=6*3600000||!Number.isFinite(duration)||at>now||!Number.isFinite(used)||used<0||used>100)return null;
   const observed=Date.parse(quota.fetchedAt),receipt=Date.parse(localReset?.observedAt);
-  const matching=localReset?.bucketId===quota.bucketId&&localReset?.windowKey===quota.key&&localReset?.resetsAt===quota.resetsAt&&Number.isFinite(receipt)&&receipt>=at&&receipt<=now;
+  const matching=sameAccount(quota,localReset)&&localReset?.bucketId===quota.bucketId&&localReset?.windowKey===quota.key&&localReset?.resetsAt===quota.resetsAt&&Number.isFinite(receipt)&&receipt>=at&&receipt<=now;
   // Cached cycle boundaries remain historical facts while polling is paused.
   // An unobserved/future cycle or a bare stale/error response is not completion.
   if(!(Number.isFinite(observed)&&observed>=at&&observed<=now+60000)&&!matching)return null;
@@ -100,7 +116,7 @@
  function projectAfterReset(sources,quota,localReset,now=Date.now()){
   const projected=(sources||[]).map(s=>projectForecasts(s,now));
   const cycle=localCycleCompletion(quota,localReset,now),observed=Date.parse(localReset?.observedAt);
-  const local=cycle&&localReset?.kind==='quota-reset'&&localReset.bucketId===quota?.bucketId&&localReset.windowKey===quota?.key&&localReset.resetsAt===quota?.resetsAt&&Number.isFinite(observed)&&observed>=cycle.at&&observed<=now?cycle:null;
+  const local=cycle&&sameAccount(quota,localReset)&&localReset?.kind==='quota-reset'&&localReset.bucketId===quota?.bucketId&&localReset.windowKey===quota?.key&&localReset.resetsAt===quota?.resetsAt&&Number.isFinite(observed)&&observed>=cycle.at&&observed<=now?cycle:null;
   const completions=[];
   for(const s of projected)for(const record of [s.lastReset,...(s.historyEvents||[])]){
    // A stale or unverified collector cannot invalidate another source's live ETA.

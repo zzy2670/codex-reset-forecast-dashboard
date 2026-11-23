@@ -1,4 +1,4 @@
-(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./time-zone.js'));else root.ResetCalendar=factory(root.DashboardTimeZone);})(globalThis,TimeZone=>{
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./time-zone.js'),require('./history-groups.js'));else root.ResetCalendar=factory(root.DashboardTimeZone,root.HistoryGroups);})(globalThis,(TimeZone,HistoryGroups)=>{
  'use strict';
  const DAY=86400000;
  function timestamp(value){
@@ -21,37 +21,32 @@
   zone=TimeZone.normalize(zone);
   const today=dayNumber(dateKey(at,zone));return {at,today,start:today-42,end:today+7,zone};
  }
- function postKey(value){
-  try{
-   const url=new URL(value);
-   if(url.protocol!=='https:'||url.username||url.password)return null;
-   const post=['x.com','twitter.com','www.x.com','www.twitter.com'].includes(url.hostname)&&url.pathname.match(/^\/[^/]+\/status\/(\d+)\/?$/);
-   if(post)return `post:${post[1]}`;
-   url.hash='';return `url:${url.href}`;
-  }catch{return null;}
- }
- function historyEvents(history,range){
-  const rows=(Array.isArray(history)?history:[]).filter(record=>{
-   const at=timestamp(record?.at),day=Number.isFinite(at)?dayNumber(dateKey(at,range.zone)):NaN;
-   return !['observation','commentary','repair'].includes(record?.type)&&Number.isFinite(at)&&at<=range.at&&day>=range.start&&day<=range.today;
-  });
-  // IDs and original-post URLs are aliases. Merge both transitively so source
-  // copies cannot create a second event even when they use different row IDs.
-  const parent=rows.map((_,i)=>i),aliases=new Map();
-  const find=i=>{while(parent[i]!==i){parent[i]=parent[parent[i]];i=parent[i];}return i;};
-  rows.forEach((row,i)=>{
-   const keys=[row.id===undefined||row.id===null||String(row.id)===''?null:`id:${row.id}`,postKey(row.url)].filter(Boolean);
-   for(const key of keys){if(aliases.has(key))parent[find(i)]=find(aliases.get(key));else aliases.set(key,i);}
-  });
-  const selected=new Map();rows.forEach((row,i)=>{const root=find(i);if(!selected.has(root))selected.set(root,row);});
-  return [...selected.values()].map(row=>{
+ function historyEvents(history,range,options){
+  const valid=value=>{
+   const at=timestamp(value?.at),day=Number.isFinite(at)?dayNumber(dateKey(at,range.zone)):NaN;
+   return Number.isFinite(at)&&at<=range.at&&day>=range.start&&day<=range.today;
+  };
+  const publicRows=(Array.isArray(history)?history:[]).filter(valid),localRows=(Array.isArray(options.localHistory)?options.localHistory:[]).filter(valid);
+  const grouped=HistoryGroups.rows(publicRows,localRows,{now:range.at});
+  const selected=new Map(),current=options.currentAccountFingerprint;
+  for(const row of grouped){
+   if(['observation','commentary','repair'].includes(row.type)||['observation','commentary','repair'].includes(row.phase)||row.evidenceOnly)continue;
+   const at=timestamp(row.at),day=Number.isFinite(at)?dayNumber(dateKey(at,range.zone)):NaN;
+   if(!Number.isFinite(at)||at>range.at||day<range.start||day>range.today)continue;
+   // One official event can have separate local rows for different accounts.
+   // Show one calendar mark, preferring the currently connected account.
+   const key=row.officialGroupKey||`row:${row.id??row.type+':'+at}`;
+   const rank=current&&row.accountFingerprint===current?3:row.hasLocalReset?2:1;
+   const previous=selected.get(key);if(!previous||rank>previous.rank)selected.set(key,{row,rank});
+  }
+  return [...selected.values()].map(({row})=>{
    const at=timestamp(row.at),clock=TimeZone.time(at,range.zone);
-   return {...row,id:String(row.id??postKey(row.url)??`${row.type||'reset'}:${at}`),time:clock,scope:row.scope??null};
+   return {...row,id:String(row.id??`${row.type||'reset'}:${at}`),time:clock,scope:row.scope??null};
   }).sort((a,b)=>timestamp(a.at)-timestamp(b.at)||a.id.localeCompare(b.id));
  }
- function calendar(history,now=Date.now(),zone=TimeZone.DEFAULT){
+ function calendar(history,now=Date.now(),zone=TimeZone.DEFAULT,options={}){
   const range=bounds(now,zone),byDay=new Map();
-  for(const event of historyEvents(history,range)){const key=dateKey(event.at,range.zone);if(!byDay.has(key))byDay.set(key,[]);byDay.get(key).push(event);}
+  for(const event of historyEvents(history,range,options)){const key=dateKey(event.at,range.zone);if(!byDay.has(key))byDay.set(key,[]);byDay.get(key).push(event);}
   const leading=(new Date(range.start*DAY).getUTCDay()+6)%7,cells=[];
   for(let i=0;i<56;i++){
    const day=range.start+i-leading;

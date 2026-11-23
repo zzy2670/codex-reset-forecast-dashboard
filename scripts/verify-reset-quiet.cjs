@@ -6,9 +6,9 @@ const now=Date.now(),iso=t=>new Date(t).toISOString(),cycleStart=now-25*60000;
 let application,page;const errors=[],http=[],results=[];
 function fixture(){
  const s=makeDemo(now,{language:'zh-CN'});s.schemaVersion=3;s.baseline=true;s.seen=[];s.settings.notify=true;s.settings.autoStart=false;
- s.quota={state:'ok',source:'local-codex',fetchedAt:iso(now),limits:[{id:'codex',name:'Codex',planType:'pro',secondary:{usedPercent:2,durationMins:10080,resetsAt:iso(cycleStart+7*86400000)}}]};
+ s.quota={state:'ok',source:'local-codex',accountFingerprint:'a'.repeat(64),fetchedAt:iso(now),limits:[{id:'codex',name:'Codex',planType:'pro',secondary:{usedPercent:2,durationMins:10080,resetsAt:iso(cycleStart+7*86400000)}}]};
  for(const [i,source] of s.sources.entries())source.forecast=i<2?{id:`old-${i}`,type:'global',kindLabel:'全局重置',state:'scheduled',scope:{plans:['all']},timingKind:'announcement',issuedAt:iso(now-2*3600000),start:iso(now+(17+i)*60000),end:iso(now+(17+i)*60000),url:source.url,text:'Original forecast before the reset'}:{state:'none'};
- const q=quotaView(s.quota,s.settings,now);s.events=[{key:`quota-reset:${q.bucketId}:${q.key}:${q.resetsAt}`,kind:'quota_reset',title:'本机额度已补充',body:'个人重置时间已更新',at:iso(cycleStart+1000),sourceId:null,read:true}];return s;
+ const q=quotaView(s.quota,s.settings,now);s.events=[{key:`quota-reset:${q.bucketId}:${q.key}:${q.resetsAt}`,accountFingerprint:q.accountFingerprint,kind:'quota_reset',title:'本机额度已补充',body:'个人重置时间已更新',at:iso(cycleStart+1000),sourceId:null,read:true}];return s;
 }
 async function launch(){
  const env={...process.env};delete env.ELECTRON_RUN_AS_NODE;

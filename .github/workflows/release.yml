@@ -28,6 +28,7 @@ jobs:
       - run: npm run test:timezone
       - run: npm run test:calendar
       - run: npm run test:quota-history
+      - run: node scripts/verify-weekly-accounts.cjs
       - run: npm run build
       - run: node scripts/verify-package.cjs
       - name: Install release on a clean Windows runner
@@ -49,6 +50,12 @@ jobs:
         run: |
           $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
           npm run test:onboarding
+      - name: Verify packaged weekly accounts
+        shell: pwsh
+        run: |
+          $env:DASHBOARD_TEST_EXE = Join-Path $env:RUNNER_TEMP 'Codex Dashboard First Install/Codex Reset Dashboard.exe'
+          node scripts/verify-weekly-accounts.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify installed official reset calendar clearing
         shell: pwsh
         run: |

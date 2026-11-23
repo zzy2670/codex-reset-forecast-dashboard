@@ -25,7 +25,7 @@ The AI follows [AGENTS.md](AGENTS.md) and runs `scripts/install.ps1` to install 
 <details>
 <summary>Installation and runtime notes</summary>
 
-- Both builds include the official Codex runtime; Node.js, npm and a separate CLI installation are not required. If you use another provider, the dashboard connects to ChatGPT separately for quota.
+- Both builds include the official Codex runtime; Node.js, npm and a separate CLI installation are not required. Quota follows the local Codex ChatGPT sign-in; switch accounts in Codex when needed.
 - Release binaries are unsigned, so Windows may show an unknown-publisher prompt. SHA256SUMS.txt is included in each release to check your download.
 - Both installed and portable versions save settings and cached data in your Windows profile. Upgrades keep that data.
 - Startup with Windows is enabled by default and can be changed in Settings. Windows notification settings and Do Not Disturb affect notification display.
@@ -74,9 +74,9 @@ The calendar groups the past six weeks and the next week by month. Reset days ar
 
 Browse resets from September 2026, newest first. Expand a record to compare each site’s timestamp and original post. The latest cross-checked reset and elapsed time appear at the top of the dashboard.
 
-Official completion times define a reset window. Records within that window or three hours on either side are grouped as one global reset, using the local receipt time when available. A later refill after the quota reaches zero is shown as a personal reset-card use. Expand it to compare original source records and quota sampling times. The last remaining percentage recorded before the refill is highlighted on the right. The last trusted snapshot before that refill can fill a missing reading, with its sampling time shown; entries with neither a reading nor a usable snapshot show “Not recorded”.
+Official completion times define a reset window. Records within that window or three hours on either side are grouped as one global reset, using the local receipt time when available. Later local refills are recorded separately; an unverified cause is labelled accordingly. Expand it to compare original source records and quota sampling times. The last remaining percentage recorded before the refill is highlighted on the right. The last trusted snapshot before that refill can fill a missing reading, with its sampling time shown; entries with neither a reading nor a usable snapshot show “Not recorded”.
 
-Reset-card records have a pale yellow background and retain the original issuance or usage notice.
+Personal reset-card use and plan-upgrade refills have a pale yellow background. Card issuance announcements have a separate purple background and do not by themselves indicate a local refill.
 
 After a reset, the dashboard assumes a six-hour gap and clears older forecasts within it. New explicit announcements after the reset take priority.
 

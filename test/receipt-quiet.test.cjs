@@ -1,17 +1,17 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{EventEmitter}=require('node:events');
 const Policy=require('../app/notification-policy.cjs'),{quotaView,quotaChanges}=require('../app/codex-quota.cjs'),I18n=require('../app/ui/i18n.js');
-const start=Date.parse('2026-10-15T06:13:00Z'),iso=t=>new Date(t).toISOString();
-const sample=(now,used=2,end=start+7*86400000)=>({state:'ok',source:'local-codex',fetchedAt:iso(now),limits:[{id:'codex',name:'Codex',planType:'pro',secondary:{usedPercent:used,durationMins:10080,resetsAt:iso(end)}}]});
+const start=Date.parse('2026-10-15T06:13:00Z'),iso=t=>new Date(t).toISOString(),owner='a'.repeat(64);
+const sample=(now,used=2,end=start+7*86400000)=>({state:'ok',source:'local-codex',accountFingerprint:owner,fetchedAt:iso(now),limits:[{id:'codex',name:'Codex',planType:'pro',secondary:{usedPercent:used,durationMins:10080,resetsAt:iso(end)}}]});
 function runtime(saved=null){
  let now=start,writes=0,opened=0,next=sample(now),persisted;
  const state=saved||{settings:{notify:true,sound:false,language:'zh-CN',quotaWindow:'secondary',quotaLimitId:'codex'},quota:sample(now-30000,90,start+86400000),events:[],seen:[],notificationGroups:[]};
  const notifications=[],balloons=[],activeNotifications=new Map();
  class Native extends EventEmitter{constructor(options){super();this.options=options;notifications.push(this);}show(){this.emit('show');}close(){this.closed=true;this.emit('close',{reason:'dismissed'});}}
  const source=fs.readFileSync(path.join(__dirname,'../app/main.cjs'),'utf8');
- const sandbox={rememberLocalQuotaSnapshot:(s,q)=>require('../app/local-quota-history.cjs').rememberLocalQuotaSnapshot(s,q,now),recoverLocalQuotaHistory:s=>require('../app/local-quota-history.cjs').recoverLocalQuotaHistory(s,now),rememberLocalQuotaReset:(s,e)=>require('../app/local-quota-history.cjs').rememberLocalQuotaReset(s,e,now),state,Date:class extends Date{constructor(...a){super(...(a.length?a:[now]));}static now(){return now;}},path,__dirname:'',URLSearchParams,Notification:Native,activeNotifications,tr:t=>I18n.text(t,state.settings.language),...Policy,
- isQuiet:until=>Policy.isQuiet(until,now),shouldNotify:(g,e,u)=>Policy.shouldNotify(g,e,u,now),acknowledgeReset:(s,t,q,clickedAt=now)=>Policy.acknowledgeReset(s,t,q,clickedAt),recoverLocalReset:(s,q)=>Policy.recoverLocalReset(s,q,now),
- quotaView:(q,s)=>quotaView(q,s,now),quotaChanges:(a,b,s)=>quotaChanges(a,b,s,now),safeWrite:()=>{writes++;persisted=JSON.parse(JSON.stringify(state));},publish:()=>{},showWindow:()=>opened++,smoke:false,quotaRunning:false,
+ const sandbox={...require('../app/weekly-account-snapshots.cjs'),rememberLocalQuotaSnapshot:(s,q,n,options)=>require('../app/local-quota-history.cjs').rememberLocalQuotaSnapshot(s,q,now,options),recoverLocalQuotaHistory:s=>require('../app/local-quota-history.cjs').recoverLocalQuotaHistory(s,now),rememberLocalQuotaReset:(s,e)=>require('../app/local-quota-history.cjs').rememberLocalQuotaReset(s,e,now),state,Date:class extends Date{constructor(...a){super(...(a.length?a:[now]));}static now(){return now;}},path,__dirname:'',URLSearchParams,Notification:Native,activeNotifications,tr:t=>I18n.text(t,state.settings.language),...Policy,
+ isQuiet:until=>Policy.isQuiet(until,now),shouldNotify:(g,e,u)=>Policy.shouldNotify(g,e,u,now),acknowledgeReset:(s,t,q,clickedAt=now)=>Policy.acknowledgeReset(s,t,q,clickedAt),recoverLocalReset:(s,q,n,options)=>Policy.recoverLocalReset(s,q,now,options),
+ quotaView:(q,s)=>quotaView(q,s,now),quotaChanges:(a,b,s,n,options)=>quotaChanges(a,b,s,now,options),safeWrite:()=>{writes++;persisted=JSON.parse(JSON.stringify(state));},publish:()=>{},showWindow:()=>opened++,smoke:false,quotaRunning:false,quotaLoginInProgress:false,quotaAccountRevision:0,accountVerified:true,connection:{},activeAccountAliases:[],activeAccountHint:null,invalidateQuotaForAccountUpdate:()=>{},
  quotaFlight:null,localQuota:{read:async()=>next},tray:{displayBalloon:v=>balloons.push(v)}};
  vm.createContext(sandbox);
  vm.runInContext(source.slice(source.indexOf('function addEvent('),source.indexOf('\nasync function fetchJson('))+source.slice(source.indexOf('async function refreshQuota('),source.indexOf('\nfunction trayMenu(')),sandbox);
@@ -46,7 +46,7 @@ test('persisted notification activation works after restart and repeated receipt
  const c=runtime(b.persisted);c.advance(300000);c.receipt(n);assert.equal(c.state.resetQuietUntil,quiet);assert.equal(c.notifications.length,0);
 });
 test('recovery uses exact legacy local-event key and preserves received reset state',()=>{
- const q=quotaView(sample(start),{quotaWindow:'secondary'},start),key=`quota-reset:${q.bucketId}:${q.key}:${q.resetsAt}`;
+ const q=quotaView(sample(start),{quotaWindow:'secondary'},start);delete q.accountFingerprint;const key=`quota-reset:${q.bucketId}:${q.key}:${q.resetsAt}`;
  const state={events:[{kind:'quota_reset',key,at:iso(start-1000),sourceId:null}]};Policy.recoverLocalReset(state,q,start);assert.equal(state.localReset.key,key);state.localReset.acknowledgedAt=iso(start);Policy.recoverLocalReset(state,q,start);assert.equal(state.localReset.acknowledgedAt,iso(start));
  const wrong={events:[{kind:'confirmed',key,at:iso(start),sourceId:null}]};Policy.recoverLocalReset(wrong,{...q,fetchedAt:null,stale:true},start);assert.equal(wrong.localReset,undefined);
 });
@@ -58,7 +58,7 @@ test('different bucket, window, cycle and stale local quota reject starting new 
 test('muted, verification and stale samples do not send; English receipt is fully translated',async()=>{
  const muted=runtime();muted.state.settings.notify=false;await muted.sandbox.refreshQuota();assert.equal(muted.notifications.length,0);
  const verify=runtime();verify.sandbox.smoke=true;await verify.sandbox.refreshQuota();assert.equal(verify.notifications.length,0);
- const stale=runtime();stale.state.quota.fetchedAt=iso(start-130000);await stale.sandbox.refreshQuota();assert.equal(stale.notifications.length,0);assert.equal(stale.state.localReset.kind,'observed-cycle');assert.equal(stale.state.events.length,0);
+ const stale=runtime();stale.state.quota.fetchedAt=iso(start-310000);await stale.sandbox.refreshQuota();assert.equal(stale.notifications.length,0);assert.equal(stale.state.localReset.kind,'observed-cycle');assert.equal(stale.state.events.length,0);
  const en=runtime();en.state.settings.language='en';await en.sandbox.refreshQuota();assert.doesNotMatch(en.notifications[0].options.body,/[\u4e00-\u9fff]/);assert.match(en.notifications[0].options.toastXml,/content="Acknowledge"/);
 });
 test('switching local quota A to B and back cannot forget its already acknowledged reset',async()=>{
@@ -87,7 +87,7 @@ test('fresh current-cycle proof restores after an upgrade without inventing a re
  r.forecast('after-upgrade-notice');await r.receipt(r.notifications[0]);assert.equal(Date.parse(r.state.resetQuietUntil),r.now+Policy.QUIET_MS);
 });
 test('a source arriving before the cold quota read waits to bind the real current cycle',async()=>{
- const r=runtime();r.state.quota.fetchedAt=iso(start-180000);r.forecast('first-boot-source');await r.sandbox.quotaFlight;await Promise.resolve();
+ const r=runtime();r.state.quota=sample(start-180000);r.forecast('first-boot-source');await r.sandbox.quotaFlight;await Promise.resolve();
  assert.equal(r.notifications.length,1);assert.equal(r.state.localReset.kind,'observed-cycle');assert.equal(r.state.notificationGroups[0].localResetKeyAtDelivery,r.state.localReset.key);
  await r.receipt(r.notifications[0]);assert.equal(Date.parse(r.state.resetQuietUntil),r.now+Policy.QUIET_MS);
 });
@@ -96,4 +96,19 @@ test('turning notifications off during quota refresh cancels queued delivery wit
  r.forecast('queued');r.state.settings.notify=false;finish(sample(r.now));await r.sandbox.quotaFlight;await Promise.resolve();
  assert.equal(r.notifications.length,0);assert.equal(r.state.notificationGroups[0].pending,false);assert.notEqual(r.state.notificationGroups[0].delivered,true);
  r.state.settings.notify=true;r.forecast('unmuted-related-source');assert.equal(r.notifications.length,1);
+});
+
+test('both quota windows record distinct refills even if only weekly is selected; short cycle stays independent',async()=>{
+ const r=runtime(),old=sample(start-30000,90,start+86400000),next=sample(start,2,start+7*86400000);
+ old.limits[0].primary={usedPercent:85,durationMins:300,resetsAt:iso(start+60000)};
+ next.limits[0].primary={usedPercent:0,durationMins:300,resetsAt:iso(start+5*3600000)};
+ r.state.quota=old;r.setNext(next);await r.sandbox.refreshQuota();
+ const rows=require('../app/local-quota-history.cjs').localQuotaHistoryRows(r.state,r.now,owner);
+ assert.equal(rows.length,2);const short=rows.find(x=>x.windowKey==='primary'),weekly=rows.find(x=>x.windowKey==='secondary');assert.equal(short.beforeRemainingPercent,15);assert.equal(short.periodicWindow,true);assert.equal(weekly.beforeRemainingPercent,10);assert.equal(weekly.periodicWindow,undefined);assert.equal(r.state.localReset.windowKey,'secondary');assert.equal(r.notifications.length,1);
+});
+
+test('short cycle refill notification text is factual and localized',async()=>{
+ const r=runtime(),I18n=require('../app/ui/i18n.js'),old=sample(start-30000,90,start+86400000),next=sample(start,2,start+7*86400000);
+ old.limits[0].primary={usedPercent:85,durationMins:300,resetsAt:iso(start+60000)};next.limits[0].primary={usedPercent:0,durationMins:300,resetsAt:iso(start+5*3600000)};
+ r.state.quota=old;r.setNext(next);await r.sandbox.refreshQuota();const e=r.state.events.find(x=>x.periodicWindow);assert.equal(e.title,'周期额度补充');assert.doesNotMatch(e.body,/个人重置时间/);assert.doesNotMatch(I18n.text(e.title+e.body,'en'),/[\u4e00-\u9fff]/);
 });
