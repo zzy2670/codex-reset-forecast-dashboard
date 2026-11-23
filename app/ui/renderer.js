@@ -50,17 +50,27 @@ let state, toastTimer, detailsExpanded=false, temporalKey='',barDrag=null,barSav
 function toast(message) { setText($('toast'),message); $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true,3600);applyLocale(); }
 async function call(fn) { try { return await fn(); } catch(error) { toast(error.message?.replace(/^Error invoking remote method '[^']+': Error: /,'') || '操作未完成，请重试'); return null; } }
 function isFresh(s) { return PaceTiming.isFresh(s); }
+function weeklyResetSchedule(account,now){
+ const recordedReset=Date.parse(account?.resetsAt);
+ if(!Number.isFinite(recordedReset)||!Number.isFinite(now))return null;
+ const week=7*86400000;
+ const simulated=account?.isCurrent===false&&now>=recordedReset;
+ const reset=simulated?recordedReset+(Math.floor((now-recordedReset)/week)+1)*week:recordedReset;
+ return {reset,simulated,week};
+}
 function weeklyCountdown(account,now=Date.now()){
- const reset=Date.parse(account?.resetsAt);
- if(!Number.isFinite(reset)||!Number.isFinite(now))return '重置时间未记录';
+ const schedule=weeklyResetSchedule(account,now);
+ if(!schedule)return '重置时间未记录';
+ const {reset,simulated}=schedule;
  if(now>=reset)return '预计重置时间已到，等待确认';
  const minutes=Math.ceil((reset-now)/60000),days=Math.floor(minutes/1440),hours=Math.floor(minutes%1440/60),mins=minutes%60;
  const time=days?`${days} 天 ${hours} 小时`:hours?`${hours} 小时 ${mins} 分钟`:`${mins} 分钟`;
- return `距预计重置 ${time}`;
+ return `${simulated?'距模拟重置':'距预计重置'} ${time}`;
 }
 function weeklyPace(account,now){
- const reset=Date.parse(account?.resetsAt),week=7*24*60*60*1000;
- if(!Number.isFinite(reset)||!Number.isFinite(now))return null;
+ const schedule=weeklyResetSchedule(account,now);
+ if(!schedule)return null;
+ const {reset,week}=schedule;
  return Math.max(0,Math.min(100,(now-(reset-week))/week*100));
 }
 function renderWeeklyAccounts(now=Date.now()){
@@ -81,7 +91,7 @@ function renderWeeklyAccounts(now=Date.now()){
   const track=node.querySelector('.weekly-account-track'),fill=track.querySelector('i'),marker=track.querySelector('.weekly-account-pace'),pace=weeklyPace(a,now),language=state?.settings.language||'zh-CN';
   track.classList.toggle('unknown',used===null);fill.hidden=used===null;setWidth(fill,`${used??0}%`);if(used===null)track.removeAttribute('aria-valuenow');else setAttribute(track,'aria-valuenow',used);
   marker.hidden=pace===null;if(pace!==null&&marker.style.left!==`${pace}%`)marker.style.left=`${pace}%`;
-  const labelText=`${used===null?'实际消耗未提供':`已消耗 ${Number(used.toFixed(1))}%`}${pace===null?'':` · 七天周期已过 ${Number(pace.toFixed(1))}%`}`;
+  const labelText=`${used===null?'实际消耗未提供':`已消耗 ${Number(used.toFixed(1))}%`}${pace===null?'':` · ${weeklyResetSchedule(a,now)?.simulated?'模拟周期已过':'七天周期已过'} ${Number(pace.toFixed(1))}%`}`;
   setAttribute(track,'aria-label',DashboardI18n.text('周额度实际消耗',language));setAttribute(track,'aria-valuetext',DashboardI18n.text(labelText,language));setAttribute(track,'title',DashboardI18n.text(labelText,language));
   setLiveLocalizedText(node.querySelector('.weekly-account-countdown'),weeklyCountdown(a,now));setLiveLocalizedText(node.querySelector('.weekly-account-sampled'),`${live?'更新于':'记录于'} ${full(a?.fetchedAt)}`);
  }
